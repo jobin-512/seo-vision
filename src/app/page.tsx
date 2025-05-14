@@ -26,7 +26,6 @@ import {
   BarChart2 as BarChartIcon,
   RefreshCw,
   XCircle,
-  LineChart as LineChartIcon,
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -40,12 +39,10 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import {
-  LineChart,
   BarChart,
   CartesianGrid,
   XAxis,
   YAxis,
-  Line,
   Bar,
   LabelList,
   Cell,
@@ -62,23 +59,6 @@ const coreVitalsConfig = [
   { name: 'CLS', defaultStatus: 'Poor' as const, defaultValue: '0.32', dataKeyPrefix: 'cls' },
   { name: 'FID', defaultStatus: 'Good' as const, defaultValue: '80ms', dataKeyPrefix: 'fid' },
 ] as const;
-
-// Default/Fallback Website Traffic Data
-const defaultWebsiteTrafficData = [
-  { month: 'Jan', visits: 12500 },
-  { month: 'Feb', visits: 13800 },
-  { month: 'Mar', visits: 15200 },
-  { month: 'Apr', visits: 14800 },
-  { month: 'May', visits: 16500 },
-  { month: 'Jun', visits: 17200 },
-];
-
-const trafficChartConfig = {
-  visits: {
-    label: "Monthly Visits",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig;
 
 // Default/Fallback Data and Config for SEO Distribution Chart
 const defaultSeoDistributionData = [
@@ -174,10 +154,6 @@ export default function HomePage() {
       });
     }
   };
-
-  const currentTrafficData = reportData?.websiteTraffic && reportData.websiteTraffic.length > 0
-    ? reportData.websiteTraffic
-    : defaultWebsiteTrafficData;
 
   const currentSeoDistributionData = React.useMemo(() => {
     if (
@@ -288,12 +264,6 @@ export default function HomePage() {
             <Card className="shadow-lg rounded-lg">
               <CardContent className="p-4 space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-primary">Website Traffic Trend</h3>
-                  <div className="h-[200px]">
-                    {/* Placeholder chart or default data chart */}
-                  </div>
-                </div>
-                <div>
                   <h3 className="text-lg font-semibold mb-2 text-primary">SEO Factor Distribution</h3>
                   <div className="h-[250px]">
                     {/* Placeholder chart or default data chart */}
@@ -310,7 +280,7 @@ export default function HomePage() {
               <div
                 className={cn(
                   'space-y-6',
-                  (activeAction === 'Web Vitals' || activeAction === 'Traffic') && !showFullReport ? 'block' : 'hidden',
+                  activeAction === 'Web Vitals' && !showFullReport ? 'block' : 'hidden',
                   'print:block print:space-y-4' 
                 )}
               >
@@ -327,46 +297,6 @@ export default function HomePage() {
                 </div>
                 <Card className="shadow-lg rounded-lg print:shadow-none print:border">
                   <CardContent className="p-4 space-y-6 print:p-2">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2 text-primary print:text-xl">Website Traffic Trend</h3>
-                      <div className="h-[200px] print:h-[180px]">
-                        <ChartContainer config={trafficChartConfig} className="w-full h-full">
-                          <LineChart
-                            data={currentTrafficData}
-                            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis
-                              dataKey="month"
-                              tickLine={false}
-                              axisLine={false}
-                              tickMargin={8}
-                              fontSize={12}
-                            />
-                            <YAxis
-                              tickLine={false}
-                              axisLine={false}
-                              tickMargin={8}
-                              fontSize={12}
-                              tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)}
-                            />
-                            <ChartTooltip
-                              cursor={true}
-                              content={<ChartTooltipContent indicator="line" hideLabel />}
-                            />
-                            <ChartLegend content={<ChartLegendContent />} />
-                            <Line
-                              dataKey="visits"
-                              type="monotone"
-                              stroke="var(--color-visits)"
-                              strokeWidth={2}
-                              dot={{ r:4, fill: "var(--color-visits)" }}
-                              activeDot={{ r: 6 }}
-                            />
-                          </LineChart>
-                        </ChartContainer>
-                      </div>
-                    </div>
                     <div>
                       <h3 className="text-lg font-semibold mb-2 text-primary print:text-xl">SEO Factor Distribution</h3>
                       <div className="h-[250px] print:h-[220px]">
@@ -504,12 +434,6 @@ export default function HomePage() {
                     onClick={() => handleActionClick("Web Vitals")}
                     isActive={activeAction === "Web Vitals" && !showFullReport}
                     textColorClassName="text-primary"
-                  />
-                  <ActionButton
-                    icon={LineChartIcon}
-                    label="Traffic"
-                    onClick={() => handleActionClick("Traffic")}
-                    isActive={activeAction === "Traffic" && !showFullReport}
                   />
                    <ActionButton
                     icon={AlertTriangle}
