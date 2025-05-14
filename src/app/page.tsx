@@ -5,7 +5,6 @@ import * as React from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +26,7 @@ import {
   BarChart2 as BarChartIcon, 
   RefreshCw, 
   XCircle,
-  LineChart as LineChartIcon, // Added for clarity, though 'Traffic' button uses BarChartIcon
+  LineChart as LineChartIcon,
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -63,8 +62,8 @@ const mockVitals = [
   { name: 'FID', status: 'Good', value: '80ms' },
 ] as const;
 
-// Sample Data and Config for Website Traffic Trend Chart
-const websiteTrafficData = [
+// Default/Fallback Website Traffic Data
+const defaultWebsiteTrafficData = [
   { month: 'Jan', visits: 12500 },
   { month: 'Feb', visits: 13800 },
   { month: 'Mar', visits: 15200 },
@@ -76,7 +75,7 @@ const websiteTrafficData = [
 const trafficChartConfig = {
   visits: {
     label: "Monthly Visits",
-    color: "hsl(var(--chart-2))", // Using chart-2 for traffic
+    color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig;
 
@@ -168,7 +167,7 @@ export default function HomePage() {
       const newShowFullReport = !showFullReport;
       setShowFullReport(newShowFullReport);
       if (!newShowFullReport) { 
-        setActiveAction("Web Vitals"); // Default back to Web Vitals if Full Report is closed
+        setActiveAction("Web Vitals"); 
       }
     }
   };
@@ -185,6 +184,10 @@ export default function HomePage() {
       });
     }
   };
+
+  const currentTrafficData = reportData?.websiteTraffic && reportData.websiteTraffic.length > 0 
+    ? reportData.websiteTraffic 
+    : defaultWebsiteTrafficData;
 
 
   return (
@@ -267,14 +270,13 @@ export default function HomePage() {
 
               <Card className="shadow-lg rounded-lg">
                 <CardContent className="p-4 space-y-6">
-                  {/* Website Traffic Trend Line Chart */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2 text-primary">Website Traffic Trend (Mock Data)</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-primary">Website Traffic Trend</h3>
                     <div className="h-[200px]">
                       <ChartContainer config={trafficChartConfig} className="w-full h-full">
                         <LineChart 
-                          data={websiteTrafficData} 
-                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }} // Adjusted margins
+                          data={currentTrafficData} 
+                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
                           <XAxis 
@@ -289,7 +291,7 @@ export default function HomePage() {
                             axisLine={false} 
                             tickMargin={8} 
                             fontSize={12}
-                            domain={['dataMin - 1000', 'dataMax + 1000']} // Adjusted domain for visits
+                            domain={['dataMin - 1000', 'dataMax + 1000']} 
                             tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)}
                           />
                           <ChartTooltip
@@ -298,9 +300,9 @@ export default function HomePage() {
                           />
                           <ChartLegend content={<ChartLegendContent />} />
                           <Line 
-                            dataKey="visits" // Changed from score to visits
+                            dataKey="visits" 
                             type="monotone" 
-                            stroke="var(--color-visits)" // Using new color from trafficChartConfig
+                            stroke="var(--color-visits)" 
                             strokeWidth={2} 
                             dot={{ r:4, fill: "var(--color-visits)" }}
                             activeDot={{ r: 6 }} 
@@ -310,7 +312,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* SEO Distribution Bar Chart */}
                   <div>
                     <h3 className="text-lg font-semibold mb-2 text-primary">SEO Factor Distribution</h3>
                     <div className="h-[250px]">
@@ -318,7 +319,7 @@ export default function HomePage() {
                         <BarChart 
                           data={seoDistributionData} 
                           layout="vertical" 
-                          margin={{ top: 5, right: 30, left: 0, bottom: 5 }} // Adjusted right margin
+                          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                           <XAxis type="number" hide />
@@ -356,7 +357,6 @@ export default function HomePage() {
             </>
           )}
 
-          {/* Improvement Suggestions View */}
           {reportData && activeAction === "Improve" && !showFullReport && (
             <Card className="shadow-lg rounded-lg">
               <CardHeader>
@@ -379,7 +379,6 @@ export default function HomePage() {
             </Card>
           )}
 
-          {/* Identified Errors View */}
           {reportData && activeAction === "Errors" && !showFullReport && (
             <Card className="shadow-lg rounded-lg">
               <CardHeader>
@@ -413,11 +412,10 @@ export default function HomePage() {
                     textColorClassName="text-primary"
                   />
                   <ActionButton 
-                    icon={LineChartIcon}  // Changed to LineChartIcon for traffic
+                    icon={LineChartIcon}
                     label="Traffic" 
                     onClick={() => handleActionClick("Traffic")} 
                     isActive={activeAction === "Traffic"}
-                    // textColorClassName="text-[hsl(var(--chart-2))]" // Optional: color traffic icon
                   />
                   <ActionButton 
                     icon={FileText} 
@@ -502,4 +500,3 @@ export default function HomePage() {
     </div>
   );
 }
-
