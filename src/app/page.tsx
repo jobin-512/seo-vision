@@ -13,7 +13,7 @@ import type { ReportData } from '@/lib/types';
 import { AppLogo } from '@/components/app-logo';
 import { ScoreCard } from '@/components/score-card';
 import { ReportContentCard } from '@/components/report-content-card';
-import { LoaderCircle, Link as LinkIcon, FileText, Zap, Download, AlertTriangle, Lightbulb, Gauge } from 'lucide-react';
+import { LoaderCircle, Link as LinkIcon, FileText, Zap, Download, AlertTriangle, Gauge } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -185,6 +185,17 @@ export default function HomePage() {
       <footer className="text-center mt-12 text-muted-foreground text-sm no-print">
         <p>&copy; {new Date().getFullYear()} SEOVision. All rights reserved.</p>
         <p>Powered by AI</p>
+        <p>
+          Made by{' '}
+          <a
+            href="https://github.com/jobin-512"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-primary"
+          >
+            jobin-512
+          </a>
+        </p>
       </footer>
     </div>
   );
