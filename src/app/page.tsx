@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -17,15 +18,14 @@ import { CoreVitalCard } from '@/components/core-vital-card';
 import { ActionButton } from '@/components/action-button';
 import { 
   LoaderCircle, 
-  Link as LinkIcon, 
   FileText, 
   Zap, 
   Download, 
   AlertTriangle, 
   Gauge,
-  Activity,
-  BarChart2,
-  RefreshCw,
+  Activity, // For Web Vitals
+  BarChart2, // For Traffic
+  RefreshCw, // For Refresh
   XCircle, // For Errors
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -41,7 +41,7 @@ const mockVitals = [
   { name: 'LCP', status: 'Improve', value: '2.8s' },
   { name: 'CLS', status: 'Poor', value: '0.32' },
   { name: 'FID', status: 'Good', value: '80ms' },
-] as const; // Added 'as const' for stricter type on status
+] as const;
 
 
 export default function HomePage() {
@@ -50,6 +50,7 @@ export default function HomePage() {
   const [error, setError] = React.useState<string | null>(null);
   const [showFullReport, setShowFullReport] = React.useState(false);
   const { toast } = useToast();
+  const [activeAction, setActiveAction] = React.useState<string>("Web Vitals");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -63,6 +64,7 @@ export default function HomePage() {
     setError(null);
     setReportData(null);
     setShowFullReport(false);
+    setActiveAction("Web Vitals"); // Reset to default view on new analysis
 
     try {
       const result = await generateSeoReport({ url: data.url });
@@ -91,23 +93,42 @@ export default function HomePage() {
   };
 
   const handleDownloadPdf = () => {
-    // Ensure full report is shown for printing if it's currently hidden
     const wasHidden = !showFullReport;
     if (wasHidden) {
       setShowFullReport(true);
-      // Allow state to update and DOM to re-render before printing
+      setActiveAction("Full Report"); // Ensure Full Report is active for printing
       setTimeout(() => {
         window.print();
-        // Optionally hide it again after printing if it was originally hidden
+        // Optionally hide it again if it was originally hidden by user action
         // setShowFullReport(false); 
+        // setActiveAction("Web Vitals"); // Or revert to a default view
       }, 100); 
     } else {
       window.print();
     }
   };
+  
+  const handleActionClick = (actionName: string) => {
+    setActiveAction(actionName);
+    if (actionName !== "Full Report") {
+      setShowFullReport(false);
+    } else {
+      // Toggle full report visibility if "Full Report" is clicked
+      const newShowFullReport = !showFullReport;
+      setShowFullReport(newShowFullReport);
+      if (!newShowFullReport) { // If we just closed full report, set active to Web Vitals
+        setActiveAction("Web Vitals");
+      }
+    }
+  };
 
-  // Determine active button for action bar
-  const [activeAction, setActiveAction] = React.useState<string | null>('Web Vitals');
+  const handleRefresh = () => {
+    const urlValue = form.getValues("url");
+    if (urlValue) {
+      onSubmit({ url: urlValue });
+    }
+    setActiveAction("Web Vitals");
+  };
 
 
   return (
@@ -178,11 +199,10 @@ export default function HomePage() {
         </Card>
       )}
 
-      {/* Display content only if not loading, no error, or if reportData exists for "Full Report" view */}
       {(!isLoading && !error) && (
         <main className="w-full max-w-3xl space-y-6">
           {/* Core Web Vitals Small Cards - Show if reportData or for initial view */}
-          {(reportData || !form.formState.isSubmitted) && (
+          {(reportData || !form.formState.isSubmitted || (activeAction !== "Full Report")) && !showFullReport && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {mockVitals.map(vital => (
                 <CoreVitalCard key={vital.name} metricName={vital.name} status={vital.status} value={vital.value} />
@@ -190,15 +210,15 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Charts Area - Show if reportData or for initial view */}
-          {(reportData || !form.formState.isSubmitted) && (
+          {/* Charts Area - Show if reportData or for initial view, and not in Full Report mode */}
+          {(reportData || !form.formState.isSubmitted || (activeAction !== "Full Report")) && !showFullReport && (
             <Card className="shadow-lg rounded-lg">
               <CardContent className="p-4">
                 <div className="mb-4">
-                    <Image data-ai-hint="data chart" src="https://placehold.co/600x100.png" alt="Stacked Bar Chart Placeholder" width={600} height={100} className="rounded w-full h-auto" />
+                    <Image data-ai-hint="performance trend line chart" src="https://placehold.co/600x100.png" alt="Performance Trend Chart Placeholder" width={600} height={100} className="rounded w-full h-auto" />
                 </div>
                 <div>
-                    <Image data-ai-hint="bar chart" src="https://placehold.co/600x150.png" alt="Bar Chart Placeholder" width={600} height={150} className="rounded w-full h-auto" />
+                    <Image data-ai-hint="seo distribution bar chart" src="https://placehold.co/600x150.png" alt="SEO Distribution Chart Placeholder" width={600} height={150} className="rounded w-full h-auto" />
                 </div>
               </CardContent>
             </Card>
@@ -212,47 +232,44 @@ export default function HomePage() {
                   <ActionButton 
                     icon={Activity} 
                     label="Web Vitals" 
-                    onClick={() => { setActiveAction("Web Vitals"); setShowFullReport(false); }} 
-                    isActive={activeAction === "Web Vitals" && !showFullReport}
-                    textColorClassName="text-primary"
+                    onClick={() => handleActionClick("Web Vitals")} 
+                    isActive={activeAction === "Web Vitals"}
+                    textColorClassName="text-primary" // Default active color for this one
                   />
                   <ActionButton 
                     icon={BarChart2} 
                     label="Traffic" 
-                    onClick={() => { setActiveAction("Traffic"); setShowFullReport(false); }} 
+                    onClick={() => handleActionClick("Traffic")} 
                     isActive={activeAction === "Traffic"}
-                    textColorClassName="text-foreground"
                   />
                   <ActionButton 
                     icon={FileText} 
                     label="Full Report" 
-                    badgeCount={reportData?.score ? Math.round(reportData.score) : (form.formState.isSubmitted ? 'N/A' : undefined)}
-                    onClick={() => { setShowFullReport(prev => !prev); if (!showFullReport) setActiveAction("Full Report"); else setActiveAction(null);}} 
+                    badgeCount={reportData?.score ? Math.round(reportData.score) : (form.formState.isSubmitted && !isLoading ? 'N/A' : undefined)}
+                    onClick={() => handleActionClick("Full Report")} 
                     isActive={activeAction === "Full Report" && showFullReport}
-                    textColorClassName="text-foreground"
                   />
                   <ActionButton 
                     icon={AlertTriangle} 
                     label="Improve" 
-                    badgeCount={reportData ? 9 : undefined} // Example count
-                    onClick={() => { setActiveAction("Improve"); setShowFullReport(false); }} 
+                    badgeCount={reportData ? 9 : undefined} // Mock count
+                    onClick={() => handleActionClick("Improve")} 
                     isActive={activeAction === "Improve"}
                     isAlert={true}
                   />
                   <ActionButton 
                     icon={XCircle} 
                     label="Errors" 
-                    badgeCount={reportData ? 5 : undefined} // Example count
-                    onClick={() => { setActiveAction("Errors"); setShowFullReport(false); }} 
+                    badgeCount={reportData ? 5 : undefined} // Mock count
+                    onClick={() => handleActionClick("Errors")} 
                     isActive={activeAction === "Errors"}
                     isError={true}
                   />
                   <ActionButton 
                     icon={RefreshCw} 
                     label="Refresh" 
-                    onClick={() => { if (form.getValues("url")) onSubmit(form.getValues()); setActiveAction(null);}}
-                    isActive={activeAction === "Refresh"}
-                    textColorClassName="text-foreground"
+                    onClick={handleRefresh}
+                    isActive={activeAction === "Refresh"} // Momentary active state if needed
                   />
                 </div>
               </CardContent>
@@ -309,3 +326,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
