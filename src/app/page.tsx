@@ -24,9 +24,10 @@ import {
   AlertTriangle, 
   Gauge,
   Activity, 
-  BarChart2 as BarChartIcon, // Renamed to avoid conflict with Recharts BarChart
+  BarChart2 as BarChartIcon, 
   RefreshCw, 
-  XCircle, 
+  XCircle,
+  LineChart as LineChartIcon, // Added for clarity, though 'Traffic' button uses BarChartIcon
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -62,23 +63,24 @@ const mockVitals = [
   { name: 'FID', status: 'Good', value: '80ms' },
 ] as const;
 
-// Sample Data and Config for Charts
-const performanceTrendData = [
-  { month: 'Jan', score: 65 },
-  { month: 'Feb', score: 68 },
-  { month: 'Mar', score: 72 },
-  { month: 'Apr', score: 70 },
-  { month: 'May', score: 75 },
-  { month: 'Jun', score: 78 },
+// Sample Data and Config for Website Traffic Trend Chart
+const websiteTrafficData = [
+  { month: 'Jan', visits: 12500 },
+  { month: 'Feb', visits: 13800 },
+  { month: 'Mar', visits: 15200 },
+  { month: 'Apr', visits: 14800 },
+  { month: 'May', visits: 16500 },
+  { month: 'Jun', visits: 17200 },
 ];
 
-const performanceChartConfig = {
-  score: {
-    label: "Performance",
-    color: "hsl(var(--chart-1))",
+const trafficChartConfig = {
+  visits: {
+    label: "Monthly Visits",
+    color: "hsl(var(--chart-2))", // Using chart-2 for traffic
   },
 } satisfies ChartConfig;
 
+// Sample Data and Config for SEO Distribution Chart
 const seoDistributionData = [
   { name: 'On-Page', value: 70, fill: 'hsl(var(--chart-1))' },
   { name: 'Off-Page', value: 55, fill: 'hsl(var(--chart-2))' },
@@ -88,8 +90,7 @@ const seoDistributionData = [
 ];
 
 const seoChartConfig = {
-  value: { label: "Score" }, // General label for the 'value' dataKey
-  // Colors for legend/tooltip if needed for specific items - keys should match the 'name' in data
+  value: { label: "Score" }, 
   "On-Page": { label: "On-Page", color: "hsl(var(--chart-1))" },
   "Off-Page": { label: "Off-Page", color: "hsl(var(--chart-2))" },
   "Technical": { label: "Technical", color: "hsl(var(--chart-3))" },
@@ -167,7 +168,7 @@ export default function HomePage() {
       const newShowFullReport = !showFullReport;
       setShowFullReport(newShowFullReport);
       if (!newShowFullReport) { 
-        setActiveAction("Web Vitals");
+        setActiveAction("Web Vitals"); // Default back to Web Vitals if Full Report is closed
       }
     }
   };
@@ -183,7 +184,6 @@ export default function HomePage() {
         variant: "destructive",
       });
     }
-    // setActiveAction("Web Vitals"); // Optionally reset view, or keep current activeAction
   };
 
 
@@ -257,7 +257,6 @@ export default function HomePage() {
 
       {(!isLoading && !error) && (
         <main className="w-full max-w-3xl space-y-6">
-          {/* Web Vitals and Charts View (Default or when activeAction is "Web Vitals" or "Traffic") */}
           {((!form.formState.isSubmitted && !reportData) || (reportData && (activeAction === "Web Vitals" || activeAction === "Traffic"))) && !showFullReport && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -268,14 +267,14 @@ export default function HomePage() {
 
               <Card className="shadow-lg rounded-lg">
                 <CardContent className="p-4 space-y-6">
-                  {/* Performance Trend Line Chart */}
+                  {/* Website Traffic Trend Line Chart */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2 text-primary">Performance Trend</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-primary">Website Traffic Trend (Mock Data)</h3>
                     <div className="h-[200px]">
-                      <ChartContainer config={performanceChartConfig} className="w-full h-full">
+                      <ChartContainer config={trafficChartConfig} className="w-full h-full">
                         <LineChart 
-                          data={performanceTrendData} 
-                          margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                          data={websiteTrafficData} 
+                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }} // Adjusted margins
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
                           <XAxis 
@@ -290,7 +289,8 @@ export default function HomePage() {
                             axisLine={false} 
                             tickMargin={8} 
                             fontSize={12}
-                            domain={['dataMin - 5', 'dataMax + 5']} 
+                            domain={['dataMin - 1000', 'dataMax + 1000']} // Adjusted domain for visits
+                            tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)}
                           />
                           <ChartTooltip
                             cursor={true}
@@ -298,11 +298,11 @@ export default function HomePage() {
                           />
                           <ChartLegend content={<ChartLegendContent />} />
                           <Line 
-                            dataKey="score" 
+                            dataKey="visits" // Changed from score to visits
                             type="monotone" 
-                            stroke="var(--color-score)"
+                            stroke="var(--color-visits)" // Using new color from trafficChartConfig
                             strokeWidth={2} 
-                            dot={{ r:4, fill: "var(--color-score)" }}
+                            dot={{ r:4, fill: "var(--color-visits)" }}
                             activeDot={{ r: 6 }} 
                           />
                         </LineChart>
@@ -318,7 +318,7 @@ export default function HomePage() {
                         <BarChart 
                           data={seoDistributionData} 
                           layout="vertical" 
-                          margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                          margin={{ top: 5, right: 30, left: 0, bottom: 5 }} // Adjusted right margin
                         >
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                           <XAxis type="number" hide />
@@ -401,7 +401,6 @@ export default function HomePage() {
             </Card>
           )}
           
-          {/* Action Buttons Card - Render if not loading, not error, and either no form submitted yet OR report data exists */}
           {(!form.formState.isSubmitted || reportData) && (
             <Card className="shadow-lg rounded-lg no-print">
               <CardContent className="p-1 sm:p-2">
@@ -414,10 +413,11 @@ export default function HomePage() {
                     textColorClassName="text-primary"
                   />
                   <ActionButton 
-                    icon={BarChartIcon} 
+                    icon={LineChartIcon}  // Changed to LineChartIcon for traffic
                     label="Traffic" 
                     onClick={() => handleActionClick("Traffic")} 
                     isActive={activeAction === "Traffic"}
+                    // textColorClassName="text-[hsl(var(--chart-2))]" // Optional: color traffic icon
                   />
                   <ActionButton 
                     icon={FileText} 
@@ -429,7 +429,7 @@ export default function HomePage() {
                   <ActionButton 
                     icon={AlertTriangle} 
                     label="Improve" 
-                    badgeCount={reportData ? 9 : undefined} // Mock count
+                    badgeCount={reportData ? 9 : undefined} 
                     onClick={() => handleActionClick("Improve")} 
                     isActive={activeAction === "Improve"}
                     isAlert={true}
@@ -437,7 +437,7 @@ export default function HomePage() {
                   <ActionButton 
                     icon={XCircle} 
                     label="Errors" 
-                    badgeCount={reportData ? 5 : undefined} // Mock count
+                    badgeCount={reportData ? 5 : undefined} 
                     onClick={() => handleActionClick("Errors")} 
                     isActive={activeAction === "Errors"}
                     isError={true}
@@ -446,7 +446,7 @@ export default function HomePage() {
                     icon={RefreshCw} 
                     label="Refresh" 
                     onClick={handleRefresh}
-                    isActive={activeAction === "Refresh"} // Optional: visual cue for refresh, though it's an action
+                    isActive={activeAction === "Refresh"} 
                   />
                 </div>
               </CardContent>
@@ -502,3 +502,4 @@ export default function HomePage() {
     </div>
   );
 }
+
