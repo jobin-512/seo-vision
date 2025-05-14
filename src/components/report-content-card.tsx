@@ -26,7 +26,7 @@ export function ReportContentCard({ title, content, Icon }: ReportContentCardPro
       }
       if (lowerLine.startsWith("suggestion:")) {
         currentSection = 'suggestion';
-        return <strong key={index} className="block text-accent mt-3 mb-1">{line}</strong>;
+        return <strong key={index} className="block text-[hsl(var(--chart-4))] mt-3 mb-1">{line}</strong>;
       }
       
       // Heuristic for other potential subheadings (e.g., "Key Findings:")
@@ -42,7 +42,7 @@ export function ReportContentCard({ title, content, Icon }: ReportContentCardPro
       if (isListItem) {
         let itemColorClass = "";
         if (currentSection === 'problem') itemColorClass = "text-destructive";
-        else if (currentSection === 'suggestion') itemColorClass = "text-accent";
+        else if (currentSection === 'suggestion') itemColorClass = "text-[hsl(var(--chart-4))]"; 
         // For list items under 'other_heading' (primary) or 'general', use foreground for better readability of content.
         else itemColorClass = "text-foreground"; 
         
@@ -58,7 +58,7 @@ export function ReportContentCard({ title, content, Icon }: ReportContentCardPro
       // General content lines
       let lineColorClass = "";
       if (currentSection === 'problem') lineColorClass = "text-destructive";
-      else if (currentSection === 'suggestion') lineColorClass = "text-accent";
+      else if (currentSection === 'suggestion') lineColorClass = "text-[hsl(var(--chart-4))]";
       // Content under 'other_heading' (primary) or 'general' sections uses foreground color.
       else lineColorClass = "text-foreground";
 
