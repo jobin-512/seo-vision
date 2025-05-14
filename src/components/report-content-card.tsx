@@ -11,43 +11,59 @@ interface ReportContentCardProps {
 export function ReportContentCard({ title, content, Icon }: ReportContentCardProps) {
   const renderContentWithHighlighting = (text: string) => {
     if (!text) return null;
-    return text.split('\\n').map((line, index) => {
-      if (line.toLowerCase().startsWith("problem:")) {
-        return (
-          <span key={index} className="block text-destructive">
-            {line}
-          </span>
-        );
+    let currentSection: 'problem' | 'suggestion' | 'other_heading' | 'general' = 'general';
+    // Handles both literal "\\n" if it comes from AI and actual newline characters "\n"
+    const lines = text.split(/\\n|\n/); 
+
+    return lines.map((line, index) => {
+      const trimmedLine = line.trim();
+      const lowerLine = line.toLowerCase();
+
+      // Section Headers
+      if (lowerLine.startsWith("problem:")) {
+        currentSection = 'problem';
+        return <strong key={index} className="block text-destructive mt-3 mb-1">{line}</strong>;
       }
-      if (line.toLowerCase().startsWith("suggestion:")) {
-        return (
-          <span key={index} className="block text-accent">
-            {line}
-          </span>
-        );
+      if (lowerLine.startsWith("suggestion:")) {
+        currentSection = 'suggestion';
+        return <strong key={index} className="block text-accent mt-3 mb-1">{line}</strong>;
       }
-      // For lines that are part of a list under "Problems" or "Suggestions"
-      // This is a simple check, might need refinement based on actual report structure
-      if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
-        // Check the previous line to determine context, very basic context check
-        const prevLine = index > 0 ? text.split('\\n')[index-1] : "";
-        if (prevLine.toLowerCase().startsWith("problem:")) {
-            return (
-              <span key={index} className="block text-destructive ml-4">
-                {line}
-              </span>
-            );
-        }
-        if (prevLine.toLowerCase().startsWith("suggestion:")) {
-             return (
-              <span key={index} className="block text-accent ml-4">
-                {line}
-              </span>
-            );
-        }
+      
+      // Heuristic for other potential subheadings (e.g., "Key Findings:")
+      // Recognizes lines ending with a colon, not too long, and not list items.
+      const isPotentialOtherHeading = trimmedLine.endsWith(':') && trimmedLine.length > 0 && trimmedLine.length < 80 && !/^\s*([-*+]|\d+\.|[a-zA-Z]\.)\s+/.test(trimmedLine);
+      if (isPotentialOtherHeading) {
+        currentSection = 'other_heading';
+        return <strong key={index} className="block text-primary mt-3 mb-1">{line}</strong>;
       }
+
+      // List Items
+      const isListItem = /^\s*([-*+]|\d+\.|[a-zA-Z]\.)\s+/.test(trimmedLine);
+      if (isListItem) {
+        let itemColorClass = "";
+        if (currentSection === 'problem') itemColorClass = "text-destructive";
+        else if (currentSection === 'suggestion') itemColorClass = "text-accent";
+        // For list items under 'other_heading' (primary) or 'general', use foreground for better readability of content.
+        else itemColorClass = "text-foreground"; 
+        
+        return <span key={index} className={`block ml-4 ${itemColorClass}`}>{line}</span>;
+      }
+
+      // Empty Lines
+      if (trimmedLine === '') {
+        // currentSection = 'general'; // Optionally reset section on blank lines if desired for stricter context. For now, context persists.
+        return <br key={index} />;
+      }
+      
+      // General content lines
+      let lineColorClass = "";
+      if (currentSection === 'problem') lineColorClass = "text-destructive";
+      else if (currentSection === 'suggestion') lineColorClass = "text-accent";
+      // Content under 'other_heading' (primary) or 'general' sections uses foreground color.
+      else lineColorClass = "text-foreground";
+
       return (
-        <span key={index} className="block">
+        <span key={index} className={`block ${lineColorClass}`}>
           {line}
         </span>
       );
@@ -63,7 +79,8 @@ export function ReportContentCard({ title, content, Icon }: ReportContentCardPro
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm max-w-none text-muted-foreground dark:prose-invert whitespace-pre-wrap">
+        {/* Removed prose classes for more direct control with Tailwind utilities. Base text size, colors handled by spans. */}
+        <div className="max-w-none whitespace-pre-wrap text-sm">
           {renderContentWithHighlighting(content)}
         </div>
       </CardContent>
