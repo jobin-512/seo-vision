@@ -56,10 +56,10 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const mockVitals = [
-  { name: 'LCP', status: 'Improve', value: '2.8s' },
-  { name: 'CLS', status: 'Poor', value: '0.32' },
-  { name: 'FID', status: 'Good', value: '80ms' },
+const coreVitalsConfig = [
+  { name: 'LCP', defaultStatus: 'Improve' as const, defaultValue: '2.8s', dataKeyPrefix: 'lcp' },
+  { name: 'CLS', defaultStatus: 'Poor' as const, defaultValue: '0.32', dataKeyPrefix: 'cls' },
+  { name: 'FID', defaultStatus: 'Good' as const, defaultValue: '80ms', dataKeyPrefix: 'fid' },
 ] as const;
 
 // Default/Fallback Website Traffic Data
@@ -283,8 +283,13 @@ export default function HomePage() {
           {((!form.formState.isSubmitted && !reportData) || (reportData && (activeAction === "Web Vitals" || activeAction === "Traffic"))) && !showFullReport && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {mockVitals.map(vital => (
-                  <CoreVitalCard key={vital.name} metricName={vital.name} status={vital.status} value={vital.value} />
+                {coreVitalsConfig.map(vital => (
+                  <CoreVitalCard 
+                    key={vital.name} 
+                    metricName={vital.name} 
+                    status={(reportData?.[`${vital.dataKeyPrefix}Status` as keyof ReportData] as "Good" | "Improve" | "Poor" | undefined) || vital.defaultStatus}
+                    value={(reportData?.[`${vital.dataKeyPrefix}Value` as keyof ReportData] as string | undefined) || vital.defaultValue}
+                  />
                 ))}
               </div>
 

@@ -28,6 +28,12 @@ const GenerateSeoReportOutputSchema = z.object({
   technicalScore: z.number().min(0).max(100).optional().describe('Score for Technical SEO factors (0-100).'),
   contentScore: z.number().min(0).max(100).optional().describe('Score for Content quality and relevance (0-100).'),
   uxScore: z.number().min(0).max(100).optional().describe('Score for User Experience (UX) factors (0-100).'),
+  lcpValue: z.string().optional().describe('Largest Contentful Paint value (e.g., "2.5s").'),
+  lcpStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('Largest Contentful Paint status.'),
+  clsValue: z.string().optional().describe('Cumulative Layout Shift value (e.g., "0.1").'),
+  clsStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('Cumulative Layout Shift status.'),
+  fidValue: z.string().optional().describe('First Input Delay value (e.g., "100ms").'),
+  fidStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('First Input Delay status.'),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
 
@@ -52,6 +58,11 @@ const prompt = ai.definePrompt({
   - Technical SEO (technicalScore)
   - Content Quality & Relevance (contentScore)
   - User Experience (UX) (uxScore)
+
+  Also, determine the Core Web Vitals for the site:
+  - Largest Contentful Paint (LCP): Provide the value (e.g., "2.5s") and its status ("Good", "Improve", or "Poor") as lcpValue and lcpStatus.
+  - Cumulative Layout Shift (CLS): Provide the value (e.g., "0.1") and its status ("Good", "Improve", or "Poor") as clsValue and clsStatus.
+  - First Input Delay (FID): Provide the value (e.g., "100ms") and its status ("Good", "Improve", or "Poor") as fidValue and fidStatus.
 
   Use the 'getWebsiteTrafficData' tool to fetch website traffic data for the URL: {{{url}}} for the last 6 months. Include this traffic data in your output. If the tool returns an error or no data, omit the websiteTraffic field or set it to an empty array.
 

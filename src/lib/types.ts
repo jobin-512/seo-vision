@@ -10,5 +10,11 @@ export type ReportData = {
   technicalScore?: number;
   contentScore?: number;
   uxScore?: number;
+  lcpValue?: string;
+  lcpStatus?: "Good" | "Improve" | "Poor";
+  clsValue?: string;
+  clsStatus?: "Good" | "Improve" | "Poor";
+  fidValue?: string;
+  fidStatus?: "Good" | "Improve" | "Poor";
 };
 
