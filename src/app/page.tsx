@@ -151,9 +151,10 @@ export default function HomePage() {
     if (wasHidden) {
       setShowFullReport(true);
       setActiveAction("Full Report"); 
+      // Wait for the state to update and DOM to re-render
       setTimeout(() => {
         window.print();
-      }, 100); 
+      }, 100); // 100ms delay, adjust if needed
     } else {
       window.print();
     }
@@ -164,9 +165,10 @@ export default function HomePage() {
     if (actionName !== "Full Report") {
       setShowFullReport(false);
     } else {
+      // Toggle full report visibility
       const newShowFullReport = !showFullReport;
       setShowFullReport(newShowFullReport);
-      if (!newShowFullReport) { 
+      if (!newShowFullReport) { // If toggled off, revert to Web Vitals
         setActiveAction("Web Vitals"); 
       }
     }
