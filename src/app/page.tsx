@@ -311,7 +311,6 @@ export default function HomePage() {
                             axisLine={false} 
                             tickMargin={8} 
                             fontSize={12}
-                            domain={['dataMin - 1000', 'dataMax + 1000']} 
                             tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)}
                           />
                           <ChartTooltip
