@@ -23,12 +23,32 @@ import {
   Download, 
   AlertTriangle, 
   Gauge,
-  Activity, // For Web Vitals
-  BarChart2, // For Traffic
-  RefreshCw, // For Refresh
-  XCircle, // For Errors
+  Activity, 
+  BarChart2 as BarChartIcon, // Renamed to avoid conflict with Recharts BarChart
+  RefreshCw, 
+  XCircle, 
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import {
+  LineChart,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Line,
+  Bar,
+  LabelList,
+  Cell,
+} from 'recharts';
 
 const formSchema = z.object({
   url: z.string().url({ message: 'Please enter a valid URL (e.g., https://example.com)' }),
@@ -36,12 +56,46 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Mock data for Core Web Vitals until AI flow is updated
 const mockVitals = [
   { name: 'LCP', status: 'Improve', value: '2.8s' },
   { name: 'CLS', status: 'Poor', value: '0.32' },
   { name: 'FID', status: 'Good', value: '80ms' },
 ] as const;
+
+// Sample Data and Config for Charts
+const performanceTrendData = [
+  { month: 'Jan', score: 65 },
+  { month: 'Feb', score: 68 },
+  { month: 'Mar', score: 72 },
+  { month: 'Apr', score: 70 },
+  { month: 'May', score: 75 },
+  { month: 'Jun', score: 78 },
+];
+
+const performanceChartConfig = {
+  score: {
+    label: "Performance",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig;
+
+const seoDistributionData = [
+  { name: 'On-Page', value: 70, fill: 'hsl(var(--chart-1))' },
+  { name: 'Off-Page', value: 55, fill: 'hsl(var(--chart-2))' },
+  { name: 'Technical', value: 80, fill: 'hsl(var(--chart-3))' },
+  { name: 'Content', value: 65, fill: 'hsl(var(--chart-4))' },
+  { name: 'UX', value: 75, fill: 'hsl(var(--chart-5))' },
+];
+
+const seoChartConfig = {
+  value: { label: "Score" }, // General label for the 'value' dataKey
+  // Colors for legend/tooltip if needed for specific items - keys should match the 'name' in data
+  "On-Page": { label: "On-Page", color: "hsl(var(--chart-1))" },
+  "Off-Page": { label: "Off-Page", color: "hsl(var(--chart-2))" },
+  "Technical": { label: "Technical", color: "hsl(var(--chart-3))" },
+  "Content": { label: "Content", color: "hsl(var(--chart-4))" },
+  "UX": { label: "UX", color: "hsl(var(--chart-5))" },
+} satisfies ChartConfig;
 
 
 export default function HomePage() {
@@ -64,7 +118,7 @@ export default function HomePage() {
     setError(null);
     setReportData(null);
     setShowFullReport(false);
-    setActiveAction("Web Vitals"); // Reset to default view on new analysis
+    setActiveAction("Web Vitals"); 
 
     try {
       const result = await generateSeoReport({ url: data.url });
@@ -96,12 +150,9 @@ export default function HomePage() {
     const wasHidden = !showFullReport;
     if (wasHidden) {
       setShowFullReport(true);
-      setActiveAction("Full Report"); // Ensure Full Report is active for printing
+      setActiveAction("Full Report"); 
       setTimeout(() => {
         window.print();
-        // Optionally hide it again if it was originally hidden by user action
-        // setShowFullReport(false); 
-        // setActiveAction("Web Vitals"); // Or revert to a default view
       }, 100); 
     } else {
       window.print();
@@ -113,10 +164,9 @@ export default function HomePage() {
     if (actionName !== "Full Report") {
       setShowFullReport(false);
     } else {
-      // Toggle full report visibility if "Full Report" is clicked
       const newShowFullReport = !showFullReport;
       setShowFullReport(newShowFullReport);
-      if (!newShowFullReport) { // If we just closed full report, set active to Web Vitals
+      if (!newShowFullReport) { 
         setActiveAction("Web Vitals");
       }
     }
@@ -201,7 +251,6 @@ export default function HomePage() {
 
       {(!isLoading && !error) && (
         <main className="w-full max-w-3xl space-y-6">
-          {/* Core Web Vitals Small Cards - Show if reportData or for initial view */}
           {(reportData || !form.formState.isSubmitted || (activeAction !== "Full Report")) && !showFullReport && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {mockVitals.map(vital => (
@@ -210,21 +259,96 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Charts Area - Show if reportData or for initial view, and not in Full Report mode */}
           {(reportData || !form.formState.isSubmitted || (activeAction !== "Full Report")) && !showFullReport && (
             <Card className="shadow-lg rounded-lg">
-              <CardContent className="p-4">
-                <div className="mb-4">
-                    <Image data-ai-hint="performance trend line chart" src="https://placehold.co/600x100.png" alt="Performance Trend Chart Placeholder" width={600} height={100} className="rounded w-full h-auto" />
-                </div>
+              <CardContent className="p-4 space-y-6">
+                {/* Performance Trend Line Chart */}
                 <div>
-                    <Image data-ai-hint="seo distribution bar chart" src="https://placehold.co/600x150.png" alt="SEO Distribution Chart Placeholder" width={600} height={150} className="rounded w-full h-auto" />
+                  <h3 className="text-lg font-semibold mb-2 text-primary">Performance Trend</h3>
+                  <div className="h-[200px]">
+                    <ChartContainer config={performanceChartConfig} className="w-full h-full">
+                      <LineChart 
+                        data={performanceTrendData} 
+                        margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis 
+                          dataKey="month" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tickMargin={8} 
+                          fontSize={12}
+                        />
+                        <YAxis 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tickMargin={8} 
+                          fontSize={12}
+                          domain={['dataMin - 5', 'dataMax + 5']} 
+                        />
+                        <ChartTooltip
+                          cursor={true}
+                          content={<ChartTooltipContent indicator="line" hideLabel />}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Line 
+                          dataKey="score" 
+                          type="monotone" 
+                          stroke="var(--color-score)"
+                          strokeWidth={2} 
+                          dot={{ r:4, fill: "var(--color-score)" }}
+                          activeDot={{ r: 6 }} 
+                        />
+                      </LineChart>
+                    </ChartContainer>
+                  </div>
+                </div>
+
+                {/* SEO Distribution Bar Chart */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-2 text-primary">SEO Factor Distribution</h3>
+                  <div className="h-[250px]">
+                    <ChartContainer config={seoChartConfig} className="w-full h-full">
+                      <BarChart 
+                        data={seoDistributionData} 
+                        layout="vertical" 
+                        margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                        <XAxis type="number" hide />
+                        <YAxis 
+                          dataKey="name" 
+                          type="category" 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tickMargin={8} 
+                          width={80} 
+                          fontSize={12}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dot" />}
+                        />
+                        <Bar dataKey="value" layout="vertical" radius={4}>
+                          {seoDistributionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                          <LabelList 
+                            dataKey="value" 
+                            position="right" 
+                            offset={8} 
+                            className="fill-foreground" 
+                            fontSize={12} 
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           )}
           
-          {/* Bottom Action Bar - Show if reportData or for initial view */}
           {(reportData || !form.formState.isSubmitted) && (
             <Card className="shadow-lg rounded-lg no-print">
               <CardContent className="p-1 sm:p-2">
@@ -234,10 +358,10 @@ export default function HomePage() {
                     label="Web Vitals" 
                     onClick={() => handleActionClick("Web Vitals")} 
                     isActive={activeAction === "Web Vitals"}
-                    textColorClassName="text-primary" // Default active color for this one
+                    textColorClassName="text-primary"
                   />
                   <ActionButton 
-                    icon={BarChart2} 
+                    icon={BarChartIcon} 
                     label="Traffic" 
                     onClick={() => handleActionClick("Traffic")} 
                     isActive={activeAction === "Traffic"}
@@ -252,7 +376,7 @@ export default function HomePage() {
                   <ActionButton 
                     icon={AlertTriangle} 
                     label="Improve" 
-                    badgeCount={reportData ? 9 : undefined} // Mock count
+                    badgeCount={reportData ? 9 : undefined} 
                     onClick={() => handleActionClick("Improve")} 
                     isActive={activeAction === "Improve"}
                     isAlert={true}
@@ -260,7 +384,7 @@ export default function HomePage() {
                   <ActionButton 
                     icon={XCircle} 
                     label="Errors" 
-                    badgeCount={reportData ? 5 : undefined} // Mock count
+                    badgeCount={reportData ? 5 : undefined} 
                     onClick={() => handleActionClick("Errors")} 
                     isActive={activeAction === "Errors"}
                     isError={true}
@@ -269,14 +393,13 @@ export default function HomePage() {
                     icon={RefreshCw} 
                     label="Refresh" 
                     onClick={handleRefresh}
-                    isActive={activeAction === "Refresh"} // Momentary active state if needed
+                    isActive={activeAction === "Refresh"}
                   />
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Detailed Text Reports (conditionally shown) */}
           {showFullReport && reportData && (
             <div className="space-y-8 mt-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -326,5 +449,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    
