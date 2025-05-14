@@ -29,6 +29,7 @@ import {
   LineChart as LineChartIcon,
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 import {
   ChartContainer,
@@ -147,22 +148,17 @@ export default function HomePage() {
   };
 
   const handleDownloadPdf = () => {
-    // The button is only rendered when showFullReport is true,
-    // so we can directly call window.print().
     window.print();
   };
 
   const handleActionClick = (actionName: string) => {
-    setActiveAction(actionName);
-    if (actionName !== "Full Report") {
-      setShowFullReport(false);
-    } else {
-      // Toggle full report visibility
+    if (actionName === "Full Report") {
       const newShowFullReport = !showFullReport;
       setShowFullReport(newShowFullReport);
-      if (!newShowFullReport) { // If toggled off, revert to Web Vitals
-        setActiveAction("Web Vitals");
-      }
+      setActiveAction(newShowFullReport ? "Full Report" : "Web Vitals");
+    } else {
+      setActiveAction(actionName);
+      setShowFullReport(false); // Ensure full report is hidden if other actions are clicked
     }
   };
 
@@ -274,150 +270,230 @@ export default function HomePage() {
 
       {(!isLoading && !error) && (
         <main className="w-full max-w-3xl space-y-6">
-          {((!form.formState.isSubmitted && !reportData) || (reportData && (activeAction === "Web Vitals" || activeAction === "Traffic"))) && !showFullReport && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {coreVitalsConfig.map(vital => (
-                  <CoreVitalCard
-                    key={vital.name}
-                    metricName={vital.name}
-                    status={(reportData?.[`${vital.dataKeyPrefix}Status` as keyof ReportData] as "Good" | "Improve" | "Poor" | undefined) || vital.defaultStatus}
-                    value={(reportData?.[`${vital.dataKeyPrefix}Value` as keyof ReportData] as string | undefined) || vital.defaultValue}
-                  />
-                ))}
-              </div>
-
-              <Card className="shadow-lg rounded-lg">
-                <CardContent className="p-4 space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 text-primary">Website Traffic Trend</h3>
-                    <div className="h-[200px]">
-                      <ChartContainer config={trafficChartConfig} className="w-full h-full">
-                        <LineChart
-                          data={currentTrafficData}
-                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis
-                            dataKey="month"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            fontSize={12}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            fontSize={12}
-                            tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)}
-                          />
-                          <ChartTooltip
-                            cursor={true}
-                            content={<ChartTooltipContent indicator="line" hideLabel />}
-                          />
-                          <ChartLegend content={<ChartLegendContent />} />
-                          <Line
-                            dataKey="visits"
-                            type="monotone"
-                            stroke="var(--color-visits)"
-                            strokeWidth={2}
-                            dot={{ r:4, fill: "var(--color-visits)" }}
-                            activeDot={{ r: 6 }}
-                          />
-                        </LineChart>
-                      </ChartContainer>
-                    </div>
+          {/* Initial view or when no reportData - hidden in print if reportData exists */}
+          <div className={cn(
+            ((!form.formState.isSubmitted && !reportData) || (!reportData && form.formState.isSubmitted && !isLoading && !error)) && !showFullReport ? 'block space-y-6' : 'hidden',
+            reportData ? 'print:hidden' : ''
+          )}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {coreVitalsConfig.map(vital => (
+                <CoreVitalCard
+                  key={vital.name}
+                  metricName={vital.name}
+                  status={vital.defaultStatus}
+                  value={vital.defaultValue}
+                />
+              ))}
+            </div>
+            <Card className="shadow-lg rounded-lg">
+              <CardContent className="p-4 space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2 text-primary">Website Traffic Trend</h3>
+                  <div className="h-[200px]">
+                    {/* Placeholder chart or default data chart */}
                   </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2 text-primary">SEO Factor Distribution</h3>
+                  <div className="h-[250px]">
+                    {/* Placeholder chart or default data chart */}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 text-primary">SEO Factor Distribution</h3>
-                    <div className="h-[250px]">
-                      <ChartContainer config={seoChartConfig} className="w-full h-full">
-                        <BarChart
-                          data={currentSeoDistributionData}
-                          layout="vertical"
-                          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                          <XAxis type="number" hide />
-                          <YAxis
-                            dataKey="name"
-                            type="category"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            width={80}
-                            fontSize={12}
-                          />
-                          <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent indicator="dot" />}
-                          />
-                          <Bar dataKey="value" layout="vertical" radius={4}>
-                            {currentSeoDistributionData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.fill} />
-                            ))}
-                            <LabelList
-                              dataKey="value"
-                              position="right"
-                              offset={8}
-                              className="fill-foreground"
+          {/* Sections to show when reportData is available */}
+          {reportData && (
+            <>
+              {/* Web Vitals & Charts Area */}
+              <div
+                className={cn(
+                  'space-y-6',
+                  (activeAction === 'Web Vitals' || activeAction === 'Traffic') && !showFullReport ? 'block' : 'hidden',
+                  'print:block print:space-y-4' 
+                )}
+              >
+                 <h2 className="text-2xl font-semibold text-primary print:block hidden pt-4">Core Web Vitals & Key Metrics</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:grid-cols-3">
+                  {coreVitalsConfig.map(vital => (
+                    <CoreVitalCard
+                      key={vital.name}
+                      metricName={vital.name}
+                      status={(reportData?.[`${vital.dataKeyPrefix}Status` as keyof ReportData] as "Good" | "Improve" | "Poor" | undefined) || vital.defaultStatus}
+                      value={(reportData?.[`${vital.dataKeyPrefix}Value` as keyof ReportData] as string | undefined) || vital.defaultValue}
+                    />
+                  ))}
+                </div>
+                <Card className="shadow-lg rounded-lg print:shadow-none print:border">
+                  <CardContent className="p-4 space-y-6 print:p-2">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2 text-primary print:text-xl">Website Traffic Trend</h3>
+                      <div className="h-[200px] print:h-[180px]">
+                        <ChartContainer config={trafficChartConfig} className="w-full h-full">
+                          <LineChart
+                            data={currentTrafficData}
+                            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis
+                              dataKey="month"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
                               fontSize={12}
                             />
-                          </Bar>
-                        </BarChart>
-                      </ChartContainer>
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              fontSize={12}
+                              tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)}
+                            />
+                            <ChartTooltip
+                              cursor={true}
+                              content={<ChartTooltipContent indicator="line" hideLabel />}
+                            />
+                            <ChartLegend content={<ChartLegendContent />} />
+                            <Line
+                              dataKey="visits"
+                              type="monotone"
+                              stroke="var(--color-visits)"
+                              strokeWidth={2}
+                              dot={{ r:4, fill: "var(--color-visits)" }}
+                              activeDot={{ r: 6 }}
+                            />
+                          </LineChart>
+                        </ChartContainer>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2 text-primary print:text-xl">SEO Factor Distribution</h3>
+                      <div className="h-[250px] print:h-[220px]">
+                        <ChartContainer config={seoChartConfig} className="w-full h-full">
+                          <BarChart
+                            data={currentSeoDistributionData}
+                            layout="vertical"
+                            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                            <XAxis type="number" hide />
+                            <YAxis
+                              dataKey="name"
+                              type="category"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              width={80}
+                              fontSize={12}
+                            />
+                            <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <Bar dataKey="value" layout="vertical" radius={4}>
+                              {currentSeoDistributionData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                              ))}
+                              <LabelList
+                                dataKey="value"
+                                position="right"
+                                offset={8}
+                                className="fill-foreground print:fill-black"
+                                fontSize={12}
+                              />
+                            </Bar>
+                          </BarChart>
+                        </ChartContainer>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Improvement Suggestions Area */}
+              <div
+                className={cn(
+                  activeAction === 'Improve' && !showFullReport ? 'block' : 'hidden',
+                  'print:block print:pt-4' 
+                )}
+              >
+                <Card className="shadow-lg rounded-lg print:shadow-none print:border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg text-[hsl(var(--chart-4))] print:text-xl print:text-[hsl(var(--chart-4))]">
+                      <AlertTriangle className="mr-2 h-5 w-5"/>
+                      Improvement Suggestions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="print:p-2">
+                    <p className="text-sm text-muted-foreground mb-2 print:text-gray-700">Based on the analysis, here are some key areas for improvement:</p>
+                    <ul className="list-disc pl-5 space-y-1 text-sm print:text-gray-800">
+                      <li>Optimize images to improve LCP (Largest Contentful Paint). Consider compressing images and using next-gen formats.</li>
+                      <li>Specify dimensions for all image elements to reduce CLS (Cumulative Layout Shift).</li>
+                      <li>Enhance server response time. Look into server-side caching or upgrading your hosting plan.</li>
+                      <li>Minify CSS and JavaScript files to reduce their size.</li>
+                      <li>Leverage browser caching for static assets.</li>
+                    </ul>
+                    <p className="mt-4 text-sm text-muted-foreground print:text-gray-700">Refer to the full SEO report for detailed, actionable suggestions tailored to your site.</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Identified Errors Area */}
+              <div
+                className={cn(
+                  activeAction === 'Errors' && !showFullReport ? 'block' : 'hidden',
+                  'print:block print:pt-4' 
+                )}
+              >
+                <Card className="shadow-lg rounded-lg print:shadow-none print:border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg text-destructive print:text-xl print:text-destructive">
+                      <XCircle className="mr-2 h-5 w-5"/>
+                      Identified Errors
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="print:p-2">
+                    <p className="text-sm text-muted-foreground mb-2 print:text-gray-700">The following critical issues were found that might be impacting your site's performance and SEO:</p>
+                    <ul className="list-disc pl-5 space-y-1 text-sm print:text-gray-800">
+                      <li>3 images are missing 'alt' text, which is crucial for accessibility and image SEO.</li>
+                      <li>Found 1 broken internal link pointing to '/about-us/team-old-link'.</li>
+                      <li>The page '/services/discontinued-service' returns a 404 (Not Found) error.</li>
+                      <li>Mobile usability: Tap targets are too close together on the contact page.</li>
+                    </ul>
+                    <p className="mt-4 text-sm text-muted-foreground print:text-gray-700">A comprehensive list of errors and their specific locations can be found in the full SEO report.</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Full Report Details Area */}
+              <div
+                className={cn(
+                  'space-y-8', 
+                  showFullReport ? 'block' : 'hidden',
+                  'print:block print:space-y-4 print:pt-4' 
+                )}
+              >
+                 <h2 className="text-2xl font-semibold text-primary print:block hidden">Full SEO & Performance Report</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid-cols-2">
+                  <ScoreCard title="Overall SEO Score" score={reportData.score} Icon={Gauge} />
+                  <ScoreCard title="Performance Score" score={reportData.performanceScore} Icon={Zap} />
+                </div>
+                <ReportContentCard
+                  title="Comprehensive SEO Report"
+                  content={reportData.report}
+                  Icon={FileText}
+                />
+                <ReportContentCard
+                  title="Website Performance Analysis"
+                  content={reportData.performanceReport}
+                  Icon={Zap}
+                />
+              </div>
             </>
           )}
 
-          {reportData && activeAction === "Improve" && !showFullReport && (
-            <Card className="shadow-lg rounded-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg text-[hsl(var(--chart-4))]">
-                  <AlertTriangle className="mr-2 h-5 w-5"/>
-                  Improvement Suggestions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">Based on the analysis, here are some key areas for improvement:</p>
-                <ul className="list-disc pl-5 space-y-1 text-sm">
-                  <li>Optimize images to improve LCP (Largest Contentful Paint). Consider compressing images and using next-gen formats.</li>
-                  <li>Specify dimensions for all image elements to reduce CLS (Cumulative Layout Shift).</li>
-                  <li>Enhance server response time. Look into server-side caching or upgrading your hosting plan.</li>
-                  <li>Minify CSS and JavaScript files to reduce their size.</li>
-                  <li>Leverage browser caching for static assets.</li>
-                </ul>
-                <p className="mt-4 text-sm text-muted-foreground">Refer to the full SEO report for detailed, actionable suggestions tailored to your site.</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {reportData && activeAction === "Errors" && !showFullReport && (
-            <Card className="shadow-lg rounded-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg text-destructive">
-                  <XCircle className="mr-2 h-5 w-5"/>
-                  Identified Errors
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">The following critical issues were found that might be impacting your site's performance and SEO:</p>
-                <ul className="list-disc pl-5 space-y-1 text-sm">
-                  <li>3 images are missing 'alt' text, which is crucial for accessibility and image SEO.</li>
-                  <li>Found 1 broken internal link pointing to '/about-us/team-old-link'.</li>
-                  <li>The page '/services/discontinued-service' returns a 404 (Not Found) error.</li>
-                  <li>Mobile usability: Tap targets are too close together on the contact page.</li>
-                </ul>
-                <p className="mt-4 text-sm text-muted-foreground">A comprehensive list of errors and their specific locations can be found in the full SEO report.</p>
-              </CardContent>
-            </Card>
-          )}
-
+          {/* Action Button Bar - always rendered if initial submission happened or reportData exists */}
           {(!form.formState.isSubmitted || reportData) && (
             <Card className="shadow-lg rounded-lg no-print">
               <CardContent className="p-1 sm:p-2">
@@ -426,28 +502,21 @@ export default function HomePage() {
                     icon={Activity}
                     label="Web Vitals"
                     onClick={() => handleActionClick("Web Vitals")}
-                    isActive={activeAction === "Web Vitals"}
+                    isActive={activeAction === "Web Vitals" && !showFullReport}
                     textColorClassName="text-primary"
                   />
                   <ActionButton
                     icon={LineChartIcon}
                     label="Traffic"
                     onClick={() => handleActionClick("Traffic")}
-                    isActive={activeAction === "Traffic"}
+                    isActive={activeAction === "Traffic" && !showFullReport}
                   />
-                  <ActionButton
-                    icon={FileText}
-                    label="Full Report"
-                    badgeCount={reportData?.score ? Math.round(reportData.score) : (form.formState.isSubmitted && !isLoading ? 'N/A' : undefined)}
-                    onClick={() => handleActionClick("Full Report")}
-                    isActive={activeAction === "Full Report" && showFullReport}
-                  />
-                  <ActionButton
+                   <ActionButton
                     icon={AlertTriangle}
                     label="Improve"
                     badgeCount={reportData ? 9 : undefined}
                     onClick={() => handleActionClick("Improve")}
-                    isActive={activeAction === "Improve"}
+                    isActive={activeAction === "Improve" && !showFullReport}
                     isAlert={true}
                   />
                   <ActionButton
@@ -455,48 +524,39 @@ export default function HomePage() {
                     label="Errors"
                     badgeCount={reportData ? 5 : undefined}
                     onClick={() => handleActionClick("Errors")}
-                    isActive={activeAction === "Errors"}
+                    isActive={activeAction === "Errors" && !showFullReport}
                     isError={true}
+                  />
+                  <ActionButton
+                    icon={FileText}
+                    label="Full Report"
+                    badgeCount={reportData?.score ? Math.round(reportData.score) : (form.formState.isSubmitted && !isLoading && !error ? 'N/A' : undefined)}
+                    onClick={() => handleActionClick("Full Report")}
+                    isActive={showFullReport}
                   />
                   <ActionButton
                     icon={RefreshCw}
                     label="Refresh"
                     onClick={handleRefresh}
-                    isActive={activeAction === "Refresh"}
+                    isActive={activeAction === "Refresh"} // Refresh is momentary, might not need active state
                   />
                 </div>
               </CardContent>
             </Card>
           )}
-
-          {showFullReport && reportData && (
-            <div className="space-y-8 mt-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ScoreCard title="Overall SEO Score" score={reportData.score} Icon={Gauge} />
-                <ScoreCard title="Performance Score" score={reportData.performanceScore} Icon={Zap} />
-              </div>
-              <ReportContentCard
-                title="Comprehensive SEO Report"
-                content={reportData.report}
-                Icon={FileText}
-              />
-              <ReportContentCard
-                title="Website Performance Analysis"
-                content={reportData.performanceReport}
-                Icon={Zap}
-              />
-              <div className="text-center mt-8 no-print">
-                <Button
-                  onClick={handleDownloadPdf}
-                  variant="outline"
-                  className="py-3 px-6 text-base"
-                >
-                  <Download className="mr-2 h-5 w-5" />
-                  Download Report as PDF
-                </Button>
-              </div>
-            </div>
-          )}
+            {/* Download button - only appears if full report is active on screen, but is itself no-print */}
+            {reportData && showFullReport && (
+                 <div className="text-center mt-8 no-print">
+                    <Button
+                    onClick={handleDownloadPdf}
+                    variant="outline"
+                    className="py-3 px-6 text-base"
+                    >
+                    <Download className="mr-2 h-5 w-5" />
+                    Download Report as PDF
+                    </Button>
+                </div>
+            )}
         </main>
       )}
 
