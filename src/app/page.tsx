@@ -15,16 +15,16 @@ import { ScoreCard } from '@/components/score-card';
 import { ReportContentCard } from '@/components/report-content-card';
 import { CoreVitalCard } from '@/components/core-vital-card';
 import { ActionButton } from '@/components/action-button';
-import { 
-  LoaderCircle, 
-  FileText, 
-  Zap, 
-  Download, 
-  AlertTriangle, 
+import {
+  LoaderCircle,
+  FileText,
+  Zap,
+  Download,
+  AlertTriangle,
   Gauge,
-  Activity, 
-  BarChart2 as BarChartIcon, 
-  RefreshCw, 
+  Activity,
+  BarChart2 as BarChartIcon,
+  RefreshCw,
   XCircle,
   LineChart as LineChartIcon,
 } from 'lucide-react';
@@ -89,7 +89,7 @@ const defaultSeoDistributionData = [
 ];
 
 const seoChartConfig = {
-  value: { label: "Score" }, 
+  value: { label: "Score" },
   "On-Page": { label: "On-Page", color: "hsl(var(--chart-1))" },
   "Off-Page": { label: "Off-Page", color: "hsl(var(--chart-2))" },
   "Technical": { label: "Technical", color: "hsl(var(--chart-3))" },
@@ -118,7 +118,7 @@ export default function HomePage() {
     setError(null);
     setReportData(null);
     setShowFullReport(false);
-    setActiveAction("Web Vitals"); 
+    setActiveAction("Web Vitals");
 
     try {
       const result = await generateSeoReport({ url: data.url });
@@ -147,19 +147,11 @@ export default function HomePage() {
   };
 
   const handleDownloadPdf = () => {
-    const wasHidden = !showFullReport;
-    if (wasHidden) {
-      setShowFullReport(true);
-      setActiveAction("Full Report"); 
-      // Wait for the state to update and DOM to re-render
-      setTimeout(() => {
-        window.print();
-      }, 100); // 100ms delay, adjust if needed
-    } else {
-      window.print();
-    }
+    // The button is only rendered when showFullReport is true,
+    // so we can directly call window.print().
+    window.print();
   };
-  
+
   const handleActionClick = (actionName: string) => {
     setActiveAction(actionName);
     if (actionName !== "Full Report") {
@@ -169,7 +161,7 @@ export default function HomePage() {
       const newShowFullReport = !showFullReport;
       setShowFullReport(newShowFullReport);
       if (!newShowFullReport) { // If toggled off, revert to Web Vitals
-        setActiveAction("Web Vitals"); 
+        setActiveAction("Web Vitals");
       }
     }
   };
@@ -187,8 +179,8 @@ export default function HomePage() {
     }
   };
 
-  const currentTrafficData = reportData?.websiteTraffic && reportData.websiteTraffic.length > 0 
-    ? reportData.websiteTraffic 
+  const currentTrafficData = reportData?.websiteTraffic && reportData.websiteTraffic.length > 0
+    ? reportData.websiteTraffic
     : defaultWebsiteTrafficData;
 
   const currentSeoDistributionData = React.useMemo(() => {
@@ -228,9 +220,9 @@ export default function HomePage() {
                 <FormItem className="flex-grow">
                   <FormLabel className="text-sm text-muted-foreground">Website URL</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="https://example.com" 
-                      {...field} 
+                    <Input
+                      placeholder="https://example.com"
+                      {...field}
                       className="text-base py-2 h-10"
                       disabled={isLoading}
                     />
@@ -239,9 +231,9 @@ export default function HomePage() {
                 </FormItem>
               )}
             />
-            <Button 
-              type="submit" 
-              className="py-2 h-10 text-sm font-semibold" 
+            <Button
+              type="submit"
+              className="py-2 h-10 text-sm font-semibold"
               style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}
               disabled={isLoading}
             >
@@ -257,7 +249,7 @@ export default function HomePage() {
           </form>
         </Form>
       </div>
-      
+
       {isLoading && (
         <div className="flex flex-col items-center justify-center text-center p-8 bg-card rounded-lg shadow-md w-full max-w-3xl">
           <LoaderCircle className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -286,9 +278,9 @@ export default function HomePage() {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {coreVitalsConfig.map(vital => (
-                  <CoreVitalCard 
-                    key={vital.name} 
-                    metricName={vital.name} 
+                  <CoreVitalCard
+                    key={vital.name}
+                    metricName={vital.name}
                     status={(reportData?.[`${vital.dataKeyPrefix}Status` as keyof ReportData] as "Good" | "Improve" | "Poor" | undefined) || vital.defaultStatus}
                     value={(reportData?.[`${vital.dataKeyPrefix}Value` as keyof ReportData] as string | undefined) || vital.defaultValue}
                   />
@@ -301,22 +293,22 @@ export default function HomePage() {
                     <h3 className="text-lg font-semibold mb-2 text-primary">Website Traffic Trend</h3>
                     <div className="h-[200px]">
                       <ChartContainer config={trafficChartConfig} className="w-full h-full">
-                        <LineChart 
-                          data={currentTrafficData} 
+                        <LineChart
+                          data={currentTrafficData}
                           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis 
-                            dataKey="month" 
-                            tickLine={false} 
-                            axisLine={false} 
-                            tickMargin={8} 
+                          <XAxis
+                            dataKey="month"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
                             fontSize={12}
                           />
-                          <YAxis 
-                            tickLine={false} 
-                            axisLine={false} 
-                            tickMargin={8} 
+                          <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
                             fontSize={12}
                             tickFormatter={(value) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(value)}
                           />
@@ -325,13 +317,13 @@ export default function HomePage() {
                             content={<ChartTooltipContent indicator="line" hideLabel />}
                           />
                           <ChartLegend content={<ChartLegendContent />} />
-                          <Line 
-                            dataKey="visits" 
-                            type="monotone" 
-                            stroke="var(--color-visits)" 
-                            strokeWidth={2} 
+                          <Line
+                            dataKey="visits"
+                            type="monotone"
+                            stroke="var(--color-visits)"
+                            strokeWidth={2}
                             dot={{ r:4, fill: "var(--color-visits)" }}
-                            activeDot={{ r: 6 }} 
+                            activeDot={{ r: 6 }}
                           />
                         </LineChart>
                       </ChartContainer>
@@ -342,20 +334,20 @@ export default function HomePage() {
                     <h3 className="text-lg font-semibold mb-2 text-primary">SEO Factor Distribution</h3>
                     <div className="h-[250px]">
                       <ChartContainer config={seoChartConfig} className="w-full h-full">
-                        <BarChart 
-                          data={currentSeoDistributionData} 
-                          layout="vertical" 
+                        <BarChart
+                          data={currentSeoDistributionData}
+                          layout="vertical"
                           margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                           <XAxis type="number" hide />
-                          <YAxis 
-                            dataKey="name" 
-                            type="category" 
-                            tickLine={false} 
-                            axisLine={false} 
-                            tickMargin={8} 
-                            width={80} 
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                            width={80}
                             fontSize={12}
                           />
                           <ChartTooltip
@@ -366,12 +358,12 @@ export default function HomePage() {
                             {currentSeoDistributionData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
                             ))}
-                            <LabelList 
-                              dataKey="value" 
-                              position="right" 
-                              offset={8} 
-                              className="fill-foreground" 
-                              fontSize={12} 
+                            <LabelList
+                              dataKey="value"
+                              position="right"
+                              offset={8}
+                              className="fill-foreground"
+                              fontSize={12}
                             />
                           </Bar>
                         </BarChart>
@@ -425,52 +417,52 @@ export default function HomePage() {
               </CardContent>
             </Card>
           )}
-          
+
           {(!form.formState.isSubmitted || reportData) && (
             <Card className="shadow-lg rounded-lg no-print">
               <CardContent className="p-1 sm:p-2">
                 <div className="flex justify-around items-center">
-                  <ActionButton 
-                    icon={Activity} 
-                    label="Web Vitals" 
-                    onClick={() => handleActionClick("Web Vitals")} 
+                  <ActionButton
+                    icon={Activity}
+                    label="Web Vitals"
+                    onClick={() => handleActionClick("Web Vitals")}
                     isActive={activeAction === "Web Vitals"}
                     textColorClassName="text-primary"
                   />
-                  <ActionButton 
+                  <ActionButton
                     icon={LineChartIcon}
-                    label="Traffic" 
-                    onClick={() => handleActionClick("Traffic")} 
+                    label="Traffic"
+                    onClick={() => handleActionClick("Traffic")}
                     isActive={activeAction === "Traffic"}
                   />
-                  <ActionButton 
-                    icon={FileText} 
-                    label="Full Report" 
+                  <ActionButton
+                    icon={FileText}
+                    label="Full Report"
                     badgeCount={reportData?.score ? Math.round(reportData.score) : (form.formState.isSubmitted && !isLoading ? 'N/A' : undefined)}
-                    onClick={() => handleActionClick("Full Report")} 
+                    onClick={() => handleActionClick("Full Report")}
                     isActive={activeAction === "Full Report" && showFullReport}
                   />
-                  <ActionButton 
-                    icon={AlertTriangle} 
-                    label="Improve" 
-                    badgeCount={reportData ? 9 : undefined} 
-                    onClick={() => handleActionClick("Improve")} 
+                  <ActionButton
+                    icon={AlertTriangle}
+                    label="Improve"
+                    badgeCount={reportData ? 9 : undefined}
+                    onClick={() => handleActionClick("Improve")}
                     isActive={activeAction === "Improve"}
                     isAlert={true}
                   />
-                  <ActionButton 
-                    icon={XCircle} 
-                    label="Errors" 
-                    badgeCount={reportData ? 5 : undefined} 
-                    onClick={() => handleActionClick("Errors")} 
+                  <ActionButton
+                    icon={XCircle}
+                    label="Errors"
+                    badgeCount={reportData ? 5 : undefined}
+                    onClick={() => handleActionClick("Errors")}
                     isActive={activeAction === "Errors"}
                     isError={true}
                   />
-                  <ActionButton 
-                    icon={RefreshCw} 
-                    label="Refresh" 
+                  <ActionButton
+                    icon={RefreshCw}
+                    label="Refresh"
                     onClick={handleRefresh}
-                    isActive={activeAction === "Refresh"} 
+                    isActive={activeAction === "Refresh"}
                   />
                 </div>
               </CardContent>
@@ -483,8 +475,8 @@ export default function HomePage() {
                 <ScoreCard title="Overall SEO Score" score={reportData.score} Icon={Gauge} />
                 <ScoreCard title="Performance Score" score={reportData.performanceScore} Icon={Zap} />
               </div>
-              <ReportContentCard 
-                title="Comprehensive SEO Report" 
+              <ReportContentCard
+                title="Comprehensive SEO Report"
                 content={reportData.report}
                 Icon={FileText}
               />
@@ -494,9 +486,9 @@ export default function HomePage() {
                 Icon={Zap}
               />
               <div className="text-center mt-8 no-print">
-                <Button 
-                  onClick={handleDownloadPdf} 
-                  variant="outline" 
+                <Button
+                  onClick={handleDownloadPdf}
+                  variant="outline"
                   className="py-3 px-6 text-base"
                 >
                   <Download className="mr-2 h-5 w-5" />
@@ -507,7 +499,7 @@ export default function HomePage() {
           )}
         </main>
       )}
-      
+
       <footer className="text-center mt-12 text-muted-foreground text-sm no-print">
         <p>&copy; {new Date().getFullYear()} SEOVision. All rights reserved.</p>
         <p>Powered by AI</p>
@@ -526,4 +518,3 @@ export default function HomePage() {
     </div>
   );
 }
-
