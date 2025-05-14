@@ -23,6 +23,11 @@ const GenerateSeoReportOutputSchema = z.object({
   websiteTraffic: z.array(MonthlyTrafficDataSchema)
     .optional()
     .describe('Monthly website traffic data for the past 6 months. This data is fetched using the getWebsiteTrafficData tool.'),
+  onPageScore: z.number().min(0).max(100).optional().describe('Score for On-Page SEO factors (0-100).'),
+  offPageScore: z.number().min(0).max(100).optional().describe('Score for Off-Page SEO factors (0-100).'),
+  technicalScore: z.number().min(0).max(100).optional().describe('Score for Technical SEO factors (0-100).'),
+  contentScore: z.number().min(0).max(100).optional().describe('Score for Content quality and relevance (0-100).'),
+  uxScore: z.number().min(0).max(100).optional().describe('Score for User Experience (UX) factors (0-100).'),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
 
@@ -40,6 +45,14 @@ const prompt = ai.definePrompt({
   Identify problems and provide optimization suggestions.
   Also, calculate an SEO score (out of 100) to represent the overall performance of the website.
   Generate a performance report with a performance score out of 100.
+
+  In addition, provide specific scores (0-100) for the following SEO factors:
+  - On-Page SEO (onPageScore)
+  - Off-Page SEO (offPageScore)
+  - Technical SEO (technicalScore)
+  - Content Quality & Relevance (contentScore)
+  - User Experience (UX) (uxScore)
+
   Use the 'getWebsiteTrafficData' tool to fetch website traffic data for the URL: {{{url}}} for the last 6 months. Include this traffic data in your output. If the tool returns an error or no data, omit the websiteTraffic field or set it to an empty array.
 
   URL: {{{url}}}
@@ -57,3 +70,4 @@ const generateSeoReportFlow = ai.defineFlow(
     return output!;
   }
 );
+

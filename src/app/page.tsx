@@ -79,8 +79,8 @@ const trafficChartConfig = {
   },
 } satisfies ChartConfig;
 
-// Sample Data and Config for SEO Distribution Chart
-const seoDistributionData = [
+// Default/Fallback Data and Config for SEO Distribution Chart
+const defaultSeoDistributionData = [
   { name: 'On-Page', value: 70, fill: 'hsl(var(--chart-1))' },
   { name: 'Off-Page', value: 55, fill: 'hsl(var(--chart-2))' },
   { name: 'Technical', value: 80, fill: 'hsl(var(--chart-3))' },
@@ -188,6 +188,26 @@ export default function HomePage() {
   const currentTrafficData = reportData?.websiteTraffic && reportData.websiteTraffic.length > 0 
     ? reportData.websiteTraffic 
     : defaultWebsiteTrafficData;
+
+  const currentSeoDistributionData = React.useMemo(() => {
+    if (
+      reportData &&
+      reportData.onPageScore !== undefined &&
+      reportData.offPageScore !== undefined &&
+      reportData.technicalScore !== undefined &&
+      reportData.contentScore !== undefined &&
+      reportData.uxScore !== undefined
+    ) {
+      return [
+        { name: 'On-Page', value: reportData.onPageScore, fill: seoChartConfig['On-Page'].color as string },
+        { name: 'Off-Page', value: reportData.offPageScore, fill: seoChartConfig['Off-Page'].color as string },
+        { name: 'Technical', value: reportData.technicalScore, fill: seoChartConfig['Technical'].color as string },
+        { name: 'Content', value: reportData.contentScore, fill: seoChartConfig['Content'].color as string },
+        { name: 'UX', value: reportData.uxScore, fill: seoChartConfig['UX'].color as string },
+      ];
+    }
+    return defaultSeoDistributionData;
+  }, [reportData]);
 
 
   return (
@@ -317,7 +337,7 @@ export default function HomePage() {
                     <div className="h-[250px]">
                       <ChartContainer config={seoChartConfig} className="w-full h-full">
                         <BarChart 
-                          data={seoDistributionData} 
+                          data={currentSeoDistributionData} 
                           layout="vertical" 
                           margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
                         >
@@ -337,7 +357,7 @@ export default function HomePage() {
                             content={<ChartTooltipContent indicator="dot" />}
                           />
                           <Bar dataKey="value" layout="vertical" radius={4}>
-                            {seoDistributionData.map((entry, index) => (
+                            {currentSeoDistributionData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} />
                             ))}
                             <LabelList 
@@ -500,3 +520,4 @@ export default function HomePage() {
     </div>
   );
 }
+

@@ -5,4 +5,10 @@ export type ReportData = {
   performanceReport: string;
   performanceScore: number;
   websiteTraffic?: { month: string; visits: number }[];
+  onPageScore?: number;
+  offPageScore?: number;
+  technicalScore?: number;
+  contentScore?: number;
+  uxScore?: number;
 };
+
