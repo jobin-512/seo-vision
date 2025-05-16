@@ -15,6 +15,13 @@ import HeadingsAccordionContent from './headings-accordion-content';
 import ContentAnalysisAccordionContent from './content-analysis-accordion-content';
 import AltAttributeAccordionContent from './alt-attribute-accordion-content';
 import InPageLinksAccordionContent from './inpage-links-accordion-content';
+// Import new Indexing content components
+import WebFeedsAccordionContent from './webfeeds-accordion-content';
+import UrlResolveAccordionContent from './url-resolve-accordion-content';
+import RobotsTxtAccordionContent from './robotstxt-accordion-content';
+import XmlSitemapAccordionContent from './xmlsitemap-accordion-content';
+import SitemapsValidityAccordionContent from './sitemaps-validity-accordion-content';
+import UrlParametersAccordionContent from './url-parameters-accordion-content';
 
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
@@ -24,7 +31,7 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
   statusText,
   statusColorClass,
   badgeVariant = "outline",
-  content, // Can be simple string or complex data for new sections
+  content, 
   details,
   googleDesktopPreview,
   googleMobilePreview,
@@ -32,6 +39,13 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
   contentAnalysisData,
   altAttributeAnalysis,
   inPageLinksAnalysis,
+  // Indexing data props
+  webFeedsData,
+  urlResolveData,
+  robotsTxtData,
+  xmlSitemapData,
+  sitemapValidityData,
+  urlParametersData,
 }) => {
   let effectiveBadgeVariant = badgeVariant;
   if (statusColorClass.includes('text-accent')) {
@@ -44,6 +58,7 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 
   const renderContent = () => {
     switch (id) {
+      // On-Page Sections
       case 'titleTag':
       case 'metaDescription':
         return (
@@ -77,6 +92,20 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
         return altAttributeAnalysis ? <AltAttributeAccordionContent data={altAttributeAnalysis} /> : <p>No alt attribute data available.</p>;
       case 'inPageLinks':
         return inPageLinksAnalysis ? <InPageLinksAccordionContent data={inPageLinksAnalysis} /> : <p>No in-page link data available.</p>;
+      
+      // Indexing Sections
+      case 'webFeeds':
+        return webFeedsData ? <WebFeedsAccordionContent data={webFeedsData} /> : <p>No web feeds data available.</p>;
+      case 'urlResolve':
+        return urlResolveData ? <UrlResolveAccordionContent data={urlResolveData} /> : <p>No URL resolve data available.</p>;
+      case 'robotsTxt':
+        return robotsTxtData ? <RobotsTxtAccordionContent data={robotsTxtData} /> : <p>No robots.txt data available.</p>;
+      case 'xmlSitemap':
+        return xmlSitemapData ? <XmlSitemapAccordionContent data={xmlSitemapData} /> : <p>No XML sitemap data available.</p>;
+      case 'sitemapValidity':
+        return sitemapValidityData ? <SitemapsValidityAccordionContent data={sitemapValidityData} /> : <p>No sitemap validity data available.</p>;
+      case 'urlParameters':
+        return urlParametersData ? <UrlParametersAccordionContent data={urlParametersData} /> : <p>No URL parameters data available.</p>;
       default:
         return typeof content === 'string' ? <p>{content}</p> : <p>No specific content view for this item.</p>;
     }
@@ -109,3 +138,4 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 };
 
 export default ReportAccordionItem;
+

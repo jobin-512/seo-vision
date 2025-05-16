@@ -15,11 +15,35 @@ import {
   type HeadingsAnalysis as AiHeadingsAnalysisType,
   type ContentAnalysis as AiContentAnalysisType,
   type AltAttributeAnalysis as AiAltAttributeAnalysisType,
-  type InPageLinksAnalysis as AiInPageLinksAnalysisType
+  type InPageLinksAnalysis as AiInPageLinksAnalysisType,
+  type IndexingAnalysis as AiIndexingAnalysisType,
+  type WebFeedsAnalysis as AiWebFeedsAnalysisType,
+  type UrlResolveAnalysis as AiUrlResolveAnalysisType,
+  type RobotsTxtAnalysis as AiRobotsTxtAnalysisType,
+  type XmlSitemapAnalysis as AiXmlSitemapAnalysisType,
+  type SitemapValidityAnalysis as AiSitemapValidityAnalysisType,
+  type UrlParametersAnalysis as AiUrlParametersAnalysisType
 } from '@/ai/flows/generate-seo-report';
-import type { ReportData, OnPageItem, GooglePreviewData, HeadingsAnalysis, ContentAnalysis, AltAttributeAnalysis, InPageLinksAnalysis } from '@/lib/types';
+import type { 
+  ReportData, 
+  OnPageItem, 
+  GooglePreviewData, 
+  HeadingsAnalysis, 
+  ContentAnalysis, 
+  AltAttributeAnalysis, 
+  InPageLinksAnalysis,
+  WebFeedsAnalysis,
+  UrlResolveAnalysis,
+  RobotsTxtAnalysis,
+  XmlSitemapAnalysis,
+  SitemapValidityAnalysis,
+  UrlParametersAnalysis
+} from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
-import { LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Heading1, FileSearch2, ImageIcon, Link as LinkIcon } from 'lucide-react';
+import { 
+  LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Heading1, 
+  FileSearch2, ImageIcon, Link as LinkIcon, Rss, Network, FileCode, ListChecks, Link2Icon as Link2 
+} from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
 import ReportFilters from '@/components/report-filters';
@@ -35,7 +59,7 @@ const mapAiDataToAccordionItem = (
   id: string, 
   title: string, 
   icon: React.ElementType, 
-  aiData: AiHeadingsAnalysisType | AiContentAnalysisType | AiAltAttributeAnalysisType | AiInPageLinksAnalysisType | undefined,
+  aiData: AiHeadingsAnalysisType | AiContentAnalysisType | AiAltAttributeAnalysisType | AiInPageLinksAnalysisType | AiWebFeedsAnalysisType | AiUrlResolveAnalysisType | AiRobotsTxtAnalysisType | AiXmlSitemapAnalysisType | AiSitemapValidityAnalysisType | AiUrlParametersAnalysisType | undefined,
   defaultStatusText: string = 'N/A',
   defaultStatusColorClass: string = 'text-muted-foreground'
 ): OnPageItem => {
@@ -59,10 +83,18 @@ const mapAiDataToAccordionItem = (
     badgeVariant: 'outline',
   };
 
-  if (id === 'headings' && aiData && 'h1Count' in aiData) item.headingsAnalysis = aiData as HeadingsAnalysis;
-  if (id === 'contentAnalysis' && aiData && 'keywords' in aiData) item.contentAnalysisData = aiData as ContentAnalysis;
-  if (id === 'altAttributes' && aiData && 'totalImages' in aiData) item.altAttributeAnalysis = aiData as AltAttributeAnalysis;
-  if (id === 'inPageLinks' && aiData && 'totalLinks' in aiData) item.inPageLinksAnalysis = aiData as InPageLinksAnalysis;
+  // On-Page
+  if (id === 'headings' && aiData) item.headingsAnalysis = aiData as HeadingsAnalysis;
+  if (id === 'contentAnalysis' && aiData) item.contentAnalysisData = aiData as ContentAnalysis;
+  if (id === 'altAttributes' && aiData) item.altAttributeAnalysis = aiData as AltAttributeAnalysis;
+  if (id === 'inPageLinks' && aiData) item.inPageLinksAnalysis = aiData as InPageLinksAnalysis;
+  // Indexing
+  if (id === 'webFeeds' && aiData) item.webFeedsData = aiData as WebFeedsAnalysis;
+  if (id === 'urlResolve' && aiData) item.urlResolveData = aiData as UrlResolveAnalysis;
+  if (id === 'robotsTxt' && aiData) item.robotsTxtData = aiData as RobotsTxtAnalysis;
+  if (id === 'xmlSitemap' && aiData) item.xmlSitemapData = aiData as XmlSitemapAnalysis;
+  if (id === 'sitemapValidity' && aiData) item.sitemapValidityData = aiData as SitemapValidityAnalysis;
+  if (id === 'urlParameters' && aiData) item.urlParametersData = aiData as UrlParametersAnalysis;
   
   return item;
 };
@@ -81,14 +113,14 @@ const mapAiOnPageDetailToOnPageItem = (aiItem: AiOnPageDetailItem): OnPageItem =
     statusText: aiItem.statusText,
     statusColorClass: aiItem.statusColorClass,
     badgeVariant: 'outline', 
-    content: aiItem.content || undefined, // Ensure content is not null
+    content: aiItem.content || undefined,
     details: aiItem.details,
     googleDesktopPreview: aiItem.googleDesktopPreview as GooglePreviewData | undefined, 
     googleMobilePreview: aiItem.googleMobilePreview as GooglePreviewData | undefined, 
   };
 };
 
-const getDefaultAccordionItems = (url?: string): OnPageItem[] => [
+const getDefaultOnPageAccordionItems = (url?: string): OnPageItem[] => [
   // On-Page Base
   {
     id: 'titleTag',
@@ -128,7 +160,7 @@ const getDefaultAccordionItems = (url?: string): OnPageItem[] => [
       description: 'Shorter, punchy description for mobile users. Easy to read on the go.',
     },
   },
-  // New Sections
+  // New On-Page Sections
   {
     id: 'headings',
     icon: Heading1,
@@ -180,11 +212,63 @@ const getDefaultAccordionItems = (url?: string): OnPageItem[] => [
   },
 ];
 
+const getDefaultIndexingAccordionItems = (): OnPageItem[] => [
+  {
+    id: 'webFeeds',
+    icon: Rss,
+    title: 'Web Feeds',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    webFeedsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking for web feeds...', feeds: []}
+  },
+  {
+    id: 'urlResolve',
+    icon: Network,
+    title: 'URL Resolve',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    urlResolveData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking URL resolutions...', resolutions: []}
+  },
+  {
+    id: 'robotsTxt',
+    icon: FileCode,
+    title: 'Robots.txt',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    robotsTxtData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', robotsTxtUrl: '', findings: ['Checking robots.txt...']}
+  },
+  {
+    id: 'xmlSitemap',
+    icon: FileText,  // Using FileText, can change if a more specific sitemap icon is available or preferred
+    title: 'XML Sitemap',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    xmlSitemapData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', sitemapUrl: '', details: 'Checking XML sitemap...'}
+  },
+  {
+    id: 'sitemapValidity',
+    icon: ListChecks,
+    title: 'Sitemaps Validity',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    sitemapValidityData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', summary: 'Checking sitemap validity...', checks: []}
+  },
+  {
+    id: 'urlParameters',
+    icon: Link2,
+    title: 'URL Parameters',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    urlParametersData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking URL parameters...'}
+  }
+];
+
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [reportData, setReportData] = React.useState<ReportData | null>(null);
-  const [currentAccordionItems, setCurrentAccordionItems] = React.useState<OnPageItem[]>(getDefaultAccordionItems());
+  const [onPageAccordionItems, setOnPageAccordionItems] = React.useState<OnPageItem[]>(getDefaultOnPageAccordionItems());
+  const [indexingAccordionItems, setIndexingAccordionItems] = React.useState<OnPageItem[]>(getDefaultIndexingAccordionItems());
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
 
@@ -201,7 +285,8 @@ export default function HomePage() {
     setIsLoading(true);
     setError(null);
     setReportData(null);
-    setCurrentAccordionItems(getDefaultAccordionItems(data.url)); 
+    setOnPageAccordionItems(getDefaultOnPageAccordionItems(data.url)); 
+    setIndexingAccordionItems(getDefaultIndexingAccordionItems());
     setCurrentUrl(data.url);
 
     try {
@@ -211,53 +296,55 @@ export default function HomePage() {
           ...result,
           urlAnalyzed: data.url,
           analysisTimestamp: new Date().toISOString(),
-          // Placeholder percentages, ideally these would come from AI or calculations
           passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, 
           toImprovePercent: result.score > 0 ? 20 : 0, 
           errorsPercent: result.score > 0 ? 10 : 0, 
         };
         setReportData(augmentedResult);
 
-        let newAccordionItems: OnPageItem[] = [];
-
+        // Process On-Page SEO Details
+        let newOnPageItems: OnPageItem[] = [];
         if (result.onPageSeoDetails && result.onPageSeoDetails.length > 0) {
-          newAccordionItems.push(...result.onPageSeoDetails.map(mapAiOnPageDetailToOnPageItem));
+          newOnPageItems.push(...result.onPageSeoDetails.map(mapAiOnPageDetailToOnPageItem));
         } else {
-          // Add default on-page items if AI doesn't provide them
-          newAccordionItems.push(...getDefaultAccordionItems(data.url).filter(item => ['titleTag', 'metaDescription', 'googlePreview'].includes(item.id)));
+          newOnPageItems.push(...getDefaultOnPageAccordionItems(data.url).filter(item => ['titleTag', 'metaDescription', 'googlePreview'].includes(item.id)));
         }
+        newOnPageItems.push(mapAiDataToAccordionItem('headings', 'Headings', Heading1, result.headingsAnalysis, result.headingsAnalysis?.statusText, result.headingsAnalysis?.statusColorClass));
+        newOnPageItems.push(mapAiDataToAccordionItem('contentAnalysis', 'Content Analysis', FileSearch2, result.contentAnalysis, result.contentAnalysis?.statusText, result.contentAnalysis?.statusColorClass));
+        newOnPageItems.push(mapAiDataToAccordionItem('altAttributes', 'Alt Attributes', ImageIcon, result.altAttributeAnalysis, result.altAttributeAnalysis?.statusText, result.altAttributeAnalysis?.statusColorClass));
+        newOnPageItems.push(mapAiDataToAccordionItem('inPageLinks', 'In-Page Links', LinkIcon, result.inPageLinksAnalysis, result.inPageLinksAnalysis?.statusText, result.inPageLinksAnalysis?.statusColorClass));
         
-        // Map new sections
-        newAccordionItems.push(mapAiDataToAccordionItem('headings', 'Headings', Heading1, result.headingsAnalysis, result.headingsAnalysis?.statusText, result.headingsAnalysis?.statusColorClass));
-        newAccordionItems.push(mapAiDataToAccordionItem('contentAnalysis', 'Content Analysis', FileSearch2, result.contentAnalysis, result.contentAnalysis?.statusText, result.contentAnalysis?.statusColorClass));
-        newAccordionItems.push(mapAiDataToAccordionItem('altAttributes', 'Alt Attributes', ImageIcon, result.altAttributeAnalysis, result.altAttributeAnalysis?.statusText, result.altAttributeAnalysis?.statusColorClass));
-        newAccordionItems.push(mapAiDataToAccordionItem('inPageLinks', 'In-Page Links', LinkIcon, result.inPageLinksAnalysis, result.inPageLinksAnalysis?.statusText, result.inPageLinksAnalysis?.statusColorClass));
-        
-        // Filter out any items that might have been duplicated if AI didn't provide onPageSeoDetails but provided other analyses
-        const uniqueItemIds = new Set<string>();
-        const finalAccordionItems = newAccordionItems.filter(item => {
-            if (!uniqueItemIds.has(item.id)) {
-                uniqueItemIds.add(item.id);
+        const uniqueOnPageItemIds = new Set<string>();
+        const finalOnPageItems = newOnPageItems.filter(item => {
+            if (!uniqueOnPageItemIds.has(item.id)) {
+                uniqueOnPageItemIds.add(item.id);
                 return true;
             }
-            // If onPageSeoDetails was missing, we added defaults. If AI provided structured data for other sections,
-            // ensure we prioritize the AI-derived status for those sections over the generic default.
-            const existingItem = currentAccordionItems.find(ci => ci.id === item.id);
-            if (existingItem && item.statusText !== 'N/A') { // AI provided a status
+            const existingItem = onPageAccordionItems.find(ci => ci.id === item.id);
+            if (existingItem && item.statusText !== 'N/A') { 
                 existingItem.statusText = item.statusText;
                 existingItem.statusColorClass = item.statusColorClass;
-                // Update specific content for that item
                 if(item.headingsAnalysis) existingItem.headingsAnalysis = item.headingsAnalysis;
                 if(item.contentAnalysisData) existingItem.contentAnalysisData = item.contentAnalysisData;
                 if(item.altAttributeAnalysis) existingItem.altAttributeAnalysis = item.altAttributeAnalysis;
                 if(item.inPageLinksAnalysis) existingItem.inPageLinksAnalysis = item.inPageLinksAnalysis;
-
             }
             return false;
         });
+        setOnPageAccordionItems(finalOnPageItems.length > 0 ? finalOnPageItems : getDefaultOnPageAccordionItems(data.url));
 
-
-        setCurrentAccordionItems(finalAccordionItems.length > 0 ? finalAccordionItems : getDefaultAccordionItems(data.url));
+        // Process Indexing Analysis Details
+        let newIndexingItems: OnPageItem[] = [];
+        if (result.indexingAnalysis) {
+          const ia = result.indexingAnalysis;
+          newIndexingItems.push(mapAiDataToAccordionItem('webFeeds', 'Web Feeds', Rss, ia.webFeeds, ia.webFeeds?.statusText, ia.webFeeds?.statusColorClass));
+          newIndexingItems.push(mapAiDataToAccordionItem('urlResolve', 'URL Resolve', Network, ia.urlResolve, ia.urlResolve?.statusText, ia.urlResolve?.statusColorClass));
+          newIndexingItems.push(mapAiDataToAccordionItem('robotsTxt', 'Robots.txt', FileCode, ia.robotsTxt, ia.robotsTxt?.statusText, ia.robotsTxt?.statusColorClass));
+          newIndexingItems.push(mapAiDataToAccordionItem('xmlSitemap', 'XML Sitemap', FileText, ia.xmlSitemap, ia.xmlSitemap?.statusText, ia.xmlSitemap?.statusColorClass));
+          newIndexingItems.push(mapAiDataToAccordionItem('sitemapValidity', 'Sitemaps Validity', ListChecks, ia.sitemapValidity, ia.sitemapValidity?.statusText, ia.sitemapValidity?.statusColorClass));
+          newIndexingItems.push(mapAiDataToAccordionItem('urlParameters', 'URL Parameters', Link2, ia.urlParameters, ia.urlParameters?.statusText, ia.urlParameters?.statusColorClass));
+        }
+        setIndexingAccordionItems(newIndexingItems.length > 0 ? newIndexingItems : getDefaultIndexingAccordionItems());
 
 
         toast({
@@ -272,7 +359,8 @@ export default function HomePage() {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during analysis.';
       setError(errorMessage);
-      setCurrentAccordionItems(getDefaultAccordionItems(currentUrl)); 
+      setOnPageAccordionItems(getDefaultOnPageAccordionItems(currentUrl)); 
+      setIndexingAccordionItems(getDefaultIndexingAccordionItems());
       toast({
         title: "Analysis Failed",
         description: errorMessage,
@@ -308,8 +396,6 @@ export default function HomePage() {
     }
   };
   
-  const onPageSectionData = currentAccordionItems;
-
 
   return (
     <div className="min-h-screen flex flex-col items-center py-8 px-4 md:px-8 printable-area">
@@ -391,8 +477,13 @@ export default function HomePage() {
           <div className={`print:block ${(!reportData && !currentUrl && !isLoading && !error) ? 'hidden' : ''}`}>
             <ReportAccordionSection 
               title="On-Page" 
-              items={onPageSectionData} 
+              items={onPageAccordionItems} 
               defaultOpen={true} 
+            />
+            <ReportAccordionSection 
+              title="Indexing" 
+              items={indexingAccordionItems} 
+              defaultOpen={false} 
             />
           </div>
           
@@ -419,3 +510,4 @@ export default function HomePage() {
     </div>
   );
 }
+

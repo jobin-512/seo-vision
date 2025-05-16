@@ -16,6 +16,7 @@ export const GooglePreviewDataSchema = z.object({
 });
 export type GooglePreviewData = z.infer<typeof GooglePreviewDataSchema>;
 
+// --- ON-PAGE SEO ---
 // Schema for individual On-Page SEO Detail Items
 export const OnPageDetailItemSchema = z.object({
   id: z.string().describe("Identifier for the item, e.g., 'titleTag', 'metaDescription', 'googlePreview'."),
@@ -94,6 +95,86 @@ export const InPageLinksAnalysisSchema = z.object({
 });
 export type InPageLinksAnalysis = z.infer<typeof InPageLinksAnalysisSchema>;
 
+
+// --- INDEXING ANALYSIS ---
+export const WebFeedItemSchema = z.object({
+  url: z.string().describe("URL of the web feed."),
+  format: z.string().describe("Format of the web feed (e.g., RSS, Atom)."),
+});
+export type WebFeedItem = z.infer<typeof WebFeedItemSchema>;
+
+export const WebFeedsAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status, e.g., 'Outdated', 'Good'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  feeds: z.array(WebFeedItemSchema).optional().describe("List of web feeds found."),
+  details: z.string().optional().describe("Summary message, e.g., 'We found X web feed URL(s) on this web page.'"),
+});
+export type WebFeedsAnalysis = z.infer<typeof WebFeedsAnalysisSchema>;
+
+export const UrlResolveItemSchema = z.object({
+  originalUrl: z.string().describe("The original URL checked."),
+  resolvedUrl: z.string().describe("The URL it resolves to."),
+});
+export type UrlResolveItem = z.infer<typeof UrlResolveItemSchema>;
+
+export const UrlResolveAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status, e.g., 'Good', 'Redirect issues'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  resolutions: z.array(UrlResolveItemSchema).optional().describe("List of URL resolution examples."),
+  details: z.string().optional().describe("Summary message, e.g., 'Great, a redirect is in place...'."),
+});
+export type UrlResolveAnalysis = z.infer<typeof UrlResolveAnalysisSchema>;
+
+export const RobotsTxtAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of robots.txt analysis."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  robotsTxtUrl: z.string().optional().describe("URL to the robots.txt file, if found."),
+  findings: z.array(z.string()).optional().describe("Key findings or details from robots.txt review, e.g., 'We found your robots.txt here', 'The reviewed page is allowed...'"),
+});
+export type RobotsTxtAnalysis = z.infer<typeof RobotsTxtAnalysisSchema>;
+
+export const XmlSitemapAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of XML sitemap presence/accessibility."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  sitemapUrl: z.string().optional().describe("URL to the XML sitemap, if found."),
+  details: z.string().optional().describe("Brief summary or note."),
+});
+export type XmlSitemapAnalysis = z.infer<typeof XmlSitemapAnalysisSchema>;
+
+export const SitemapValidityCheckItemSchema = z.object({
+  text: z.string().describe("Description of the validity check or finding."),
+  type: z.enum(['check', 'issue', 'positive']).describe("Type of item: 'check' (neutral/informational), 'issue' (a problem), 'positive' (a good finding)."),
+});
+export type SitemapValidityCheckItem = z.infer<typeof SitemapValidityCheckItemSchema>;
+
+export const SitemapValidityAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of sitemap validity."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  sitemapUrl: z.string().optional().describe("URL to the sitemap that was validated."),
+  summary: z.string().optional().describe("Summary like 'We found X sitemap(s) listing Y URL(s).'"),
+  checks: z.array(SitemapValidityCheckItemSchema).optional().describe("List of checks, issues, and positive findings related to sitemap validity."),
+});
+export type SitemapValidityAnalysis = z.infer<typeof SitemapValidityAnalysisSchema>;
+
+export const UrlParametersAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of URL parameters."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  details: z.string().optional().describe("Summary message, e.g., 'Good, the URLs look clean.'"),
+});
+export type UrlParametersAnalysis = z.infer<typeof UrlParametersAnalysisSchema>;
+
+export const IndexingAnalysisSchema = z.object({
+  webFeeds: WebFeedsAnalysisSchema.optional(),
+  urlResolve: UrlResolveAnalysisSchema.optional(),
+  robotsTxt: RobotsTxtAnalysisSchema.optional(),
+  xmlSitemap: XmlSitemapAnalysisSchema.optional(),
+  sitemapValidity: SitemapValidityAnalysisSchema.optional(),
+  urlParameters: UrlParametersAnalysisSchema.optional(),
+}).describe("Comprehensive analysis of various indexing aspects of the website.");
+export type IndexingAnalysis = z.infer<typeof IndexingAnalysisSchema>;
+
+
+// --- Main Schemas ---
 // Main Input Schema for the Flow
 export const GenerateSeoReportInputSchema = z.object({
   url: z.string().describe('The URL of the website to analyze.'),
@@ -120,10 +201,16 @@ export const GenerateSeoReportOutputSchema = z.object({
   clsStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('Cumulative Layout Shift status.'),
   fidValue: z.string().optional().describe('First Input Delay value (e.g., "100ms").'),
   fidStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('First Input Delay status.'),
+  
+  // On-Page specific details
   onPageSeoDetails: z.array(OnPageDetailItemSchema).optional().describe("Structured details for on-page SEO items like Title Tag, Meta Description, and Google Preview, based on the analyzed URL."),
   headingsAnalysis: HeadingsAnalysisSchema.optional().describe("Analysis of heading tags (H1-H6) on the page."),
   contentAnalysis: ContentAnalysisSchema.optional().describe("Analysis of keywords and keyphrases found in the content."),
   altAttributeAnalysis: AltAttributeAnalysisSchema.optional().describe("Analysis of image alt attributes."),
   inPageLinksAnalysis: InPageLinksAnalysisSchema.optional().describe("Analysis of internal and external links on the page."),
+
+  // Indexing Analysis
+  indexingAnalysis: IndexingAnalysisSchema.optional().describe("Detailed analysis of website indexing aspects."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
+
