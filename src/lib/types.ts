@@ -1,5 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
+import type { OnPageDetailItem as AiOnPageDetailItem } from '@/ai/flows/generate-seo-report'; // Import the AI type
 
 export interface GooglePreviewData {
   url: string;
@@ -8,8 +9,8 @@ export interface GooglePreviewData {
 }
 
 export interface OnPageItem {
-  id: string;
-  icon: LucideIcon;
+  id: string; // e.g., "titleTag", "metaDescription"
+  icon: LucideIcon; // Mapped on frontend
   title: string;
   statusText: string;
   statusColorClass: string; // e.g., "text-accent", "text-warning", "text-muted-foreground"
@@ -18,9 +19,6 @@ export interface OnPageItem {
   details?: string; // Additional details like length
   googleDesktopPreview?: GooglePreviewData;
   googleMobilePreview?: GooglePreviewData;
-  // Optional fields for filtering if needed later
-  // impact?: 'High' | 'Medium' | 'Low';
-  // effort?: 'Low' | 'Medium' | 'High';
 }
 
 
@@ -43,6 +41,9 @@ export type ReportData = {
   fidValue?: string;
   fidStatus?: "Good" | "Improve" | "Poor";
 
+  // New field for AI-generated on-page details
+  onPageSeoDetails?: AiOnPageDetailItem[]; // Data directly from AI
+
   // New fields for the redesigned header card
   urlAnalyzed?: string;
   analysisTimestamp?: string | number; // Could be ISO string or epoch
@@ -50,8 +51,7 @@ export type ReportData = {
   toImprovePercent?: number; // Percentage for the "To Improve" progress bar
   errorsPercent?: number; // Percentage for the "Errors" progress bar
 
-  // Structured data for accordion sections
-  onPageSeoDetails?: OnPageItem[]; 
-  // technicalSeoDetails?: OnPageItem[];
-  // ... other sections
+  // Note: The frontend might transform AiOnPageDetailItem[] into OnPageItem[] for rendering.
+  // If transformation happens before setting state, then onPageSeoDetails in state could be OnPageItem[].
+  // For clarity, keeping them separate for now. If state stores transformed data, adjust ReportData type.
 };

@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { generateSeoReport } from '@/ai/flows/generate-seo-report';
-import type { ReportData, OnPageItem } from '@/lib/types';
+import { generateSeoReport, type OnPageDetailItem as AiOnPageDetailItem } from '@/ai/flows/generate-seo-report';
+import type { ReportData, OnPageItem, GooglePreviewData } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
-import { LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Settings, ShieldCheck, BarChart2 as BarChartIcon, LineChart as LineChartIcon, XCircle } from 'lucide-react';
+import { LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
 import ReportFilters from '@/components/report-filters';
@@ -24,53 +24,74 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Mock data for On-Page SEO Accordion
+const mapAiOnPageDetailToOnPageItem = (aiItem: AiOnPageDetailItem): OnPageItem => {
+  let icon: React.ElementType = Info; // Default icon
+  if (aiItem.id === 'titleTag') icon = FileText;
+  else if (aiItem.id === 'metaDescription') icon = BookOpen;
+  else if (aiItem.id === 'googlePreview') icon = CheckCircle2; // Using CheckCircle2 as a placeholder for search/preview
+
+  return {
+    id: aiItem.id,
+    icon: icon,
+    title: aiItem.title,
+    statusText: aiItem.statusText,
+    statusColorClass: aiItem.statusColorClass,
+    badgeVariant: 'outline', // Default, can be refined based on status
+    content: aiItem.content,
+    details: aiItem.details,
+    googleDesktopPreview: aiItem.googleDesktopPreview as GooglePreviewData | undefined, // Cast if structure matches
+    googleMobilePreview: aiItem.googleMobilePreview as GooglePreviewData | undefined, // Cast if structure matches
+  };
+};
+
+
+// Mock data for On-Page SEO Accordion - Fallback
 const mockOnPageItems: OnPageItem[] = [
   {
     id: 'titleTag',
     icon: FileText,
     title: 'Title Tag',
-    statusText: 'Outdated',
-    statusColorClass: 'text-warning', // Or 'text-muted-foreground' for more neutral 'Outdated'
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
     badgeVariant: 'outline',
-    content: 'Referrals Real Estate Agents in New Jersey, Greenville, SC & Dallas, TX',
-    details: 'Length: 71 character(s) (519 pixels)',
+    content: 'Example: Your Website Title - Engaging and Relevant',
+    details: 'Length: ~60 character(s)',
   },
   {
     id: 'metaDescription',
     icon: BookOpen,
     title: 'Meta Description',
-    statusText: 'Outdated',
-    statusColorClass: 'text-warning',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
     badgeVariant: 'outline',
-    content: 'Find the best referral real estate agents in Greenville, Austin, TX, NJ and across the US and Canada with Referrals Real Estate Agents. We make it easy to connect with top-rated agents for buying, selling, renting or investing.',
-    details: 'Length: 227 character(s) (1299 pixels)',
+    content: 'Example: Concise and compelling summary of your page content, encouraging clicks from search results. Aim for around 155 characters.',
+    details: 'Length: ~155 character(s)',
   },
   {
     id: 'googlePreview',
-    icon: CheckCircle2, // Placeholder, could be MagnifyingGlass or similar
+    icon: CheckCircle2, 
     title: 'Google Preview',
-    statusText: 'Outdated', // Assuming this also applies here
-    statusColorClass: 'text-warning',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
     badgeVariant: 'outline',
     googleDesktopPreview: {
-      url: 'referralsrealestateagents.com',
-      title: 'Referrals Real Estate Agents in New Jersey, Greenville, SC & Dallas,...',
-      description: 'Find the best referral real estate agents in Greenville, Austin, TX, NJ and across the US and Canada with Referrals Real Estate Agents. We make it easy to ...',
+      url: 'example.com',
+      title: 'Example Website Title - Your Catchy Headline',
+      description: 'This is an example of how your website might appear in Google search results on a desktop computer. Make it count!',
     },
     googleMobilePreview: {
-      url: 'https://referralsrealestateagents.com',
-      title: 'Referrals Real Estate Agents in New Jersey, Greenville, SC & Dallas...',
-      description: 'Find the best referral real estate agents in Greenville, Austin, TX, NJ and across the US and Canada with Referrals Real...',
+      url: 'https://example.com',
+      title: 'Example Title - Mobile Friendly',
+      description: 'Shorter, punchy description for mobile users. Easy to read on the go.',
     },
   },
-  // Add more items as needed, e.g., Headings, Image SEO, etc.
 ];
 
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [reportData, setReportData] = React.useState<ReportData | null>(null);
+  const [currentOnPageItems, setCurrentOnPageItems] = React.useState<OnPageItem[]>(mockOnPageItems);
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
 
@@ -87,6 +108,7 @@ export default function HomePage() {
     setIsLoading(true);
     setError(null);
     setReportData(null);
+    setCurrentOnPageItems(mockOnPageItems); // Reset to mock data while loading new
     setCurrentUrl(data.url);
 
     try {
@@ -96,12 +118,20 @@ export default function HomePage() {
           ...result,
           urlAnalyzed: data.url,
           analysisTimestamp: new Date().toISOString(),
-          passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, // Example logic
-          toImprovePercent: result.score > 0 ? 20 : 0, // Example logic
-          errorsPercent: result.score > 0 ? 10 : 0, // Example logic
-          onPageSeoDetails: result.onPageSeoDetails || mockOnPageItems, // Use AI data or fallback to mock
+          passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, 
+          toImprovePercent: result.score > 0 ? 20 : 0, 
+          errorsPercent: result.score > 0 ? 10 : 0, 
+          // onPageSeoDetails is now directly from AI of type AiOnPageDetailItem[]
         };
         setReportData(augmentedResult);
+
+        if (result.onPageSeoDetails && result.onPageSeoDetails.length > 0) {
+          const transformedItems = result.onPageSeoDetails.map(mapAiOnPageDetailToOnPageItem);
+          setCurrentOnPageItems(transformedItems);
+        } else {
+          setCurrentOnPageItems(mockOnPageItems); // Fallback if AI doesn't provide details
+        }
+
         toast({
           title: "Analysis Complete",
           description: `SEO report for ${data.url} generated successfully.`,
@@ -114,6 +144,7 @@ export default function HomePage() {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during analysis.';
       setError(errorMessage);
+      setCurrentOnPageItems(mockOnPageItems); // Reset to mock on error
       toast({
         title: "Analysis Failed",
         description: errorMessage,
@@ -149,7 +180,7 @@ export default function HomePage() {
     }
   };
   
-  const onPageSectionData = reportData?.onPageSeoDetails || (currentUrl ? mockOnPageItems : []);
+  const onPageSectionData = currentOnPageItems;
 
 
   return (
@@ -229,24 +260,16 @@ export default function HomePage() {
           
           {(reportData || currentUrl) && <ReportFilters />}
 
-          {(reportData || currentUrl ) && onPageSectionData.length > 0 && (
-             <div className="print:block"> {/* Ensure this section is printed */}
-              <ReportAccordionSection 
-                title="On-Page" 
-                items={onPageSectionData} 
-                defaultOpen={true} 
-              />
-            </div>
-          )}
+          {/* Always render the accordion section container, but items depend on data */}
+          {/* This ensures print styles can target it even if it's "empty" on screen pre-analysis */}
+          <div className={`print:block ${(!reportData && !currentUrl && !isLoading && !error) ? 'hidden' : ''}`}>
+            <ReportAccordionSection 
+              title="On-Page" 
+              items={onPageSectionData} 
+              defaultOpen={true} 
+            />
+          </div>
           
-          {/* Fallback content for when there's no specific report data but a URL might have been analyzed */}
-          {!reportData && currentUrl && !isLoading && !error && (
-             <ReportAccordionSection 
-                title="On-Page" 
-                items={mockOnPageItems} 
-                defaultOpen={true} 
-              />
-          )}
 
           {/* Initial state message before any analysis */}
           {!reportData && !currentUrl && !isLoading && !error && (
