@@ -26,7 +26,7 @@ const OnPageDetailItemSchema = z.object({
   title: z.string().describe("The display title of the on-page SEO item, e.g., 'Title Tag'."),
   statusText: z.string().describe("A status description, e.g., 'Outdated', 'Good', 'Needs Improvement'."),
   statusColorClass: z.string().describe("Tailwind class for status color, e.g., 'text-warning', 'text-accent'."),
-  content: z.string().optional().describe("Main content, e.g., the text of the title tag or meta description."),
+  content: z.string().nullable().optional().describe("Main content, e.g., the text of the title tag or meta description."),
   details: z.string().optional().describe("Additional details, e.g., character length."),
   googleDesktopPreview: GooglePreviewDataSchema.optional(),
   googleMobilePreview: GooglePreviewDataSchema.optional(),
@@ -90,14 +90,14 @@ const prompt = ai.definePrompt({
       *   title: "Title Tag"
       *   statusText: (e.g., "Good", "Outdated", "Too long", "Too short", "Missing") - be specific.
       *   statusColorClass: (e.g., "text-accent" for Good, "text-warning" for Outdated/Too long/Too short, "text-destructive" for Missing)
-      *   content: The plausible current text of the title tag for the website.
+      *   content: The plausible current text of the title tag for the website. If missing, provide an empty string.
       *   details: The character length of this title tag, e.g., "Length: 70 character(s)".
   2.  **Meta Description**:
       *   id: "metaDescription"
       *   title: "Meta Description"
       *   statusText: (e.g., "Good", "Outdated", "Too long", "Too short", "Missing") - be specific.
       *   statusColorClass: (e.g., "text-accent" for Good, "text-warning" for Outdated/Too long/Too short, "text-destructive" for Missing)
-      *   content: The plausible current text of the meta description for the website.
+      *   content: The plausible current text of the meta description for the website. If missing, provide an empty string.
       *   details: The character length of this meta description, e.g., "Length: 155 character(s)".
   3.  **Google Preview**:
       *   id: "googlePreview"
