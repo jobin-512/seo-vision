@@ -42,6 +42,19 @@ import TapTargetsAccordionContent from './tap-targets-accordion-content';
 // Structured Data Content Components
 import SchemaOrgAccordionContent from './schemaorg-accordion-content';
 import OpenGraphAccordionContent from './opengraph-accordion-content';
+import TwitterCardAccordionContent from './twitter-card-accordion-content'; // New
+
+// Microformats Content Component
+import MicroformatsAccordionContent from './microformats-accordion-content'; // New
+
+// Security Content Components
+import EmailPrivacyAccordionContent from './email-privacy-accordion-content'; // New
+import DmarcAccordionContent from './dmarc-accordion-content'; // New
+import SslSecureAccordionContent from './ssl-secure-accordion-content'; // New
+import MixedContentAccordionContent from './mixed-content-accordion-content'; // New
+
+// Performance Content Components
+import AssetMinificationAccordionContent from './asset-minification-accordion-content'; // New
 
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
@@ -81,6 +94,16 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
   // Structured Data
   schemaOrgData,
   openGraphData,
+  twitterCardData, // New
+  // Microformats
+  microformatsData, // New
+  // Security
+  emailPrivacyData, // New
+  dmarcData, // New
+  sslSecureData, // New
+  mixedContentData, // New
+  // Performance
+  assetMinificationData, // New
 }) => {
   let effectiveBadgeVariant = badgeVariant;
   if (statusColorClass.includes('text-accent')) {
@@ -170,6 +193,26 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
         return schemaOrgData ? <SchemaOrgAccordionContent data={schemaOrgData} /> : <p>No Schema.org data available.</p>;
       case 'openGraphProtocol':
         return openGraphData ? <OpenGraphAccordionContent data={openGraphData} /> : <p>No Open Graph Protocol data available.</p>;
+      case 'twitterCard':
+        return twitterCardData ? <TwitterCardAccordionContent data={twitterCardData} /> : <p>No Twitter Card data available.</p>;
+
+      // --- MICROFORMATS ---
+      case 'microformats':
+        return microformatsData ? <MicroformatsAccordionContent data={microformatsData} /> : <p>No Microformats data available.</p>;
+      
+      // --- SECURITY ---
+      case 'emailPrivacy':
+        return emailPrivacyData ? <EmailPrivacyAccordionContent data={emailPrivacyData} /> : <p>No Email Privacy data available.</p>;
+      case 'dmarc':
+        return dmarcData ? <DmarcAccordionContent data={dmarcData} /> : <p>No DMARC data available.</p>;
+      case 'sslSecure':
+        return sslSecureData ? <SslSecureAccordionContent data={sslSecureData} /> : <p>No SSL Secure data available.</p>;
+      case 'mixedContent':
+        return mixedContentData ? <MixedContentAccordionContent data={mixedContentData} /> : <p>No Mixed Content data available.</p>;
+
+      // --- PERFORMANCE ---
+      case 'assetMinification':
+        return assetMinificationData ? <AssetMinificationAccordionContent data={assetMinificationData} /> : <p>No Asset Minification data available.</p>;
 
       default:
         return typeof content === 'string' ? <p>{content}</p> : <p>No specific content view for this item (ID: {id}).</p>;

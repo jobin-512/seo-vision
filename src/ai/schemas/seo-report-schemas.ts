@@ -293,7 +293,7 @@ export type OpenGraphTag = z.infer<typeof OpenGraphTagSchema>;
 export const OpenGraphPreviewSchema = z.object({
   title: z.string().optional().describe("The Open Graph title for the preview."),
   description: z.string().optional().describe("The Open Graph description for the preview."),
-  imageUrl: z.string().optional().describe("The Open Graph image URL for the preview. Use placeholder if not available."),
+  imageUrl: z.string().optional().describe("The Open Graph image URL for the preview. Use placeholder 'https://placehold.co/600x315.png?text=OG+Preview' and add data-ai-hint if not available."),
   url: z.string().optional().describe("The Open Graph URL or site name for the preview."),
 });
 export type OpenGraphPreview = z.infer<typeof OpenGraphPreviewSchema>;
@@ -306,11 +306,112 @@ export const OpenGraphAnalysisSchema = z.object({
 });
 export type OpenGraphAnalysis = z.infer<typeof OpenGraphAnalysisSchema>;
 
+// TWITTER CARD SCHEMAS
+export const TwitterTagSchema = z.object({
+  tag: z.string().describe("The Twitter Card tag name, e.g., 'twitter:card', 'twitter:title'."),
+  value: z.string().describe("The value of the Twitter Card tag."),
+});
+export type TwitterTag = z.infer<typeof TwitterTagSchema>;
+
+export const TwitterCardPreviewSchema = z.object({
+  cardType: z.string().optional().describe("Type of Twitter card, e.g., 'summary', 'summary_large_image'."),
+  site: z.string().optional().describe("The Twitter @username of the website/publisher."),
+  title: z.string().optional().describe("The title for the Twitter Card preview."),
+  description: z.string().optional().describe("The description for the Twitter Card preview."),
+  imageUrl: z.string().optional().describe("The image URL for the Twitter Card preview. Use placeholder 'https://placehold.co/600x315.png?text=Twitter+Card' and add data-ai-hint if not available."),
+  domain: z.string().optional().describe("The domain of the content."),
+});
+export type TwitterCardPreview = z.infer<typeof TwitterCardPreviewSchema>;
+
+export const TwitterCardAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of Twitter Card implementation, e.g., 'Well Implemented', 'Missing Key Tags'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  previewData: TwitterCardPreviewSchema.optional().describe("Data for rendering a Twitter Card preview."),
+  tags: z.array(TwitterTagSchema).optional().describe("List of key Twitter Card tags found and their values."),
+});
+export type TwitterCardAnalysis = z.infer<typeof TwitterCardAnalysisSchema>;
+
 export const StructuredDataAnalysisSchema = z.object({
   schemaOrg: SchemaOrgAnalysisSchema.optional().describe("Analysis of Schema.org structured data."),
   openGraph: OpenGraphAnalysisSchema.optional().describe("Analysis of Open Graph Protocol data."),
+  twitterCard: TwitterCardAnalysisSchema.optional().describe("Analysis of Twitter Card metadata."),
 }).describe("Comprehensive analysis of structured data implementation.");
 export type StructuredDataAnalysis = z.infer<typeof StructuredDataAnalysisSchema>;
+
+
+// --- MICROFORMATS ANALYSIS ---
+export const MicroformatItemSchema = z.object({
+  type: z.string().describe("Type of microformat found, e.g., 'h-entry', 'h-card'."),
+  count: z.number().describe("Number of times this microformat type was found."),
+});
+export type MicroformatItem = z.infer<typeof MicroformatItemSchema>;
+
+export const MicroformatsAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of microformats detection."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  formatsFound: z.array(MicroformatItemSchema).optional().describe("List of microformats detected and their counts."),
+});
+export type MicroformatsAnalysis = z.infer<typeof MicroformatsAnalysisSchema>;
+
+
+// --- SECURITY ANALYSIS ---
+export const EmailPrivacyAnalysisSchema = z.object({
+  statusText: z.string().describe("Status of email privacy, e.g., 'Good', 'Warning'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  details: z.string().optional().describe("Details about email addresses found, e.g., 'Warning! At least one email address has been found in plain text.'"),
+});
+export type EmailPrivacyAnalysis = z.infer<typeof EmailPrivacyAnalysisSchema>;
+
+export const DmarcAnalysisSchema = z.object({
+  statusText: z.string().describe("Status of DMARC record analysis."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  details: z.string().optional().describe("Details on DMARC record findings, e.g., 'We found more than one DMARC record...'."),
+});
+export type DmarcAnalysis = z.infer<typeof DmarcAnalysisSchema>;
+
+export const SslCheckItemSchema = z.object({
+  text: z.string().describe("Description of the SSL check performed."),
+  isPositive: z.boolean().describe("True if the check is a positive finding, false if it's an issue or warning."),
+});
+export type SslCheckItem = z.infer<typeof SslCheckItemSchema>;
+
+export const SslSecureAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall SSL security status."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  details: z.string().optional().describe("Overall summary, e.g., 'Great, your website is SSL secured (HTTPS).'"),
+  checks: z.array(SslCheckItemSchema).optional().describe("List of specific SSL checks and their outcomes (e.g., HTTPS redirect, HSTS, expiry, issuer)."),
+});
+export type SslSecureAnalysis = z.infer<typeof SslSecureAnalysisSchema>;
+
+export const MixedContentAnalysisSchema = z.object({
+  statusText: z.string().describe("Status of mixed content detection."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  details: z.string().optional().describe("Details, e.g., 'We didn't find any mixed content on this web page.'"),
+});
+export type MixedContentAnalysis = z.infer<typeof MixedContentAnalysisSchema>;
+
+export const SecurityAnalysisSchema = z.object({
+  emailPrivacy: EmailPrivacyAnalysisSchema.optional(),
+  dmarc: DmarcAnalysisSchema.optional(),
+  sslSecure: SslSecureAnalysisSchema.optional(),
+  mixedContent: MixedContentAnalysisSchema.optional(),
+}).describe("Comprehensive analysis of website security aspects.");
+export type SecurityAnalysis = z.infer<typeof SecurityAnalysisSchema>;
+
+
+// --- PERFORMANCE ANALYSIS ---
+export const AssetMinificationAnalysisSchema = z.object({
+  statusText: z.string().describe("Status of asset minification."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  details: z.string().optional().describe("Details, e.g., 'Perfect, all your assets are minified.'"),
+});
+export type AssetMinificationAnalysis = z.infer<typeof AssetMinificationAnalysisSchema>;
+
+export const PerformanceAnalysisSchema = z.object({
+  assetMinification: AssetMinificationAnalysisSchema.optional(),
+  // Can add more performance metrics like server response time, compression, etc.
+}).describe("Analysis of website performance aspects.");
+export type PerformanceAnalysis = z.infer<typeof PerformanceAnalysisSchema>;
 
 
 // --- MAIN SCHEMAS ---
@@ -349,7 +450,10 @@ export const GenerateSeoReportOutputSchema = z.object({
   indexingAnalysis: IndexingAnalysisSchema.optional().describe("Detailed analysis of website indexing aspects."),
   technicalSeoAnalysis: TechnicalSeoAnalysisSchema.optional().describe("Detailed analysis of technical SEO aspects like robots tags, hreflang, etc."),
   mobileAnalysis: MobileAnalysisSchema.optional().describe("Detailed analysis of mobile friendliness, rendering, and tap targets."),
-  structuredDataAnalysis: StructuredDataAnalysisSchema.optional().describe("Detailed analysis of structured data like Schema.org and Open Graph."),
+  structuredDataAnalysis: StructuredDataAnalysisSchema.optional().describe("Detailed analysis of structured data like Schema.org, Open Graph, and Twitter Cards."),
+  microformatsAnalysis: MicroformatsAnalysisSchema.optional().describe("Analysis of detected microformats on the page."),
+  securityAnalysis: SecurityAnalysisSchema.optional().describe("Analysis of website security aspects."),
+  performanceAnalysis: PerformanceAnalysisSchema.optional().describe("Analysis of website performance aspects."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
 

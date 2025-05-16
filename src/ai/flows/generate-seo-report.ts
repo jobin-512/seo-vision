@@ -24,6 +24,7 @@ import {
   type AltAttributeAnalysis,
   type LinkItem,
   type InPageLinksAnalysis,
+  // Indexing
   type WebFeedItem,
   type WebFeedsAnalysis,
   type UrlResolveItem,
@@ -55,7 +56,23 @@ import {
   type OpenGraphTag,
   type OpenGraphPreview,
   type OpenGraphAnalysis,
-  type StructuredDataAnalysis
+  type TwitterTag,
+  type TwitterCardPreview,
+  type TwitterCardAnalysis,
+  type StructuredDataAnalysis,
+  // Microformats
+  type MicroformatItem,
+  type MicroformatsAnalysis,
+  // Security
+  type EmailPrivacyAnalysis,
+  type DmarcAnalysis,
+  type SslCheckItem,
+  type SslSecureAnalysis,
+  type MixedContentAnalysis,
+  type SecurityAnalysis,
+  // Performance
+  type AssetMinificationAnalysis,
+  type PerformanceAnalysis
 } from '@/ai/schemas/seo-report-schemas';
 
 // Export types for external use (e.g., by the frontend)
@@ -73,6 +90,7 @@ export type {
   AltAttributeAnalysis,
   LinkItem,
   InPageLinksAnalysis,
+  // Indexing
   WebFeedItem,
   WebFeedsAnalysis,
   UrlResolveItem,
@@ -104,7 +122,23 @@ export type {
   OpenGraphTag,
   OpenGraphPreview,
   OpenGraphAnalysis,
-  StructuredDataAnalysis
+  TwitterTag,
+  TwitterCardPreview,
+  TwitterCardAnalysis,
+  StructuredDataAnalysis,
+  // Microformats
+  MicroformatItem,
+  MicroformatsAnalysis,
+  // Security
+  EmailPrivacyAnalysis,
+  DmarcAnalysis,
+  SslCheckItem,
+  SslSecureAnalysis,
+  MixedContentAnalysis,
+  SecurityAnalysis,
+  // Performance
+  AssetMinificationAnalysis,
+  PerformanceAnalysis
 };
 
 
@@ -119,9 +153,9 @@ const prompt = ai.definePrompt({
   tools: [getWebsiteTrafficDataTool],
   prompt: `You are an expert SEO analyst. Analyze the website at the given URL ({{{url}}}) and generate a comprehensive SEO report.
 
-  For each section and sub-section, determine a 'statusText' (e.g., 'Good', 'Needs Improvement', 'Outdated', 'Multiple H1s', 'Well-optimized', 'All images have alts', 'Some missing', 'Good link distribution', 'OK', 'Error', 'Very Good', 'Perfect', '10 Warnings') and a 'statusColorClass' (Tailwind CSS class: 'text-accent' for good, 'text-warning' for moderate issues, 'text-destructive' for critical issues, 'text-muted-foreground' for informational/neutral).
+  For each section and sub-section, determine a 'statusText' (e.g., 'Good', 'Needs Improvement', 'Outdated', 'Multiple H1s', 'Well-optimized', 'All images have alts', 'Some missing', 'Good link distribution', 'OK', 'Error', 'Very Good', 'Perfect', '10 Warnings', 'Warning!', 'Secure') and a 'statusColorClass' (Tailwind CSS class: 'text-accent' for good/positive, 'text-warning' for moderate issues/warnings, 'text-destructive' for critical issues/errors, 'text-muted-foreground' for informational/neutral).
 
-  If content for a field (like title tag text, meta description text, or URLs) is missing or not found, please return an empty string "" or an empty array [] as appropriate, rather than null, unless the schema specifically allows null. Use a placeholder image URL like "https://placehold.co/600x315.png" if an actual image URL for Open Graph preview is not found, appending data-ai-hint with relevant keywords.
+  If content for a field (like title tag text, meta description text, or URLs) is missing or not found, please return an empty string "" or an empty array [] as appropriate, rather than null, unless the schema specifically allows null. Use a placeholder image URL like "https://placehold.co/WIDTHxHEIGHT.png" (e.g. "https://placehold.co/600x315.png") if an actual image URL for Open Graph or Twitter Card preview is not found, appending data-ai-hint with relevant keywords (e.g., data-ai-hint="social media" or data-ai-hint="twitter card").
 
   1.  **Overall Report & Scores**:
       *   Identify problems and provide optimization suggestions in the main 'report' field.
@@ -132,7 +166,7 @@ const prompt = ai.definePrompt({
 
   2.  **On-Page SEO Details ('onPageSeoDetails')**: (Array of items for Title Tag, Meta Description, Google Preview)
       *   **Title Tag**: id "titleTag", title "Title Tag". statusText, statusColorClass. 'content' (current text or empty string), 'details' (char length).
-      *   **Meta Description**: id "metaDescription", title "Meta Description". statusText, statusColorClass. 'content' (current text or empty string), 'details' (char length).
+      *   **Meta Description**: id "metaDescription", title "Meta Description". statusText, statusColorClass. 'content' (current text or empty string if missing, not null), 'details' (char length).
       *   **Google Preview**: id "googlePreview", title "Google Preview". statusText, statusColorClass. 'googleDesktopPreview' (url, title, description), 'googleMobilePreview' (url, title, description).
 
   3.  **Headings Analysis ('headingsAnalysis')**:
@@ -165,7 +199,7 @@ const prompt = ai.definePrompt({
 
   9.  **Mobile Analysis ('mobileAnalysis')**:
       *   **Mobile Friendliness ('mobileFriendliness')**: statusText, statusColorClass. 'ratingText', 'progressValue', 'details'.
-      *   **Mobile Rendering ('mobileRendering')**: statusText, statusColorClass. 'details'. (No image URL needed).
+      *   **Mobile Rendering ('mobileRendering')**: statusText, statusColorClass. 'details'. (No image URL needed, frontend uses placeholder).
       *   **Tap Targets ('tapTargets')**: statusText, statusColorClass. 'details'.
 
   10. **Structured Data Analysis ('structuredDataAnalysis')**:
@@ -176,8 +210,25 @@ const prompt = ai.definePrompt({
           *   'warningCount': Total number of warnings found.
       *   **Open Graph Protocol ('openGraph')**:
           *   statusText, statusColorClass (e.g., "Well Implemented", "Missing Key Tags").
-          *   'previewData': {title, description, imageUrl (use placeholder "https://placehold.co/600x315.png?text=Open+Graph+Preview" if none found, add data-ai-hint="social media share"), url (or siteName)}.
+          *   'previewData': {title, description, imageUrl (use placeholder "https://placehold.co/600x315.png" data-ai-hint="social media" if none found), url (or siteName)}.
           *   'tags': Array of {tag (e.g., "og:type", "og:title"), value}. Include common tags like og:type, og:title, og:description, og:image, og:url, og:site_name if found.
+      *   **Twitter Card ('twitterCard')**:
+          *   statusText, statusColorClass (e.g., "Found", "Missing").
+          *   'previewData': {cardType, site, title, description, imageUrl (use placeholder "https://placehold.co/600x315.png" data-ai-hint="twitter card" if none found), domain}.
+          *   'tags': Array of {tag (e.g., "twitter:card", "twitter:title"), value}. Include common tags.
+
+  11. **Microformats Analysis ('microformatsAnalysis')**:
+      *   statusText, statusColorClass.
+      *   'formatsFound': Array of {type (e.g., "h-entry", "h-card"), count}.
+
+  12. **Security Analysis ('securityAnalysis')**:
+      *   **Email Privacy ('emailPrivacy')**: statusText, statusColorClass. 'details' (e.g., "Warning! At least one email address has been found in plain text." or "No plain text email addresses found.").
+      *   **DMARC ('dmarc')**: statusText, statusColorClass. 'details' (e.g., "DMARC record found and valid." or "No DMARC record found." or "Multiple DMARC records found for example.com.").
+      *   **SSL Secure ('sslSecure')**: statusText, statusColorClass. 'details' (overall summary). 'checks': Array of {text (e.g., "Your website's URLs redirect to HTTPS pages."), isPositive (boolean)}. Example checks: HTTPS redirect, HSTS setup, certificate expiry, certificate issuer.
+      *   **Mixed Content ('mixedContent')**: statusText, statusColorClass. 'details' (e.g., "We didn't find any mixed content on this web page." or "Mixed content found on X pages.").
+
+  13. **Performance Analysis ('performanceAnalysis')**:
+      *   **Asset Minification ('assetMinification')**: statusText, statusColorClass. 'details' (e.g., "Perfect, all your assets are minified." or "Some CSS/JS files could be minified.").
 
   Use the 'getWebsiteTrafficData' tool to fetch website traffic data for {{{url}}} for the last 6 months. Include this in 'websiteTraffic'. If no data, omit or set to empty array.
 

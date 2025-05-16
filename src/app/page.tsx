@@ -41,7 +41,19 @@ import {
   // Structured Data types
   type StructuredDataAnalysis as AiStructuredDataAnalysisType,
   type SchemaOrgAnalysis as AiSchemaOrgAnalysisType,
-  type OpenGraphAnalysis as AiOpenGraphAnalysisType
+  type OpenGraphAnalysis as AiOpenGraphAnalysisType,
+  type TwitterCardAnalysis as AiTwitterCardAnalysisType,
+  // Microformats types
+  type MicroformatsAnalysis as AiMicroformatsAnalysisType,
+  // Security types
+  type SecurityAnalysis as AiSecurityAnalysisType,
+  type EmailPrivacyAnalysis as AiEmailPrivacyAnalysisType,
+  type DmarcAnalysis as AiDmarcAnalysisType,
+  type SslSecureAnalysis as AiSslSecureAnalysisType,
+  type MixedContentAnalysis as AiMixedContentAnalysisType,
+  // Performance types
+  type PerformanceAnalysis as AiPerformanceAnalysisType,
+  type AssetMinificationAnalysis as AiAssetMinificationAnalysisType
 } from '@/ai/flows/generate-seo-report';
 
 import type { 
@@ -71,7 +83,17 @@ import type {
   TapTargetsAnalysis,
   // Structured Data
   SchemaOrgAnalysis,
-  OpenGraphAnalysis
+  OpenGraphAnalysis,
+  TwitterCardAnalysis,
+  // Microformats
+  MicroformatsAnalysis,
+  // Security
+  EmailPrivacyAnalysis,
+  DmarcAnalysis,
+  SslSecureAnalysis,
+  MixedContentAnalysis,
+  // Performance
+  AssetMinificationAnalysis
 } from '@/lib/types';
 
 import { useToast } from "@/hooks/use-toast";
@@ -79,7 +101,7 @@ import {
   LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Heading1, 
   FileSearch2, ImageIcon, Link as LinkIcon, Rss, Network, FileCode, ListChecks, Link2 as Link2Icon,
   Tags, Target, Languages, Unlink, DraftingCompass, FileStack, Smartphone, TabletSmartphone, MousePointerClick,
-  Binary, Share2 // Icons for Structured Data
+  Binary, Share2, Twitter, Code2 as MicroformatsIcon, ShieldAlert, MailWarning, ShieldCheck as DmarcIcon, Lock, Blend, Gauge // Icons
 } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
@@ -147,6 +169,16 @@ const mapAiDataToAccordionItem = (
 
   if (id === 'schemaOrg' && aiData) item.schemaOrgData = aiData as SchemaOrgAnalysis;
   if (id === 'openGraphProtocol' && aiData) item.openGraphData = aiData as OpenGraphAnalysis;
+  if (id === 'twitterCard' && aiData) item.twitterCardData = aiData as TwitterCardAnalysis;
+
+  if (id === 'microformats' && aiData) item.microformatsData = aiData as MicroformatsAnalysis;
+  
+  if (id === 'emailPrivacy' && aiData) item.emailPrivacyData = aiData as EmailPrivacyAnalysis;
+  if (id === 'dmarc' && aiData) item.dmarcData = aiData as DmarcAnalysis;
+  if (id === 'sslSecure' && aiData) item.sslSecureData = aiData as SslSecureAnalysis;
+  if (id === 'mixedContent' && aiData) item.mixedContentData = aiData as MixedContentAnalysis;
+
+  if (id === 'assetMinification' && aiData) item.assetMinificationData = aiData as AssetMinificationAnalysis;
   
   return item;
 };
@@ -208,8 +240,25 @@ const getDefaultMobileItems = (): OnPageItem[] => [
 
 const getDefaultStructuredDataItems = (): OnPageItem[] => [
     { id: 'schemaOrg', icon: Binary, title: 'Schema.org', statusText: 'N/A', statusColorClass: 'text-muted-foreground', schemaOrgData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', schemaTypes: [], issues: [], warningCount: 0 } },
-    { id: 'openGraphProtocol', icon: Share2, title: 'Open Graph Protocol', statusText: 'N/A', statusColorClass: 'text-muted-foreground', openGraphData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', previewData: { title: 'Example Site', description: 'An example site description for Open Graph.', imageUrl: 'https://placehold.co/600x315.png?text=Open+Graph+Preview', url: 'example.com' }, tags: [] } },
+    { id: 'openGraphProtocol', icon: Share2, title: 'Open Graph Protocol', statusText: 'N/A', statusColorClass: 'text-muted-foreground', openGraphData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', previewData: { title: 'Example Site', description: 'An example site description for Open Graph.', imageUrl: 'https://placehold.co/600x315.png', url: 'example.com' }, tags: [] } },
+    { id: 'twitterCard', icon: Twitter, title: 'Twitter Card', statusText: 'N/A', statusColorClass: 'text-muted-foreground', twitterCardData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', previewData: { title: 'Example Site', description: 'An example site description for Twitter.', imageUrl: 'https://placehold.co/600x315.png', domain: 'example.com' }, tags: [] } },
 ];
+
+const getDefaultMicroformatsItems = (): OnPageItem[] => [
+  { id: 'microformats', icon: MicroformatsIcon, title: 'Microformats Analysis', statusText: 'N/A', statusColorClass: 'text-muted-foreground', microformatsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', formatsFound: [] } },
+];
+
+const getDefaultSecurityItems = (): OnPageItem[] => [
+  { id: 'emailPrivacy', icon: MailWarning, title: 'Email Privacy', statusText: 'N/A', statusColorClass: 'text-muted-foreground', emailPrivacyData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'dmarc', icon: DmarcIcon, title: 'DMARC', statusText: 'N/A', statusColorClass: 'text-muted-foreground', dmarcData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'sslSecure', icon: Lock, title: 'SSL Secure', statusText: 'N/A', statusColorClass: 'text-muted-foreground', sslSecureData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...', checks: [] } },
+  { id: 'mixedContent', icon: Blend, title: 'Mixed Content', statusText: 'N/A', statusColorClass: 'text-muted-foreground', mixedContentData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+];
+
+const getDefaultPerformanceItems = (): OnPageItem[] => [
+  { id: 'assetMinification', icon: Gauge, title: 'Asset Minification', statusText: 'N/A', statusColorClass: 'text-muted-foreground', assetMinificationData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+];
+
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -219,6 +268,9 @@ export default function HomePage() {
   const [technicalSeoAccordionItems, setTechnicalSeoAccordionItems] = React.useState<OnPageItem[]>(getDefaultTechnicalSeoItems());
   const [mobileAccordionItems, setMobileAccordionItems] = React.useState<OnPageItem[]>(getDefaultMobileItems());
   const [structuredDataAccordionItems, setStructuredDataAccordionItems] = React.useState<OnPageItem[]>(getDefaultStructuredDataItems());
+  const [microformatsAccordionItems, setMicroformatsAccordionItems] = React.useState<OnPageItem[]>(getDefaultMicroformatsItems());
+  const [securityAccordionItems, setSecurityAccordionItems] = React.useState<OnPageItem[]>(getDefaultSecurityItems());
+  const [performanceAccordionItems, setPerformanceAccordionItems] = React.useState<OnPageItem[]>(getDefaultPerformanceItems());
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
 
@@ -240,6 +292,10 @@ export default function HomePage() {
     setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
     setMobileAccordionItems(getDefaultMobileItems());
     setStructuredDataAccordionItems(getDefaultStructuredDataItems());
+    setMicroformatsAccordionItems(getDefaultMicroformatsItems());
+    setSecurityAccordionItems(getDefaultSecurityItems());
+    setPerformanceAccordionItems(getDefaultPerformanceItems());
+
 
     try {
       const result = await generateSeoReport({ url: data.url });
@@ -248,6 +304,7 @@ export default function HomePage() {
           ...result,
           urlAnalyzed: data.url,
           analysisTimestamp: new Date().toISOString(),
+          // Mock percentages for the header card - consider deriving these from score or detailed issues later
           passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, 
           toImprovePercent: result.score > 0 ? 20 : 0, 
           errorsPercent: result.score > 0 ? 10 : 0, 
@@ -309,8 +366,35 @@ export default function HomePage() {
             const sda = result.structuredDataAnalysis;
             newStructuredDataItems.push(mapAiDataToAccordionItem('schemaOrg', 'Schema.org', Binary, sda.schemaOrg, sda.schemaOrg?.statusText, sda.schemaOrg?.statusColorClass));
             newStructuredDataItems.push(mapAiDataToAccordionItem('openGraphProtocol', 'Open Graph Protocol', Share2, sda.openGraph, sda.openGraph?.statusText, sda.openGraph?.statusColorClass));
+            newStructuredDataItems.push(mapAiDataToAccordionItem('twitterCard', 'Twitter Card', Twitter, sda.twitterCard, sda.twitterCard?.statusText, sda.twitterCard?.statusColorClass));
         }
         setStructuredDataAccordionItems(newStructuredDataItems.length > 0 ? newStructuredDataItems : getDefaultStructuredDataItems());
+
+        // --- Process Microformats Analysis ---
+        const newMicroformatsItems: OnPageItem[] = [];
+        if (result.microformatsAnalysis) {
+            newMicroformatsItems.push(mapAiDataToAccordionItem('microformats', 'Microformats Analysis', MicroformatsIcon, result.microformatsAnalysis, result.microformatsAnalysis?.statusText, result.microformatsAnalysis?.statusColorClass));
+        }
+        setMicroformatsAccordionItems(newMicroformatsItems.length > 0 ? newMicroformatsItems : getDefaultMicroformatsItems());
+
+        // --- Process Security Analysis ---
+        const newSecurityItems: OnPageItem[] = [];
+        if (result.securityAnalysis) {
+            const sa = result.securityAnalysis;
+            newSecurityItems.push(mapAiDataToAccordionItem('emailPrivacy', 'Email Privacy', MailWarning, sa.emailPrivacy));
+            newSecurityItems.push(mapAiDataToAccordionItem('dmarc', 'DMARC', DmarcIcon, sa.dmarc));
+            newSecurityItems.push(mapAiDataToAccordionItem('sslSecure', 'SSL Secure', Lock, sa.sslSecure));
+            newSecurityItems.push(mapAiDataToAccordionItem('mixedContent', 'Mixed Content', Blend, sa.mixedContent));
+        }
+        setSecurityAccordionItems(newSecurityItems.length > 0 ? newSecurityItems : getDefaultSecurityItems());
+
+        // --- Process Performance Analysis ---
+        const newPerformanceItems: OnPageItem[] = [];
+        if (result.performanceAnalysis) {
+            const pa = result.performanceAnalysis;
+            newPerformanceItems.push(mapAiDataToAccordionItem('assetMinification', 'Asset Minification', Gauge, pa.assetMinification));
+        }
+        setPerformanceAccordionItems(newPerformanceItems.length > 0 ? newPerformanceItems : getDefaultPerformanceItems());
 
 
         toast({ title: "Analysis Complete", description: `SEO report for ${data.url} generated successfully.`, variant: "default" });
@@ -326,6 +410,9 @@ export default function HomePage() {
       setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
       setMobileAccordionItems(getDefaultMobileItems());
       setStructuredDataAccordionItems(getDefaultStructuredDataItems());
+      setMicroformatsAccordionItems(getDefaultMicroformatsItems());
+      setSecurityAccordionItems(getDefaultSecurityItems());
+      setPerformanceAccordionItems(getDefaultPerformanceItems());
       toast({ title: "Analysis Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoading(false);
@@ -396,6 +483,9 @@ export default function HomePage() {
             <ReportAccordionSection title="Technical SEO" items={technicalSeoAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Mobile" items={mobileAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Structured Data" items={structuredDataAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Microformats" items={microformatsAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Security" items={securityAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Performance" items={performanceAccordionItems} defaultOpen={false} />
           </div>
           
           {!reportData && !currentUrl && !isLoading && !error && (

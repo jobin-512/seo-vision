@@ -46,7 +46,23 @@ import type {
   OpenGraphTag as AiOpenGraphTag,
   OpenGraphPreview as AiOpenGraphPreview,
   OpenGraphAnalysis as AiOpenGraphAnalysis,
-  StructuredDataAnalysis as AiStructuredDataAnalysis
+  TwitterTag as AiTwitterTag,
+  TwitterCardPreview as AiTwitterCardPreview,
+  TwitterCardAnalysis as AiTwitterCardAnalysis,
+  StructuredDataAnalysis as AiStructuredDataAnalysis,
+  // Microformats
+  MicroformatItem as AiMicroformatItem,
+  MicroformatsAnalysis as AiMicroformatsAnalysis,
+  // Security
+  EmailPrivacyAnalysis as AiEmailPrivacyAnalysis,
+  DmarcAnalysis as AiDmarcAnalysis,
+  SslCheckItem as AiSslCheckItem,
+  SslSecureAnalysis as AiSslSecureAnalysis,
+  MixedContentAnalysis as AiMixedContentAnalysis,
+  SecurityAnalysis as AiSecurityAnalysis,
+  // Performance
+  AssetMinificationAnalysis as AiAssetMinificationAnalysis,
+  PerformanceAnalysis as AiPerformanceAnalysis
 } from '@/ai/schemas/seo-report-schemas';
 
 // Re-exporting AI types for easier use in components
@@ -95,7 +111,26 @@ export interface SchemaOrgAnalysis extends AiSchemaOrgAnalysis {}
 export interface OpenGraphTag extends AiOpenGraphTag {}
 export interface OpenGraphPreview extends AiOpenGraphPreview {}
 export interface OpenGraphAnalysis extends AiOpenGraphAnalysis {}
+export interface TwitterTag extends AiTwitterTag {}
+export interface TwitterCardPreview extends AiTwitterCardPreview {}
+export interface TwitterCardAnalysis extends AiTwitterCardAnalysis {}
 export interface StructuredDataAnalysis extends AiStructuredDataAnalysis {}
+
+// Microformats Interfaces
+export interface MicroformatItem extends AiMicroformatItem {}
+export interface MicroformatsAnalysis extends AiMicroformatsAnalysis {}
+
+// Security Interfaces
+export interface EmailPrivacyAnalysis extends AiEmailPrivacyAnalysis {}
+export interface DmarcAnalysis extends AiDmarcAnalysis {}
+export interface SslCheckItem extends AiSslCheckItem {}
+export interface SslSecureAnalysis extends AiSslSecureAnalysis {}
+export interface MixedContentAnalysis extends AiMixedContentAnalysis {}
+export interface SecurityAnalysis extends AiSecurityAnalysis {}
+
+// Performance Interfaces
+export interface AssetMinificationAnalysis extends AiAssetMinificationAnalysis {}
+export interface PerformanceAnalysis extends AiPerformanceAnalysis {}
 
 
 export interface OnPageItem { // This type is becoming more generic for any accordion item
@@ -140,6 +175,19 @@ export interface OnPageItem { // This type is becoming more generic for any acco
   // Structured Data specific data
   schemaOrgData?: SchemaOrgAnalysis;
   openGraphData?: OpenGraphAnalysis;
+  twitterCardData?: TwitterCardAnalysis;
+
+  // Microformats specific data
+  microformatsData?: MicroformatsAnalysis;
+
+  // Security specific data
+  emailPrivacyData?: EmailPrivacyAnalysis;
+  dmarcData?: DmarcAnalysis;
+  sslSecureData?: SslSecureAnalysis;
+  mixedContentData?: MixedContentAnalysis;
+  
+  // Performance specific data
+  assetMinificationData?: AssetMinificationAnalysis;
 }
 
 
@@ -174,6 +222,10 @@ export type ReportData = {
   technicalSeoAnalysis?: AiTechnicalSeoAnalysis;
   mobileAnalysis?: AiMobileAnalysis;
   structuredDataAnalysis?: AiStructuredDataAnalysis;
+  microformatsAnalysis?: AiMicroformatsAnalysis;
+  securityAnalysis?: AiSecurityAnalysis;
+  performanceAnalysis?: AiPerformanceAnalysis;
+
 
   // Fields for the header card (some might overlap or be derived)
   urlAnalyzed?: string;
