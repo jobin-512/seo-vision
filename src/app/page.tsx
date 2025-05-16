@@ -37,7 +37,11 @@ import {
   type MobileAnalysis as AiMobileAnalysisType,
   type MobileFriendlinessAnalysis as AiMobileFriendlinessAnalysisType,
   type MobileRenderingAnalysis as AiMobileRenderingAnalysisType,
-  type TapTargetsAnalysis as AiTapTargetsAnalysisType
+  type TapTargetsAnalysis as AiTapTargetsAnalysisType,
+  // Structured Data types
+  type StructuredDataAnalysis as AiStructuredDataAnalysisType,
+  type SchemaOrgAnalysis as AiSchemaOrgAnalysisType,
+  type OpenGraphAnalysis as AiOpenGraphAnalysisType
 } from '@/ai/flows/generate-seo-report';
 
 import type { 
@@ -64,14 +68,18 @@ import type {
   // Mobile
   MobileFriendlinessAnalysis,
   MobileRenderingAnalysis,
-  TapTargetsAnalysis
+  TapTargetsAnalysis,
+  // Structured Data
+  SchemaOrgAnalysis,
+  OpenGraphAnalysis
 } from '@/lib/types';
 
 import { useToast } from "@/hooks/use-toast";
 import { 
   LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Heading1, 
   FileSearch2, ImageIcon, Link as LinkIcon, Rss, Network, FileCode, ListChecks, Link2 as Link2Icon,
-  Tags, Target, Languages, Unlink, DraftingCompass, FileStack, Smartphone, TabletSmartphone, MousePointerClick 
+  Tags, Target, Languages, Unlink, DraftingCompass, FileStack, Smartphone, TabletSmartphone, MousePointerClick,
+  Binary, Share2 // Icons for Structured Data
 } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
@@ -89,7 +97,7 @@ const mapAiDataToAccordionItem = (
   id: string, 
   title: string, 
   icon: React.ElementType, 
-  aiData: any, // Can be any of the specific analysis types
+  aiData: any, 
   defaultStatusText: string = 'N/A',
   defaultStatusColorClass: string = 'text-muted-foreground'
 ): OnPageItem => {
@@ -136,6 +144,9 @@ const mapAiDataToAccordionItem = (
   if (id === 'mobileFriendliness' && aiData) item.mobileFriendlinessData = aiData as MobileFriendlinessAnalysis;
   if (id === 'mobileRendering' && aiData) item.mobileRenderingData = aiData as MobileRenderingAnalysis;
   if (id === 'tapTargets' && aiData) item.tapTargetsData = aiData as TapTargetsAnalysis;
+
+  if (id === 'schemaOrg' && aiData) item.schemaOrgData = aiData as SchemaOrgAnalysis;
+  if (id === 'openGraphProtocol' && aiData) item.openGraphData = aiData as OpenGraphAnalysis;
   
   return item;
 };
@@ -195,6 +206,10 @@ const getDefaultMobileItems = (): OnPageItem[] => [
   { id: 'tapTargets', icon: MousePointerClick, title: 'Tap Targets', statusText: 'N/A', statusColorClass: 'text-muted-foreground', tapTargetsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
 ];
 
+const getDefaultStructuredDataItems = (): OnPageItem[] => [
+    { id: 'schemaOrg', icon: Binary, title: 'Schema.org', statusText: 'N/A', statusColorClass: 'text-muted-foreground', schemaOrgData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', schemaTypes: [], issues: [], warningCount: 0 } },
+    { id: 'openGraphProtocol', icon: Share2, title: 'Open Graph Protocol', statusText: 'N/A', statusColorClass: 'text-muted-foreground', openGraphData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', previewData: { title: 'Example Site', description: 'An example site description for Open Graph.', imageUrl: 'https://placehold.co/600x315.png?text=Open+Graph+Preview', url: 'example.com' }, tags: [] } },
+];
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -203,6 +218,7 @@ export default function HomePage() {
   const [indexingAccordionItems, setIndexingAccordionItems] = React.useState<OnPageItem[]>(getDefaultIndexingAccordionItems());
   const [technicalSeoAccordionItems, setTechnicalSeoAccordionItems] = React.useState<OnPageItem[]>(getDefaultTechnicalSeoItems());
   const [mobileAccordionItems, setMobileAccordionItems] = React.useState<OnPageItem[]>(getDefaultMobileItems());
+  const [structuredDataAccordionItems, setStructuredDataAccordionItems] = React.useState<OnPageItem[]>(getDefaultStructuredDataItems());
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
 
@@ -223,6 +239,7 @@ export default function HomePage() {
     setIndexingAccordionItems(getDefaultIndexingAccordionItems());
     setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
     setMobileAccordionItems(getDefaultMobileItems());
+    setStructuredDataAccordionItems(getDefaultStructuredDataItems());
 
     try {
       const result = await generateSeoReport({ url: data.url });
@@ -242,10 +259,8 @@ export default function HomePage() {
         if (result.onPageSeoDetails && result.onPageSeoDetails.length > 0) {
           newOnPageItems.push(...result.onPageSeoDetails.map(mapAiOnPageDetailToOnPageItem));
         } else {
-          // Fallback for base on-page items if AI doesn't provide them
           newOnPageItems.push(...getDefaultOnPageAccordionItems(data.url).filter(item => ['titleTag', 'metaDescription', 'googlePreview'].includes(item.id)));
         }
-        // Add other on-page sections
         newOnPageItems.push(mapAiDataToAccordionItem('headings', 'Headings', Heading1, result.headingsAnalysis, result.headingsAnalysis?.statusText, result.headingsAnalysis?.statusColorClass));
         newOnPageItems.push(mapAiDataToAccordionItem('contentAnalysis', 'Content Analysis', FileSearch2, result.contentAnalysis, result.contentAnalysis?.statusText, result.contentAnalysis?.statusColorClass));
         newOnPageItems.push(mapAiDataToAccordionItem('altAttributes', 'Alt Attributes', ImageIcon, result.altAttributeAnalysis, result.altAttributeAnalysis?.statusText, result.altAttributeAnalysis?.statusColorClass));
@@ -288,6 +303,16 @@ export default function HomePage() {
         }
         setMobileAccordionItems(newMobileItems.length > 0 ? newMobileItems : getDefaultMobileItems());
 
+        // --- Process Structured Data Analysis ---
+        const newStructuredDataItems: OnPageItem[] = [];
+        if (result.structuredDataAnalysis) {
+            const sda = result.structuredDataAnalysis;
+            newStructuredDataItems.push(mapAiDataToAccordionItem('schemaOrg', 'Schema.org', Binary, sda.schemaOrg, sda.schemaOrg?.statusText, sda.schemaOrg?.statusColorClass));
+            newStructuredDataItems.push(mapAiDataToAccordionItem('openGraphProtocol', 'Open Graph Protocol', Share2, sda.openGraph, sda.openGraph?.statusText, sda.openGraph?.statusColorClass));
+        }
+        setStructuredDataAccordionItems(newStructuredDataItems.length > 0 ? newStructuredDataItems : getDefaultStructuredDataItems());
+
+
         toast({ title: "Analysis Complete", description: `SEO report for ${data.url} generated successfully.`, variant: "default" });
       } else {
         throw new Error("Received empty report from AI.");
@@ -296,11 +321,11 @@ export default function HomePage() {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during analysis.';
       setError(errorMessage);
-      // Reset to defaults on error
       setOnPageAccordionItems(getDefaultOnPageAccordionItems(currentUrl));
       setIndexingAccordionItems(getDefaultIndexingAccordionItems());
       setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
       setMobileAccordionItems(getDefaultMobileItems());
+      setStructuredDataAccordionItems(getDefaultStructuredDataItems());
       toast({ title: "Analysis Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoading(false);
@@ -370,6 +395,7 @@ export default function HomePage() {
             <ReportAccordionSection title="Indexing" items={indexingAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Technical SEO" items={technicalSeoAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Mobile" items={mobileAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Structured Data" items={structuredDataAccordionItems} defaultOpen={false} />
           </div>
           
           {!reportData && !currentUrl && !isLoading && !error && (
@@ -389,3 +415,4 @@ export default function HomePage() {
     </div>
   );
 }
+

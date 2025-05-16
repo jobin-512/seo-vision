@@ -202,7 +202,6 @@ export const BrokenLinksAnalysisSchema = z.object({
   statusText: z.string().describe("Status of broken links, e.g., 'No broken links', 'X broken links found'"),
   statusColorClass: z.string().describe("Tailwind class for status color."),
   details: z.string().optional().describe("Summary about broken links."),
-  // brokenLinksList: z.array(z.string()).optional().describe("List of broken link URLs."), // Potentially add if AI can reliably provide
 });
 export type BrokenLinksAnalysis = z.infer<typeof BrokenLinksAnalysisSchema>;
 
@@ -245,7 +244,6 @@ export type MobileFriendlinessAnalysis = z.infer<typeof MobileFriendlinessAnalys
 export const MobileRenderingAnalysisSchema = z.object({
   statusText: z.string().describe("Status of mobile rendering."),
   statusColorClass: z.string().describe("Tailwind class for status color."),
-  // imageUrl: z.string().optional().describe("URL of a mobile rendering preview image. If not provided by AI, frontend will use a default."),
   details: z.string().optional().describe("Observations about mobile rendering."),
 });
 export type MobileRenderingAnalysis = z.infer<typeof MobileRenderingAnalysisSchema>;
@@ -264,6 +262,56 @@ export const MobileAnalysisSchema = z.object({
 }).describe("Comprehensive analysis of mobile usability aspects.");
 export type MobileAnalysis = z.infer<typeof MobileAnalysisSchema>;
 
+// --- STRUCTURED DATA ---
+export const SchemaTypeBadgeSchema = z.object({
+  type: z.string().describe("The type of schema found, e.g., 'Product', 'FAQPage'."),
+  count: z.number().describe("The number of times this schema type was found."),
+});
+export type SchemaTypeBadge = z.infer<typeof SchemaTypeBadgeSchema>;
+
+export const SchemaIssueItemSchema = z.object({
+  text: z.string().describe("Description of the schema validation issue."),
+  severity: z.enum(["warning", "error"]).default("warning").describe("Severity of the issue."),
+});
+export type SchemaIssueItem = z.infer<typeof SchemaIssueItemSchema>;
+
+export const SchemaOrgAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of Schema.org implementation, e.g., 'Good', 'Outdated', 'Multiple Issues'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  schemaTypes: z.array(SchemaTypeBadgeSchema).optional().describe("List of schema types found with their counts."),
+  issues: z.array(SchemaIssueItemSchema).optional().describe("List of validation issues found."),
+  warningCount: z.number().optional().describe("Total number of warnings related to Schema.org implementation."),
+});
+export type SchemaOrgAnalysis = z.infer<typeof SchemaOrgAnalysisSchema>;
+
+export const OpenGraphTagSchema = z.object({
+  tag: z.string().describe("The Open Graph tag name, e.g., 'og:type', 'og:title'."),
+  value: z.string().describe("The value of the Open Graph tag."),
+});
+export type OpenGraphTag = z.infer<typeof OpenGraphTagSchema>;
+
+export const OpenGraphPreviewSchema = z.object({
+  title: z.string().optional().describe("The Open Graph title for the preview."),
+  description: z.string().optional().describe("The Open Graph description for the preview."),
+  imageUrl: z.string().optional().describe("The Open Graph image URL for the preview. Use placeholder if not available."),
+  url: z.string().optional().describe("The Open Graph URL or site name for the preview."),
+});
+export type OpenGraphPreview = z.infer<typeof OpenGraphPreviewSchema>;
+
+export const OpenGraphAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of Open Graph implementation, e.g., 'Good', 'Missing Tags'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  previewData: OpenGraphPreviewSchema.optional().describe("Data for rendering an Open Graph preview card."),
+  tags: z.array(OpenGraphTagSchema).optional().describe("List of key Open Graph tags found and their values."),
+});
+export type OpenGraphAnalysis = z.infer<typeof OpenGraphAnalysisSchema>;
+
+export const StructuredDataAnalysisSchema = z.object({
+  schemaOrg: SchemaOrgAnalysisSchema.optional().describe("Analysis of Schema.org structured data."),
+  openGraph: OpenGraphAnalysisSchema.optional().describe("Analysis of Open Graph Protocol data."),
+}).describe("Comprehensive analysis of structured data implementation.");
+export type StructuredDataAnalysis = z.infer<typeof StructuredDataAnalysisSchema>;
+
 
 // --- MAIN SCHEMAS ---
 export const GenerateSeoReportInputSchema = z.object({
@@ -280,7 +328,6 @@ export const GenerateSeoReportOutputSchema = z.object({
     .optional()
     .describe('Monthly website traffic data for the past 6 months. This data is fetched using the getWebsiteTrafficData tool.'),
   
-  // Core Web Vitals
   lcpValue: z.string().optional().describe('Largest Contentful Paint value (e.g., "2.5s").'),
   lcpStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('Largest Contentful Paint status.'),
   clsValue: z.string().optional().describe('Cumulative Layout Shift value (e.g., "0.1").'),
@@ -288,28 +335,21 @@ export const GenerateSeoReportOutputSchema = z.object({
   fidValue: z.string().optional().describe('First Input Delay value (e.g., "100ms").'),
   fidStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('First Input Delay status.'),
   
-  // Specific Scores
   onPageScore: z.number().min(0).max(100).optional().describe('Score for On-Page SEO factors (0-100).'),
   offPageScore: z.number().min(0).max(100).optional().describe('Score for Off-Page SEO factors (0-100).'),
   technicalScore: z.number().min(0).max(100).optional().describe('Score for Technical SEO factors (0-100).'),
   contentScore: z.number().min(0).max(100).optional().describe('Score for Content quality and relevance (0-100).'),
   uxScore: z.number().min(0).max(100).optional().describe('Score for User Experience (UX) factors (0-100).'),
   
-  // On-Page structured details
   onPageSeoDetails: z.array(OnPageDetailItemSchema).optional().describe("Structured details for on-page SEO items like Title Tag, Meta Description, and Google Preview, based on the analyzed URL."),
   headingsAnalysis: HeadingsAnalysisSchema.optional().describe("Analysis of heading tags (H1-H6) on the page."),
   contentAnalysis: ContentAnalysisSchema.optional().describe("Analysis of keywords and keyphrases found in the content."),
   altAttributeAnalysis: AltAttributeAnalysisSchema.optional().describe("Analysis of image alt attributes."),
   inPageLinksAnalysis: InPageLinksAnalysisSchema.optional().describe("Analysis of internal and external links on the page."),
-
-  // Indexing Analysis
   indexingAnalysis: IndexingAnalysisSchema.optional().describe("Detailed analysis of website indexing aspects."),
-
-  // Technical SEO Analysis
   technicalSeoAnalysis: TechnicalSeoAnalysisSchema.optional().describe("Detailed analysis of technical SEO aspects like robots tags, hreflang, etc."),
-
-  // Mobile Analysis
   mobileAnalysis: MobileAnalysisSchema.optional().describe("Detailed analysis of mobile friendliness, rendering, and tap targets."),
-
+  structuredDataAnalysis: StructuredDataAnalysisSchema.optional().describe("Detailed analysis of structured data like Schema.org and Open Graph."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
+

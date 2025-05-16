@@ -38,7 +38,15 @@ import type {
   MobileFriendlinessAnalysis as AiMobileFriendlinessAnalysis,
   MobileRenderingAnalysis as AiMobileRenderingAnalysis,
   TapTargetsAnalysis as AiTapTargetsAnalysis,
-  MobileAnalysis as AiMobileAnalysis
+  MobileAnalysis as AiMobileAnalysis,
+  // Structured Data
+  SchemaTypeBadge as AiSchemaTypeBadge,
+  SchemaIssueItem as AiSchemaIssueItem,
+  SchemaOrgAnalysis as AiSchemaOrgAnalysis,
+  OpenGraphTag as AiOpenGraphTag,
+  OpenGraphPreview as AiOpenGraphPreview,
+  OpenGraphAnalysis as AiOpenGraphAnalysis,
+  StructuredDataAnalysis as AiStructuredDataAnalysis
 } from '@/ai/schemas/seo-report-schemas';
 
 // Re-exporting AI types for easier use in components
@@ -80,6 +88,15 @@ export interface MobileRenderingAnalysis extends AiMobileRenderingAnalysis {}
 export interface TapTargetsAnalysis extends AiTapTargetsAnalysis {}
 export interface MobileAnalysis extends AiMobileAnalysis {}
 
+// Structured Data Interfaces
+export interface SchemaTypeBadge extends AiSchemaTypeBadge {}
+export interface SchemaIssueItem extends AiSchemaIssueItem {}
+export interface SchemaOrgAnalysis extends AiSchemaOrgAnalysis {}
+export interface OpenGraphTag extends AiOpenGraphTag {}
+export interface OpenGraphPreview extends AiOpenGraphPreview {}
+export interface OpenGraphAnalysis extends AiOpenGraphAnalysis {}
+export interface StructuredDataAnalysis extends AiStructuredDataAnalysis {}
+
 
 export interface OnPageItem { // This type is becoming more generic for any accordion item
   id: string; 
@@ -88,7 +105,7 @@ export interface OnPageItem { // This type is becoming more generic for any acco
   statusText: string;
   statusColorClass: string; 
   badgeVariant?: "default" | "secondary" | "destructive" | "outline";
-  content?: string | React.ReactNode; // Can be simple text or complex data structure
+  content?: string | React.ReactNode; 
   details?: string; 
   
   // On-Page specific data
@@ -119,6 +136,10 @@ export interface OnPageItem { // This type is becoming more generic for any acco
   mobileFriendlinessData?: MobileFriendlinessAnalysis;
   mobileRenderingData?: MobileRenderingAnalysis;
   tapTargetsData?: TapTargetsAnalysis;
+
+  // Structured Data specific data
+  schemaOrgData?: SchemaOrgAnalysis;
+  openGraphData?: OpenGraphAnalysis;
 }
 
 
@@ -152,6 +173,7 @@ export type ReportData = {
   indexingAnalysis?: AiIndexingAnalysis;
   technicalSeoAnalysis?: AiTechnicalSeoAnalysis;
   mobileAnalysis?: AiMobileAnalysis;
+  structuredDataAnalysis?: AiStructuredDataAnalysis;
 
   // Fields for the header card (some might overlap or be derived)
   urlAnalyzed?: string;
@@ -160,3 +182,4 @@ export type ReportData = {
   toImprovePercent?: number; 
   errorsPercent?: number; 
 };
+

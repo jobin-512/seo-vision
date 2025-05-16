@@ -39,6 +39,10 @@ import MobileFriendlinessAccordionContent from './mobile-friendliness-accordion-
 import MobileRenderingAccordionContent from './mobile-rendering-accordion-content';
 import TapTargetsAccordionContent from './tap-targets-accordion-content';
 
+// Structured Data Content Components
+import SchemaOrgAccordionContent from './schemaorg-accordion-content';
+import OpenGraphAccordionContent from './opengraph-accordion-content';
+
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
   id,
@@ -74,6 +78,9 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
   mobileFriendlinessData,
   mobileRenderingData,
   tapTargetsData,
+  // Structured Data
+  schemaOrgData,
+  openGraphData,
 }) => {
   let effectiveBadgeVariant = badgeVariant;
   if (statusColorClass.includes('text-accent')) {
@@ -158,6 +165,12 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
       case 'tapTargets':
         return tapTargetsData ? <TapTargetsAccordionContent data={tapTargetsData} /> : <p>No Tap Targets data available.</p>;
 
+      // --- STRUCTURED DATA ---
+      case 'schemaOrg':
+        return schemaOrgData ? <SchemaOrgAccordionContent data={schemaOrgData} /> : <p>No Schema.org data available.</p>;
+      case 'openGraphProtocol':
+        return openGraphData ? <OpenGraphAccordionContent data={openGraphData} /> : <p>No Open Graph Protocol data available.</p>;
+
       default:
         return typeof content === 'string' ? <p>{content}</p> : <p>No specific content view for this item (ID: {id}).</p>;
     }
@@ -190,3 +203,4 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 };
 
 export default ReportAccordionItem;
+
