@@ -123,7 +123,7 @@ export type UrlResolveAnalysis = z.infer<typeof UrlResolveAnalysisSchema>;
 export const RobotsTxtAnalysisSchema = z.object({
   statusText: z.string().describe("Overall status of robots.txt analysis."),
   statusColorClass: z.string().describe("Tailwind class for status color."),
-  robotsTxtUrl: z.string().optional().describe("URL to the robots.txt file, if found."),
+  robotsTxtUrl: z.string().nullable().optional().describe("URL to the robots.txt file, if found."),
   findings: z.array(z.string()).optional().describe("Key findings or details from robots.txt review, e.g., 'We found your robots.txt here', 'The reviewed page is allowed...'"),
 });
 export type RobotsTxtAnalysis = z.infer<typeof RobotsTxtAnalysisSchema>;
@@ -131,8 +131,8 @@ export type RobotsTxtAnalysis = z.infer<typeof RobotsTxtAnalysisSchema>;
 export const XmlSitemapAnalysisSchema = z.object({
   statusText: z.string().describe("Overall status of XML sitemap presence/accessibility."),
   statusColorClass: z.string().describe("Tailwind class for status color."),
-  sitemapUrl: z.string().optional().describe("URL to the XML sitemap, if found."),
-  details: z.string().optional().describe("Brief summary or note."),
+  sitemapUrl: z.string().nullable().optional().describe("URL to the XML sitemap, if found."),
+  details: z.string().nullable().optional().describe("Brief summary or note."),
 });
 export type XmlSitemapAnalysis = z.infer<typeof XmlSitemapAnalysisSchema>;
 
@@ -145,8 +145,8 @@ export type SitemapValidityCheckItem = z.infer<typeof SitemapValidityCheckItemSc
 export const SitemapValidityAnalysisSchema = z.object({
   statusText: z.string().describe("Overall status of sitemap validity."),
   statusColorClass: z.string().describe("Tailwind class for status color."),
-  sitemapUrl: z.string().optional().describe("URL to the sitemap that was validated."),
-  summary: z.string().optional().describe("Summary like 'We found X sitemap(s) listing Y URL(s).'"),
+  sitemapUrl: z.string().nullable().optional().describe("URL to the sitemap that was validated."),
+  summary: z.string().nullable().optional().describe("Summary like 'We found X sitemap(s) listing Y URL(s).'"),
   checks: z.array(SitemapValidityCheckItemSchema).optional().describe("List of checks, issues, and positive findings related to sitemap validity."),
 });
 export type SitemapValidityAnalysis = z.infer<typeof SitemapValidityAnalysisSchema>;
@@ -291,10 +291,10 @@ export const OpenGraphTagSchema = z.object({
 export type OpenGraphTag = z.infer<typeof OpenGraphTagSchema>;
 
 export const OpenGraphPreviewSchema = z.object({
-  title: z.string().optional().describe("The Open Graph title for the preview."),
-  description: z.string().optional().describe("The Open Graph description for the preview."),
+  title: z.string().nullable().optional().describe("The Open Graph title for the preview."),
+  description: z.string().nullable().optional().describe("The Open Graph description for the preview."),
   imageUrl: z.string().optional().describe("The Open Graph image URL for the preview. Use placeholder 'https://placehold.co/600x315.png?text=OG+Preview' and add data-ai-hint if not available."),
-  url: z.string().optional().describe("The Open Graph URL or site name for the preview."),
+  url: z.string().nullable().optional().describe("The Open Graph URL or site name for the preview."),
 });
 export type OpenGraphPreview = z.infer<typeof OpenGraphPreviewSchema>;
 
@@ -314,12 +314,12 @@ export const TwitterTagSchema = z.object({
 export type TwitterTag = z.infer<typeof TwitterTagSchema>;
 
 export const TwitterCardPreviewSchema = z.object({
-  cardType: z.string().optional().describe("Type of Twitter card, e.g., 'summary', 'summary_large_image'."),
-  site: z.string().optional().describe("The Twitter @username of the website/publisher."),
-  title: z.string().optional().describe("The title for the Twitter Card preview."),
-  description: z.string().optional().describe("The description for the Twitter Card preview."),
+  cardType: z.string().nullable().optional().describe("Type of Twitter card, e.g., 'summary', 'summary_large_image'."),
+  site: z.string().nullable().optional().describe("The Twitter @username of the website/publisher."),
+  title: z.string().nullable().optional().describe("The title for the Twitter Card preview."),
+  description: z.string().nullable().optional().describe("The description for the Twitter Card preview."),
   imageUrl: z.string().optional().describe("The image URL for the Twitter Card preview. Use placeholder 'https://placehold.co/600x315.png?text=Twitter+Card' and add data-ai-hint if not available."),
-  domain: z.string().optional().describe("The domain of the content."),
+  domain: z.string().nullable().optional().describe("The domain of the content."),
 });
 export type TwitterCardPreview = z.infer<typeof TwitterCardPreviewSchema>;
 
