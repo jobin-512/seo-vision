@@ -549,6 +549,88 @@ export const DomainAnalysisSchema = z.object({
 export type DomainAnalysis = z.infer<typeof DomainAnalysisSchema>;
 
 
+// --- OFF-PAGE SEO ---
+export const BacklinksScoreSchema = z.object({
+    statusText: z.string().describe("Status text for backlinks score, e.g., 'Bad', 'Good'."),
+    statusColorClass: z.string().describe("Tailwind class for status color."),
+    score: z.number().min(0).max(100).optional().describe("Backlink score from 0-100."),
+    details: z.string().optional().describe("Additional details about the score."),
+});
+export type BacklinksScore = z.infer<typeof BacklinksScoreSchema>;
+
+export const BacklinksCounterSchema = z.object({
+    statusText: z.string().describe("Status text for backlinks count."),
+    statusColorClass: z.string().describe("Tailwind class for status color."),
+    count: z.number().optional().describe("Total number of backlinks found."),
+});
+export type BacklinksCounter = z.infer<typeof BacklinksCounterSchema>;
+
+export const ReferringDomainsSchema = z.object({
+    statusText: z.string().describe("Status text for referring domains."),
+    statusColorClass: z.string().describe("Tailwind class for status color."),
+    count: z.number().optional().describe("Total number of referring domains."),
+});
+export type ReferringDomains = z.infer<typeof ReferringDomainsSchema>;
+
+export const OffPageAnalysisSchema = z.object({
+    backlinksScore: BacklinksScoreSchema.optional(),
+    backlinksCounter: BacklinksCounterSchema.optional(),
+    referringDomains: ReferringDomainsSchema.optional(),
+});
+export type OffPageAnalysis = z.infer<typeof OffPageAnalysisSchema>;
+
+// --- TRAFFIC (as per new image section, not websiteTraffic for charts) ---
+export const TrafficEstimationsSchema = z.object({
+    statusText: z.string().describe("Status of traffic estimations, e.g., 'Very Low'."),
+    statusColorClass: z.string().describe("Tailwind class for status color."),
+    estimationText: z.string().optional().describe("Qualitative estimation, e.g., 'Very Low', 'Moderate'."),
+    details: z.string().optional().describe("Additional details about estimations."),
+});
+export type TrafficEstimations = z.infer<typeof TrafficEstimationsSchema>;
+
+export const TrafficRankSchema = z.object({
+    statusText: z.string().describe("Status of traffic rank."),
+    statusColorClass: z.string().describe("Tailwind class for status color."),
+    globalRankText: z.string().optional().describe("Text for global rank, e.g., 'Global rank too low to be calculated'."),
+    tldRankText: z.string().optional().describe("Text for TLD rank."),
+});
+export type TrafficRank = z.infer<typeof TrafficRankSchema>;
+
+export const TrafficReportAnalysisSchema = z.object({
+    trafficEstimations: TrafficEstimationsSchema.optional(),
+    trafficRank: TrafficRankSchema.optional(),
+});
+export type TrafficReportAnalysis = z.infer<typeof TrafficReportAnalysisSchema>;
+
+// --- LOCAL SEO ---
+export const LocalDirectoryLinkSchema = z.object({
+    text: z.string().describe("Text for the link, e.g., 'Add your Google My Business profile'"),
+    url: z.string().url().describe("URL for the directory link."),
+});
+export type LocalDirectoryLink = z.infer<typeof LocalDirectoryLinkSchema>;
+
+export const LocalDirectoriesSchema = z.object({
+    statusText: z.string().describe("Status of local directory listings."),
+    statusColorClass: z.string().describe("Tailwind class for status color."),
+    links: z.array(LocalDirectoryLinkSchema).optional().describe("List of links to local directory services."),
+});
+export type LocalDirectories = z.infer<typeof LocalDirectoriesSchema>;
+
+export const OnlineReviewsSchema = z.object({
+    statusText: z.string().describe("Status of online reviews."),
+    statusColorClass: z.string().describe("Tailwind class for status color."),
+    details: z.string().optional().describe("Details about online reviews, e.g., 'No local reviews found.'"),
+});
+export type OnlineReviews = z.infer<typeof OnlineReviewsSchema>;
+
+export const LocalSeoAnalysisSchema = z.object({
+    localDirectories: LocalDirectoriesSchema.optional(),
+    onlineReviews: OnlineReviewsSchema.optional(),
+});
+export type LocalSeoAnalysis = z.infer<typeof LocalSeoAnalysisSchema>;
+
+
+
 // --- MAIN SCHEMAS ---
 export const GenerateSeoReportInputSchema = z.object({
   url: z.string().describe('The URL of the website to analyze.'),
@@ -572,7 +654,7 @@ export const GenerateSeoReportOutputSchema = z.object({
   fidStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('First Input Delay status.'),
   
   onPageScore: z.number().min(0).max(100).optional().describe('Score for On-Page SEO factors (0-100).'),
-  offPageScore: z.number().min(0).max(100).optional().describe('Score for Off-Page SEO factors (0-100).'),
+  offPageScore: z.number().min(0).max(100).optional().describe('Score for Off-Page SEO factors (0-100).'), // This is general offPageScore
   technicalScore: z.number().min(0).max(100).optional().describe('Score for Technical SEO factors (0-100).'),
   contentScore: z.number().min(0).max(100).optional().describe('Score for Content quality and relevance (0-100).'),
   uxScore: z.number().min(0).max(100).optional().describe('Score for User Experience (UX) factors (0-100).'),
@@ -596,5 +678,11 @@ export const GenerateSeoReportOutputSchema = z.object({
   encodingAnalysis: EncodingAnalysisSchema.optional().describe("Analysis of the website's character encoding."),
   brandingAnalysis: BrandingAnalysisSchema.optional().describe("Analysis of website branding elements (URL, Favicon, Custom 404)."),
   domainAnalysis: DomainAnalysisSchema.optional().describe("Analysis of domain registration and availability."),
+
+  // New Sections based on the image
+  offPageAnalysis: OffPageAnalysisSchema.optional().describe("Analysis of off-page SEO factors like backlinks."),
+  trafficReportAnalysis: TrafficReportAnalysisSchema.optional().describe("Analysis of traffic estimations and rank (not chart data)."),
+  localSeoAnalysis: LocalSeoAnalysisSchema.optional().describe("Analysis of local SEO factors like directories and reviews."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
+

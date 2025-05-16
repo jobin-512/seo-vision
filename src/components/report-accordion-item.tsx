@@ -75,6 +75,19 @@ import Custom404PageAccordionContent from '@/components/custom-404-page-accordio
 import DomainRegistrationAccordionContent from '@/components/domain-registration-accordion-content';
 import DomainAvailabilityAccordionContent from '@/components/domain-availability-accordion-content';
 
+// Off-Page Components
+import BacklinksScoreAccordionContent from '@/components/backlinks-score-accordion-content';
+import BacklinksCounterAccordionContent from '@/components/backlinks-counter-accordion-content';
+import ReferringDomainsAccordionContent from '@/components/referring-domains-accordion-content';
+
+// Traffic Report Components
+import TrafficEstimationsAccordionContent from '@/components/traffic-estimations-accordion-content';
+import TrafficRankAccordionContent from '@/components/traffic-rank-accordion-content';
+
+// Local SEO Components
+import LocalDirectoriesAccordionContent from '@/components/local-directories-accordion-content';
+import OnlineReviewsAccordionContent from '@/components/online-reviews-accordion-content';
+
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
   id,
@@ -138,6 +151,16 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
   // Domain
   domainRegistrationData,
   domainAvailabilityData,
+  // Off-Page
+  backlinksScoreData,
+  backlinksCounterData,
+  referringDomainsData,
+  // Traffic Report
+  trafficEstimationsData,
+  trafficRankData,
+  // Local SEO
+  localDirectoriesData,
+  onlineReviewsData,
 }) => {
   let effectiveBadgeVariant = badgeVariant;
   if (statusColorClass.includes('text-accent')) {
@@ -277,6 +300,27 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
         return domainRegistrationData ? <DomainRegistrationAccordionContent data={domainRegistrationData} /> : <p>No Domain Registration data available.</p>;
       case 'domainAvailability':
         return domainAvailabilityData ? <DomainAvailabilityAccordionContent data={domainAvailabilityData} /> : <p>No Domain Availability data available.</p>;
+      
+      // --- OFF-PAGE ---
+      case 'backlinksScore':
+        return backlinksScoreData ? <BacklinksScoreAccordionContent data={backlinksScoreData} /> : <p>No Backlinks Score data available.</p>;
+      case 'backlinksCounter':
+        return backlinksCounterData ? <BacklinksCounterAccordionContent data={backlinksCounterData} /> : <p>No Backlinks Counter data available.</p>;
+      case 'referringDomains':
+        return referringDomainsData ? <ReferringDomainsAccordionContent data={referringDomainsData} /> : <p>No Referring Domains data available.</p>;
+
+      // --- TRAFFIC REPORT ---
+      case 'trafficEstimations':
+        return trafficEstimationsData ? <TrafficEstimationsAccordionContent data={trafficEstimationsData} /> : <p>No Traffic Estimations data available.</p>;
+      case 'trafficRank':
+        return trafficRankData ? <TrafficRankAccordionContent data={trafficRankData} /> : <p>No Traffic Rank data available.</p>;
+
+      // --- LOCAL SEO ---
+      case 'localDirectories':
+        return localDirectoriesData ? <LocalDirectoriesAccordionContent data={localDirectoriesData} /> : <p>No Local Directories data available.</p>;
+      case 'onlineReviews':
+        return onlineReviewsData ? <OnlineReviewsAccordionContent data={onlineReviewsData} /> : <p>No Online Reviews data available.</p>;
+
 
       default:
         return typeof content === 'string' ? <p>{content}</p> : <p>No specific content view for this item (ID: {id}).</p>;
@@ -316,3 +360,4 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 };
 
 export default ReportAccordionItem;
+

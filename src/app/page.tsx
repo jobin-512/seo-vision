@@ -72,6 +72,19 @@ import {
   type DomainAnalysis as AiDomainAnalysisType,
   type DomainRegistrationAnalysis as AiDomainRegistrationAnalysisType,
   type DomainAvailabilityAnalysis as AiDomainAvailabilityAnalysisType,
+  // Off-Page
+  type OffPageAnalysis as AiOffPageAnalysisType,
+  type BacklinksScore as AiBacklinksScoreType,
+  type BacklinksCounter as AiBacklinksCounterType,
+  type ReferringDomains as AiReferringDomainsType,
+  // Traffic Report
+  type TrafficReportAnalysis as AiTrafficReportAnalysisType,
+  type TrafficEstimations as AiTrafficEstimationsType,
+  type TrafficRank as AiTrafficRankType,
+  // Local SEO
+  type LocalSeoAnalysis as AiLocalSeoAnalysisType,
+  type LocalDirectories as AiLocalDirectoriesType,
+  type OnlineReviews as AiOnlineReviewsType,
 } from '@/ai/flows/generate-seo-report';
 
 import type { 
@@ -127,6 +140,16 @@ import type {
   // Domain
   DomainRegistrationAnalysis,
   DomainAvailabilityAnalysis,
+  // Off-Page
+  BacklinksScore,
+  BacklinksCounter,
+  ReferringDomains,
+  // Traffic Report
+  TrafficEstimations,
+  TrafficRank,
+  // Local SEO
+  LocalDirectories,
+  OnlineReviews,
 } from '@/lib/types';
 
 import { useToast } from "@/hooks/use-toast";
@@ -135,7 +158,8 @@ import {
   FileSearch2, ImageIcon, Link as LinkIcon, Rss, Network, FileCode, ListChecks, Link2 as Link2Icon,
   Tags, Target, Languages, Unlink, DraftingCompass, FileStack, Smartphone, TabletSmartphone, MousePointerClick,
   Binary, Share2, Twitter, Code2 as MicroformatsIcon, ShieldAlert, MailWarning, ShieldCheck as DmarcIcon, Lock, Blend, Gauge,
-  Contrast as ContrastIcon, Navigation as NavigationIcon, Cpu, AreaChart, FileBadge, Globe, CalendarDays, FileQuestion
+  Contrast as ContrastIcon, Navigation as NavigationIcon, Cpu, AreaChart, FileBadge, Globe, CalendarDays, FileQuestion,
+  Award, TrendingUp, Users, BarChartHorizontal, MapPin, MessageSquare, Activity // New icons
 } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
@@ -228,6 +252,19 @@ const mapAiDataToAccordionItem = (
   
   if (id === 'domainRegistration' && aiData) item.domainRegistrationData = aiData as DomainRegistrationAnalysis;
   if (id === 'domainAvailability' && aiData) item.domainAvailabilityData = aiData as DomainAvailabilityAnalysis;
+
+  // Off-Page
+  if (id === 'backlinksScore' && aiData) item.backlinksScoreData = aiData as BacklinksScore;
+  if (id === 'backlinksCounter' && aiData) item.backlinksCounterData = aiData as BacklinksCounter;
+  if (id === 'referringDomains' && aiData) item.referringDomainsData = aiData as ReferringDomains;
+
+  // Traffic Report
+  if (id === 'trafficEstimations' && aiData) item.trafficEstimationsData = aiData as TrafficEstimations;
+  if (id === 'trafficRank' && aiData) item.trafficRankData = aiData as TrafficRank;
+
+  // Local SEO
+  if (id === 'localDirectories' && aiData) item.localDirectoriesData = aiData as LocalDirectories;
+  if (id === 'onlineReviews' && aiData) item.onlineReviewsData = aiData as OnlineReviews;
   
   return item;
 };
@@ -328,13 +365,31 @@ const getDefaultBrandingItems = (url?: string): OnPageItem[] => [
 
 const getDefaultDomainItems = (): OnPageItem[] => [
   { id: 'domainRegistration', icon: CalendarDays, title: 'Domain Registration', statusText: 'N/A', statusColorClass: 'text-muted-foreground', domainRegistrationData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', createdDate: 'Checking...', expiryDate: 'Checking...' } },
-  { id: 'domainAvailability', icon: Globe, title: 'Domain Availability', statusText: 'N/A', statusColorClass: 'text-muted-foreground', domainAvailabilityData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', domains: [] } },
+  { id: 'domainAvailability', icon: Globe, title: 'Typo Availability', statusText: 'N/A', statusColorClass: 'text-muted-foreground', domainAvailabilityData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', domains: [] } },
+];
+
+const getDefaultOffPageItems = (): OnPageItem[] => [
+  { id: 'backlinksScore', icon: Award, title: 'Backlinks Score', statusText: 'N/A', statusColorClass: 'text-muted-foreground', backlinksScoreData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', score: 0, details: 'Checking...' } },
+  { id: 'backlinksCounter', icon: Users, title: 'Backlinks Counter', statusText: 'N/A', statusColorClass: 'text-muted-foreground', backlinksCounterData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', count: 0 } },
+  { id: 'referringDomains', icon: TrendingUp, title: 'Referring Domains', statusText: 'N/A', statusColorClass: 'text-muted-foreground', referringDomainsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', count: 0 } },
+];
+
+const getDefaultTrafficReportItems = (): OnPageItem[] => [
+  { id: 'trafficEstimations', icon: BarChartHorizontal, title: 'Traffic Estimations', statusText: 'N/A', statusColorClass: 'text-muted-foreground', trafficEstimationsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', estimationText: 'Checking...', details: 'Checking...' } },
+  { id: 'trafficRank', icon: Activity, title: 'Traffic Rank', statusText: 'N/A', statusColorClass: 'text-muted-foreground', trafficRankData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', globalRankText: 'Checking...', tldRankText: 'Checking...' } },
+];
+
+const getDefaultLocalSeoItems = (): OnPageItem[] => [
+  { id: 'localDirectories', icon: MapPin, title: 'Local Directories', statusText: 'N/A', statusColorClass: 'text-muted-foreground', localDirectoriesData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', links: [] } },
+  { id: 'onlineReviews', icon: MessageSquare, title: 'Online Reviews', statusText: 'N/A', statusColorClass: 'text-muted-foreground', onlineReviewsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
 ];
 
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [reportData, setReportData] = React.useState<ReportData | null>(null);
+  
+  // State for each accordion section's items
   const [onPageAccordionItems, setOnPageAccordionItems] = React.useState<OnPageItem[]>(getDefaultOnPageAccordionItems());
   const [indexingAccordionItems, setIndexingAccordionItems] = React.useState<OnPageItem[]>(getDefaultIndexingAccordionItems());
   const [technicalSeoAccordionItems, setTechnicalSeoAccordionItems] = React.useState<OnPageItem[]>(getDefaultTechnicalSeoItems());
@@ -347,6 +402,10 @@ export default function HomePage() {
   const [metaTechAccordionItems, setMetaTechAccordionItems] = React.useState<OnPageItem[]>(getDefaultMetaTechItems());
   const [brandingAccordionItems, setBrandingAccordionItems] = React.useState<OnPageItem[]>(getDefaultBrandingItems());
   const [domainAccordionItems, setDomainAccordionItems] = React.useState<OnPageItem[]>(getDefaultDomainItems());
+  const [offPageAccordionItems, setOffPageAccordionItems] = React.useState<OnPageItem[]>(getDefaultOffPageItems());
+  const [trafficReportAccordionItems, setTrafficReportAccordionItems] = React.useState<OnPageItem[]>(getDefaultTrafficReportItems());
+  const [localSeoAccordionItems, setLocalSeoAccordionItems] = React.useState<OnPageItem[]>(getDefaultLocalSeoItems());
+
 
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
@@ -358,13 +417,8 @@ export default function HomePage() {
     defaultValues: { url: '' },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setIsLoading(true);
-    setError(null);
-    setReportData(null);
-    setCurrentUrl(data.url);
-    // Reset accordion items to defaults for the new URL
-    setOnPageAccordionItems(getDefaultOnPageAccordionItems(data.url)); 
+  const resetAllAccordionItems = (url?: string) => {
+    setOnPageAccordionItems(getDefaultOnPageAccordionItems(url)); 
     setIndexingAccordionItems(getDefaultIndexingAccordionItems());
     setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
     setMobileAccordionItems(getDefaultMobileItems());
@@ -374,8 +428,19 @@ export default function HomePage() {
     setPerformanceAccordionItems(getDefaultPerformanceItems());
     setAccessibilityAccordionItems(getDefaultAccessibilityItems());
     setMetaTechAccordionItems(getDefaultMetaTechItems());
-    setBrandingAccordionItems(getDefaultBrandingItems(data.url));
+    setBrandingAccordionItems(getDefaultBrandingItems(url));
     setDomainAccordionItems(getDefaultDomainItems());
+    setOffPageAccordionItems(getDefaultOffPageItems());
+    setTrafficReportAccordionItems(getDefaultTrafficReportItems());
+    setLocalSeoAccordionItems(getDefaultLocalSeoItems());
+  };
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    setIsLoading(true);
+    setError(null);
+    setReportData(null);
+    setCurrentUrl(data.url);
+    resetAllAccordionItems(data.url);
 
 
     try {
@@ -385,6 +450,7 @@ export default function HomePage() {
           ...result,
           urlAnalyzed: data.url,
           analysisTimestamp: new Date().toISOString(),
+          // Simulate category percentages based on overall score for header card
           passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, 
           toImprovePercent: result.score > 0 ? 20 : 0, 
           errorsPercent: result.score > 0 ? 10 : 0, 
@@ -446,7 +512,9 @@ export default function HomePage() {
             const sda = result.structuredDataAnalysis;
             newStructuredDataItems.push(mapAiDataToAccordionItem('schemaOrg', 'Schema.org', Binary, sda.schemaOrg, sda.schemaOrg?.statusText, sda.schemaOrg?.statusColorClass));
             newStructuredDataItems.push(mapAiDataToAccordionItem('openGraphProtocol', 'Open Graph Protocol', Share2, sda.openGraph, sda.openGraph?.statusText, sda.openGraph?.statusColorClass));
-            newStructuredDataItems.push(mapAiDataToAccordionItem('twitterCard', 'Twitter Card', Twitter, sda.twitterCard, sda.twitterCard?.statusText, sda.twitterCard?.statusColorClass));
+            if (sda.twitterCard) {
+                 newStructuredDataItems.push(mapAiDataToAccordionItem('twitterCard', 'Twitter Card', Twitter, sda.twitterCard, sda.twitterCard?.statusText, sda.twitterCard?.statusColorClass));
+            }
         }
         setStructuredDataAccordionItems(newStructuredDataItems.length > 0 ? newStructuredDataItems : getDefaultStructuredDataItems());
 
@@ -508,9 +576,37 @@ export default function HomePage() {
         if (result.domainAnalysis) {
             const da = result.domainAnalysis;
             if (da.domainRegistration) newDomainItems.push(mapAiDataToAccordionItem('domainRegistration', 'Domain Registration', CalendarDays, da.domainRegistration));
-            if (da.domainAvailability) newDomainItems.push(mapAiDataToAccordionItem('domainAvailability', 'Domain Availability', Globe, da.domainAvailability));
+            if (da.domainAvailability) newDomainItems.push(mapAiDataToAccordionItem('domainAvailability', 'Typo Availability', Globe, da.domainAvailability));
         }
         setDomainAccordionItems(newDomainItems.length > 0 ? newDomainItems : getDefaultDomainItems());
+
+        // --- Process Off-Page Analysis ---
+        const newOffPageItems: OnPageItem[] = [];
+        if (result.offPageAnalysis) {
+            const opa = result.offPageAnalysis;
+            if (opa.backlinksScore) newOffPageItems.push(mapAiDataToAccordionItem('backlinksScore', 'Backlinks Score', Award, opa.backlinksScore));
+            if (opa.backlinksCounter) newOffPageItems.push(mapAiDataToAccordionItem('backlinksCounter', 'Backlinks Counter', Users, opa.backlinksCounter));
+            if (opa.referringDomains) newOffPageItems.push(mapAiDataToAccordionItem('referringDomains', 'Referring Domains', TrendingUp, opa.referringDomains));
+        }
+        setOffPageAccordionItems(newOffPageItems.length > 0 ? newOffPageItems : getDefaultOffPageItems());
+
+        // --- Process Traffic Report Analysis ---
+        const newTrafficReportItems: OnPageItem[] = [];
+        if (result.trafficReportAnalysis) {
+            const tra = result.trafficReportAnalysis;
+            if (tra.trafficEstimations) newTrafficReportItems.push(mapAiDataToAccordionItem('trafficEstimations', 'Traffic Estimations', BarChartHorizontal, tra.trafficEstimations));
+            if (tra.trafficRank) newTrafficReportItems.push(mapAiDataToAccordionItem('trafficRank', 'Traffic Rank', Activity, tra.trafficRank));
+        }
+        setTrafficReportAccordionItems(newTrafficReportItems.length > 0 ? newTrafficReportItems : getDefaultTrafficReportItems());
+
+        // --- Process Local SEO Analysis ---
+        const newLocalSeoItems: OnPageItem[] = [];
+        if (result.localSeoAnalysis) {
+            const lsa = result.localSeoAnalysis;
+            if (lsa.localDirectories) newLocalSeoItems.push(mapAiDataToAccordionItem('localDirectories', 'Local Directories', MapPin, lsa.localDirectories));
+            if (lsa.onlineReviews) newLocalSeoItems.push(mapAiDataToAccordionItem('onlineReviews', 'Online Reviews', MessageSquare, lsa.onlineReviews));
+        }
+        setLocalSeoAccordionItems(newLocalSeoItems.length > 0 ? newLocalSeoItems : getDefaultLocalSeoItems());
 
 
         toast({ title: "Analysis Complete", description: `SEO report for ${data.url} generated successfully.`, variant: "default" });
@@ -521,18 +617,7 @@ export default function HomePage() {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during analysis.';
       setError(errorMessage);
-      setOnPageAccordionItems(getDefaultOnPageAccordionItems(currentUrl));
-      setIndexingAccordionItems(getDefaultIndexingAccordionItems());
-      setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
-      setMobileAccordionItems(getDefaultMobileItems());
-      setStructuredDataAccordionItems(getDefaultStructuredDataItems());
-      setMicroformatsAccordionItems(getDefaultMicroformatsItems());
-      setSecurityAccordionItems(getDefaultSecurityItems());
-      setPerformanceAccordionItems(getDefaultPerformanceItems());
-      setAccessibilityAccordionItems(getDefaultAccessibilityItems());
-      setMetaTechAccordionItems(getDefaultMetaTechItems());
-      setBrandingAccordionItems(getDefaultBrandingItems(currentUrl));
-      setDomainAccordionItems(getDefaultDomainItems());
+      resetAllAccordionItems(currentUrl);
 
       toast({ title: "Analysis Failed", description: errorMessage, variant: "destructive" });
     } finally {
@@ -611,6 +696,9 @@ export default function HomePage() {
             <ReportAccordionSection title="Meta & Technologies" items={metaTechAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Branding" items={brandingAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Domain" items={domainAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Off-Page" items={offPageAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Traffic" items={trafficReportAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Local" items={localSeoAccordionItems} defaultOpen={false} />
           </div>
           
           {!reportData && !currentUrl && !isLoading && !error && (
@@ -630,3 +718,4 @@ export default function HomePage() {
     </div>
   );
 }
+

@@ -86,6 +86,20 @@ import type {
   DomainAvailabilityItem as AiDomainAvailabilityItem,
   DomainAvailabilityAnalysis as AiDomainAvailabilityAnalysis,
   DomainAnalysis as AiDomainAnalysis,
+  // Off-Page
+  BacklinksScore as AiBacklinksScore,
+  BacklinksCounter as AiBacklinksCounter,
+  ReferringDomains as AiReferringDomains,
+  OffPageAnalysis as AiOffPageAnalysis,
+  // Traffic (Report section, not chart data)
+  TrafficEstimations as AiTrafficEstimations,
+  TrafficRank as AiTrafficRank,
+  TrafficReportAnalysis as AiTrafficReportAnalysis,
+  // Local SEO
+  LocalDirectoryLink as AiLocalDirectoryLink,
+  LocalDirectories as AiLocalDirectories,
+  OnlineReviews as AiOnlineReviews,
+  LocalSeoAnalysis as AiLocalSeoAnalysis,
 } from '@/ai/schemas/seo-report-schemas';
 
 // Re-exporting AI types for easier use in components
@@ -182,6 +196,23 @@ export interface DomainAvailabilityItem extends AiDomainAvailabilityItem {}
 export interface DomainAvailabilityAnalysis extends AiDomainAvailabilityAnalysis {}
 export interface DomainAnalysis extends AiDomainAnalysis {}
 
+// Off-Page SEO Interfaces
+export interface BacklinksScore extends AiBacklinksScore {}
+export interface BacklinksCounter extends AiBacklinksCounter {}
+export interface ReferringDomains extends AiReferringDomains {}
+export interface OffPageAnalysis extends AiOffPageAnalysis {}
+
+// Traffic Report Interfaces (not for chart data)
+export interface TrafficEstimations extends AiTrafficEstimations {}
+export interface TrafficRank extends AiTrafficRank {}
+export interface TrafficReportAnalysis extends AiTrafficReportAnalysis {}
+
+// Local SEO Interfaces
+export interface LocalDirectoryLink extends AiLocalDirectoryLink {}
+export interface LocalDirectories extends AiLocalDirectories {}
+export interface OnlineReviews extends AiOnlineReviews {}
+export interface LocalSeoAnalysis extends AiLocalSeoAnalysis {}
+
 
 export interface OnPageItem { // This type is becoming more generic for any accordion item
   id: string; 
@@ -257,6 +288,19 @@ export interface OnPageItem { // This type is becoming more generic for any acco
   // Domain specific data
   domainRegistrationData?: DomainRegistrationAnalysis;
   domainAvailabilityData?: DomainAvailabilityAnalysis;
+
+  // Off-Page specific data
+  backlinksScoreData?: BacklinksScore;
+  backlinksCounterData?: BacklinksCounter;
+  referringDomainsData?: ReferringDomains;
+
+  // Traffic Report specific data
+  trafficEstimationsData?: TrafficEstimations;
+  trafficRankData?: TrafficRank;
+
+  // Local SEO specific data
+  localDirectoriesData?: LocalDirectories;
+  onlineReviewsData?: OnlineReviews;
 }
 
 
@@ -276,7 +320,7 @@ export type ReportData = {
   fidStatus?: "Good" | "Improve" | "Poor";
 
   onPageScore?: number;
-  offPageScore?: number;
+  offPageScore?: number; // General off-page score
   technicalScore?: number;
   contentScore?: number;
   uxScore?: number;
@@ -301,6 +345,11 @@ export type ReportData = {
   encodingAnalysis?: AiEncodingAnalysis;
   brandingAnalysis?: AiBrandingAnalysis;
   domainAnalysis?: AiDomainAnalysis;
+  
+  // New Sections
+  offPageAnalysis?: AiOffPageAnalysis;
+  trafficReportAnalysis?: AiTrafficReportAnalysis;
+  localSeoAnalysis?: AiLocalSeoAnalysis;
 
 
   // Fields for the header card (some might overlap or be derived)
@@ -310,3 +359,4 @@ export type ReportData = {
   toImprovePercent?: number; 
   errorsPercent?: number; 
 };
+
