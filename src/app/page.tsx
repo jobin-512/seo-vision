@@ -11,19 +11,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { 
   generateSeoReport, 
+  // On-Page types
   type OnPageDetailItem as AiOnPageDetailItem,
   type HeadingsAnalysis as AiHeadingsAnalysisType,
   type ContentAnalysis as AiContentAnalysisType,
   type AltAttributeAnalysis as AiAltAttributeAnalysisType,
   type InPageLinksAnalysis as AiInPageLinksAnalysisType,
+  // Indexing types
   type IndexingAnalysis as AiIndexingAnalysisType,
   type WebFeedsAnalysis as AiWebFeedsAnalysisType,
   type UrlResolveAnalysis as AiUrlResolveAnalysisType,
   type RobotsTxtAnalysis as AiRobotsTxtAnalysisType,
   type XmlSitemapAnalysis as AiXmlSitemapAnalysisType,
   type SitemapValidityAnalysis as AiSitemapValidityAnalysisType,
-  type UrlParametersAnalysis as AiUrlParametersAnalysisType
+  type UrlParametersAnalysis as AiUrlParametersAnalysisType,
+  // Technical SEO types
+  type TechnicalSeoAnalysis as AiTechnicalSeoAnalysisType,
+  type RobotsTagsAnalysis as AiRobotsTagsAnalysisType,
+  type IndexFollowAnalysis as AiIndexFollowAnalysisType,
+  type HreflangTagsAnalysis as AiHreflangTagsAnalysisType,
+  type BrokenLinksAnalysis as AiBrokenLinksAnalysisType,
+  type UnderscoresInUrlsAnalysis as AiUnderscoresInUrlsAnalysisType,
+  type DiscoveredPagesAnalysis as AiDiscoveredPagesAnalysisType,
+  // Mobile types
+  type MobileAnalysis as AiMobileAnalysisType,
+  type MobileFriendlinessAnalysis as AiMobileFriendlinessAnalysisType,
+  type MobileRenderingAnalysis as AiMobileRenderingAnalysisType,
+  type TapTargetsAnalysis as AiTapTargetsAnalysisType
 } from '@/ai/flows/generate-seo-report';
+
 import type { 
   ReportData, 
   OnPageItem, 
@@ -37,12 +53,25 @@ import type {
   RobotsTxtAnalysis,
   XmlSitemapAnalysis,
   SitemapValidityAnalysis,
-  UrlParametersAnalysis
+  UrlParametersAnalysis,
+  // Technical SEO
+  RobotsTagsAnalysis,
+  IndexFollowAnalysis,
+  HreflangTagsAnalysis,
+  BrokenLinksAnalysis,
+  UnderscoresInUrlsAnalysis,
+  DiscoveredPagesAnalysis,
+  // Mobile
+  MobileFriendlinessAnalysis,
+  MobileRenderingAnalysis,
+  TapTargetsAnalysis
 } from '@/lib/types';
+
 import { useToast } from "@/hooks/use-toast";
 import { 
   LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Heading1, 
-  FileSearch2, ImageIcon, Link as LinkIcon, Rss, Network, FileCode, ListChecks, Link2Icon as Link2 
+  FileSearch2, ImageIcon, Link as LinkIcon, Rss, Network, FileCode, ListChecks, Link2 as Link2Icon,
+  Tags, Target, Languages, Unlink, DraftingCompass, FileStack, Smartphone, TabletSmartphone, MousePointerClick 
 } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
@@ -55,11 +84,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Helper to map various AI data structures to OnPageItem for the accordion
 const mapAiDataToAccordionItem = (
   id: string, 
   title: string, 
   icon: React.ElementType, 
-  aiData: AiHeadingsAnalysisType | AiContentAnalysisType | AiAltAttributeAnalysisType | AiInPageLinksAnalysisType | AiWebFeedsAnalysisType | AiUrlResolveAnalysisType | AiRobotsTxtAnalysisType | AiXmlSitemapAnalysisType | AiSitemapValidityAnalysisType | AiUrlParametersAnalysisType | undefined,
+  aiData: any, // Can be any of the specific analysis types
   defaultStatusText: string = 'N/A',
   defaultStatusColorClass: string = 'text-muted-foreground'
 ): OnPageItem => {
@@ -67,10 +97,10 @@ const mapAiDataToAccordionItem = (
   let statusText = defaultStatusText;
   let statusColorClass = defaultStatusColorClass;
 
-  if (aiData && 'statusText' in aiData && aiData.statusText) {
+  if (aiData && typeof aiData === 'object' && 'statusText' in aiData && aiData.statusText) {
     statusText = aiData.statusText;
   }
-  if (aiData && 'statusColorClass' in aiData && aiData.statusColorClass) {
+  if (aiData && typeof aiData === 'object' && 'statusColorClass' in aiData && aiData.statusColorClass) {
     statusColorClass = aiData.statusColorClass;
   }
   
@@ -83,18 +113,29 @@ const mapAiDataToAccordionItem = (
     badgeVariant: 'outline',
   };
 
-  // On-Page
+  // Assign specific data structures based on id
   if (id === 'headings' && aiData) item.headingsAnalysis = aiData as HeadingsAnalysis;
   if (id === 'contentAnalysis' && aiData) item.contentAnalysisData = aiData as ContentAnalysis;
   if (id === 'altAttributes' && aiData) item.altAttributeAnalysis = aiData as AltAttributeAnalysis;
   if (id === 'inPageLinks' && aiData) item.inPageLinksAnalysis = aiData as InPageLinksAnalysis;
-  // Indexing
+  
   if (id === 'webFeeds' && aiData) item.webFeedsData = aiData as WebFeedsAnalysis;
   if (id === 'urlResolve' && aiData) item.urlResolveData = aiData as UrlResolveAnalysis;
   if (id === 'robotsTxt' && aiData) item.robotsTxtData = aiData as RobotsTxtAnalysis;
   if (id === 'xmlSitemap' && aiData) item.xmlSitemapData = aiData as XmlSitemapAnalysis;
   if (id === 'sitemapValidity' && aiData) item.sitemapValidityData = aiData as SitemapValidityAnalysis;
   if (id === 'urlParameters' && aiData) item.urlParametersData = aiData as UrlParametersAnalysis;
+
+  if (id === 'robotsTags' && aiData) item.robotsTagsData = aiData as RobotsTagsAnalysis;
+  if (id === 'indexFollow' && aiData) item.indexFollowData = aiData as IndexFollowAnalysis;
+  if (id === 'hreflangTags' && aiData) item.hreflangTagsData = aiData as HreflangTagsAnalysis;
+  if (id === 'brokenLinks' && aiData) item.brokenLinksData = aiData as BrokenLinksAnalysis;
+  if (id === 'underscoresInUrls' && aiData) item.underscoresInUrlsData = aiData as UnderscoresInUrlsAnalysis;
+  if (id === 'discoveredPages' && aiData) item.discoveredPagesData = aiData as DiscoveredPagesAnalysis;
+
+  if (id === 'mobileFriendliness' && aiData) item.mobileFriendlinessData = aiData as MobileFriendlinessAnalysis;
+  if (id === 'mobileRendering' && aiData) item.mobileRenderingData = aiData as MobileRenderingAnalysis;
+  if (id === 'tapTargets' && aiData) item.tapTargetsData = aiData as TapTargetsAnalysis;
   
   return item;
 };
@@ -121,146 +162,37 @@ const mapAiOnPageDetailToOnPageItem = (aiItem: AiOnPageDetailItem): OnPageItem =
 };
 
 const getDefaultOnPageAccordionItems = (url?: string): OnPageItem[] => [
-  // On-Page Base
-  {
-    id: 'titleTag',
-    icon: FileText,
-    title: 'Title Tag',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    badgeVariant: 'outline',
-    content: `Example: ${url ? new URL(url).hostname : 'YourWebsite'}.com Title - Engaging and Relevant`,
-    details: 'Length: ~60 character(s)',
-  },
-  {
-    id: 'metaDescription',
-    icon: BookOpen,
-    title: 'Meta Description',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    badgeVariant: 'outline',
-    content: 'Example: Concise and compelling summary of your page content, encouraging clicks from search results. Aim for around 155 characters.',
-    details: 'Length: ~155 character(s)',
-  },
-  {
-    id: 'googlePreview',
-    icon: CheckCircle2, 
-    title: 'Google Preview',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    badgeVariant: 'outline',
-    googleDesktopPreview: {
-      url: url ? new URL(url).hostname : 'example.com',
-      title: `Example ${url ? new URL(url).hostname : 'Website'} Title - Your Catchy Headline`,
-      description: 'This is an example of how your website might appear in Google search results on a desktop computer. Make it count!',
-    },
-    googleMobilePreview: {
-      url: url || 'https://example.com',
-      title: `Example Title - Mobile Friendly`,
-      description: 'Shorter, punchy description for mobile users. Easy to read on the go.',
-    },
-  },
-  // New On-Page Sections
-  {
-    id: 'headings',
-    icon: Heading1,
-    title: 'Headings',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    badgeVariant: 'outline',
-    headingsAnalysis: { 
-      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
-      h1Count: 0, h2Count: 0, h3Count: 0, h4Count: 0, h5Count: 0, h6Count: 0, headings: [] 
-    },
-  },
-  {
-    id: 'contentAnalysis',
-    icon: FileSearch2,
-    title: 'Content Analysis',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    badgeVariant: 'outline',
-    contentAnalysisData: { 
-      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
-      keywords: [{keyword: "example", count: 1}] 
-    },
-  },
-  {
-    id: 'altAttributes',
-    icon: ImageIcon,
-    title: 'Alt Attributes',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    badgeVariant: 'outline',
-    altAttributeAnalysis: { 
-      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
-      totalImages: 0, imagesMissingAlts: 0, details: 'No image data yet.' 
-    },
-  },
-  {
-    id: 'inPageLinks',
-    icon: LinkIcon,
-    title: 'In-Page Links',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    badgeVariant: 'outline',
-    inPageLinksAnalysis: { 
-      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
-      totalLinks: 0, internalLinks: 0, externalLinksFollow: 0, externalLinksNofollow: 0, 
-      links: [{anchorText: "Example", url: "#", type: "Internal", followStatus: "Follow"}] 
-    },
-  },
+  { id: 'titleTag', icon: FileText, title: 'Title Tag', statusText: 'N/A', statusColorClass: 'text-muted-foreground', badgeVariant: 'outline', content: `Example: ${url ? new URL(url).hostname : 'YourWebsite'}.com Title`, details: 'Length: ~60 chars' },
+  { id: 'metaDescription', icon: BookOpen, title: 'Meta Description', statusText: 'N/A', statusColorClass: 'text-muted-foreground', badgeVariant: 'outline', content: 'Example: Concise summary of your page content.', details: 'Length: ~155 chars' },
+  { id: 'googlePreview', icon: CheckCircle2, title: 'Google Preview', statusText: 'N/A', statusColorClass: 'text-muted-foreground', badgeVariant: 'outline', googleDesktopPreview: { url: url || 'example.com', title: 'Example Title', description: 'Example desktop description.'}, googleMobilePreview: { url: url || 'example.com', title: 'Example Mobile Title', description: 'Example mobile description.'} },
+  { id: 'headings', icon: Heading1, title: 'Headings', statusText: 'N/A', statusColorClass: 'text-muted-foreground', headingsAnalysis: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', h1Count: 0, h2Count: 0, h3Count: 0, h4Count: 0, h5Count: 0, h6Count: 0, headings: [] } },
+  { id: 'contentAnalysis', icon: FileSearch2, title: 'Content Analysis', statusText: 'N/A', statusColorClass: 'text-muted-foreground', contentAnalysisData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', keywords: [] } },
+  { id: 'altAttributes', icon: ImageIcon, title: 'Alt Attributes', statusText: 'N/A', statusColorClass: 'text-muted-foreground', altAttributeAnalysis: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', totalImages: 0, imagesMissingAlts: 0, details: '' } },
+  { id: 'inPageLinks', icon: LinkIcon, title: 'In-Page Links', statusText: 'N/A', statusColorClass: 'text-muted-foreground', inPageLinksAnalysis: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', totalLinks: 0, internalLinks: 0, externalLinksFollow: 0, externalLinksNofollow: 0, links: [] } },
 ];
 
 const getDefaultIndexingAccordionItems = (): OnPageItem[] => [
-  {
-    id: 'webFeeds',
-    icon: Rss,
-    title: 'Web Feeds',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    webFeedsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking for web feeds...', feeds: []}
-  },
-  {
-    id: 'urlResolve',
-    icon: Network,
-    title: 'URL Resolve',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    urlResolveData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking URL resolutions...', resolutions: []}
-  },
-  {
-    id: 'robotsTxt',
-    icon: FileCode,
-    title: 'Robots.txt',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    robotsTxtData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', robotsTxtUrl: '', findings: ['Checking robots.txt...']}
-  },
-  {
-    id: 'xmlSitemap',
-    icon: FileText,  // Using FileText, can change if a more specific sitemap icon is available or preferred
-    title: 'XML Sitemap',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    xmlSitemapData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', sitemapUrl: '', details: 'Checking XML sitemap...'}
-  },
-  {
-    id: 'sitemapValidity',
-    icon: ListChecks,
-    title: 'Sitemaps Validity',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    sitemapValidityData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', summary: 'Checking sitemap validity...', checks: []}
-  },
-  {
-    id: 'urlParameters',
-    icon: Link2,
-    title: 'URL Parameters',
-    statusText: 'N/A',
-    statusColorClass: 'text-muted-foreground',
-    urlParametersData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking URL parameters...'}
-  }
+  { id: 'webFeeds', icon: Rss, title: 'Web Feeds', statusText: 'N/A', statusColorClass: 'text-muted-foreground', webFeedsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...', feeds: []}},
+  { id: 'urlResolve', icon: Network, title: 'URL Resolve', statusText: 'N/A', statusColorClass: 'text-muted-foreground', urlResolveData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...', resolutions: []}},
+  { id: 'robotsTxt', icon: FileCode, title: 'Robots.txt', statusText: 'N/A', statusColorClass: 'text-muted-foreground', robotsTxtData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', robotsTxtUrl: '', findings: []}},
+  { id: 'xmlSitemap', icon: FileText, title: 'XML Sitemap', statusText: 'N/A', statusColorClass: 'text-muted-foreground', xmlSitemapData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', sitemapUrl: '', details: ''}},
+  { id: 'sitemapValidity', icon: ListChecks, title: 'Sitemaps Validity', statusText: 'N/A', statusColorClass: 'text-muted-foreground', sitemapValidityData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', summary: 'Checking...', checks: []}},
+  { id: 'urlParameters', icon: Link2Icon, title: 'URL Parameters', statusText: 'N/A', statusColorClass: 'text-muted-foreground', urlParametersData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...'}}
+];
+
+const getDefaultTechnicalSeoItems = (): OnPageItem[] => [
+  { id: 'robotsTags', icon: Tags, title: 'Robots Tags', statusText: 'N/A', statusColorClass: 'text-muted-foreground', robotsTagsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...', foundTags: [] } },
+  { id: 'indexFollow', icon: Target, title: 'Index and Follow', statusText: 'N/A', statusColorClass: 'text-muted-foreground', indexFollowData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'hreflangTags', icon: Languages, title: 'Hreflang Tags', statusText: 'N/A', statusColorClass: 'text-muted-foreground', hreflangTagsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'brokenLinks', icon: Unlink, title: 'Broken Links', statusText: 'N/A', statusColorClass: 'text-muted-foreground', brokenLinksData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'underscoresInUrls', icon: DraftingCompass, title: 'Underscores in the URLs', statusText: 'N/A', statusColorClass: 'text-muted-foreground', underscoresInUrlsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'discoveredPages', icon: FileStack, title: 'Discovered Pages', statusText: 'N/A', statusColorClass: 'text-muted-foreground', discoveredPagesData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', count: 0, details: 'Checking...' } },
+];
+
+const getDefaultMobileItems = (): OnPageItem[] => [
+  { id: 'mobileFriendliness', icon: Smartphone, title: 'Mobile Friendliness', statusText: 'N/A', statusColorClass: 'text-muted-foreground', mobileFriendlinessData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', ratingText: 'N/A', progressValue: 0, details: 'Checking...' } },
+  { id: 'mobileRendering', icon: TabletSmartphone, title: 'Mobile Rendering', statusText: 'N/A', statusColorClass: 'text-muted-foreground', mobileRenderingData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'tapTargets', icon: MousePointerClick, title: 'Tap Targets', statusText: 'N/A', statusColorClass: 'text-muted-foreground', tapTargetsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
 ];
 
 
@@ -269,6 +201,8 @@ export default function HomePage() {
   const [reportData, setReportData] = React.useState<ReportData | null>(null);
   const [onPageAccordionItems, setOnPageAccordionItems] = React.useState<OnPageItem[]>(getDefaultOnPageAccordionItems());
   const [indexingAccordionItems, setIndexingAccordionItems] = React.useState<OnPageItem[]>(getDefaultIndexingAccordionItems());
+  const [technicalSeoAccordionItems, setTechnicalSeoAccordionItems] = React.useState<OnPageItem[]>(getDefaultTechnicalSeoItems());
+  const [mobileAccordionItems, setMobileAccordionItems] = React.useState<OnPageItem[]>(getDefaultMobileItems());
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
 
@@ -276,18 +210,19 @@ export default function HomePage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      url: '',
-    },
+    defaultValues: { url: '' },
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     setError(null);
     setReportData(null);
+    setCurrentUrl(data.url);
+    // Reset accordion items to defaults for the new URL
     setOnPageAccordionItems(getDefaultOnPageAccordionItems(data.url)); 
     setIndexingAccordionItems(getDefaultIndexingAccordionItems());
-    setCurrentUrl(data.url);
+    setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
+    setMobileAccordionItems(getDefaultMobileItems());
 
     try {
       const result = await generateSeoReport({ url: data.url });
@@ -302,56 +237,58 @@ export default function HomePage() {
         };
         setReportData(augmentedResult);
 
-        // Process On-Page SEO Details
+        // --- Process On-Page SEO Details ---
         let newOnPageItems: OnPageItem[] = [];
         if (result.onPageSeoDetails && result.onPageSeoDetails.length > 0) {
           newOnPageItems.push(...result.onPageSeoDetails.map(mapAiOnPageDetailToOnPageItem));
         } else {
+          // Fallback for base on-page items if AI doesn't provide them
           newOnPageItems.push(...getDefaultOnPageAccordionItems(data.url).filter(item => ['titleTag', 'metaDescription', 'googlePreview'].includes(item.id)));
         }
+        // Add other on-page sections
         newOnPageItems.push(mapAiDataToAccordionItem('headings', 'Headings', Heading1, result.headingsAnalysis, result.headingsAnalysis?.statusText, result.headingsAnalysis?.statusColorClass));
         newOnPageItems.push(mapAiDataToAccordionItem('contentAnalysis', 'Content Analysis', FileSearch2, result.contentAnalysis, result.contentAnalysis?.statusText, result.contentAnalysis?.statusColorClass));
         newOnPageItems.push(mapAiDataToAccordionItem('altAttributes', 'Alt Attributes', ImageIcon, result.altAttributeAnalysis, result.altAttributeAnalysis?.statusText, result.altAttributeAnalysis?.statusColorClass));
         newOnPageItems.push(mapAiDataToAccordionItem('inPageLinks', 'In-Page Links', LinkIcon, result.inPageLinksAnalysis, result.inPageLinksAnalysis?.statusText, result.inPageLinksAnalysis?.statusColorClass));
-        
-        const uniqueOnPageItemIds = new Set<string>();
-        const finalOnPageItems = newOnPageItems.filter(item => {
-            if (!uniqueOnPageItemIds.has(item.id)) {
-                uniqueOnPageItemIds.add(item.id);
-                return true;
-            }
-            const existingItem = onPageAccordionItems.find(ci => ci.id === item.id);
-            if (existingItem && item.statusText !== 'N/A') { 
-                existingItem.statusText = item.statusText;
-                existingItem.statusColorClass = item.statusColorClass;
-                if(item.headingsAnalysis) existingItem.headingsAnalysis = item.headingsAnalysis;
-                if(item.contentAnalysisData) existingItem.contentAnalysisData = item.contentAnalysisData;
-                if(item.altAttributeAnalysis) existingItem.altAttributeAnalysis = item.altAttributeAnalysis;
-                if(item.inPageLinksAnalysis) existingItem.inPageLinksAnalysis = item.inPageLinksAnalysis;
-            }
-            return false;
-        });
-        setOnPageAccordionItems(finalOnPageItems.length > 0 ? finalOnPageItems : getDefaultOnPageAccordionItems(data.url));
+        setOnPageAccordionItems(newOnPageItems);
 
-        // Process Indexing Analysis Details
-        let newIndexingItems: OnPageItem[] = [];
+        // --- Process Indexing Analysis ---
+        const newIndexingItems: OnPageItem[] = [];
         if (result.indexingAnalysis) {
           const ia = result.indexingAnalysis;
-          newIndexingItems.push(mapAiDataToAccordionItem('webFeeds', 'Web Feeds', Rss, ia.webFeeds, ia.webFeeds?.statusText, ia.webFeeds?.statusColorClass));
-          newIndexingItems.push(mapAiDataToAccordionItem('urlResolve', 'URL Resolve', Network, ia.urlResolve, ia.urlResolve?.statusText, ia.urlResolve?.statusColorClass));
-          newIndexingItems.push(mapAiDataToAccordionItem('robotsTxt', 'Robots.txt', FileCode, ia.robotsTxt, ia.robotsTxt?.statusText, ia.robotsTxt?.statusColorClass));
-          newIndexingItems.push(mapAiDataToAccordionItem('xmlSitemap', 'XML Sitemap', FileText, ia.xmlSitemap, ia.xmlSitemap?.statusText, ia.xmlSitemap?.statusColorClass));
-          newIndexingItems.push(mapAiDataToAccordionItem('sitemapValidity', 'Sitemaps Validity', ListChecks, ia.sitemapValidity, ia.sitemapValidity?.statusText, ia.sitemapValidity?.statusColorClass));
-          newIndexingItems.push(mapAiDataToAccordionItem('urlParameters', 'URL Parameters', Link2, ia.urlParameters, ia.urlParameters?.statusText, ia.urlParameters?.statusColorClass));
+          newIndexingItems.push(mapAiDataToAccordionItem('webFeeds', 'Web Feeds', Rss, ia.webFeeds));
+          newIndexingItems.push(mapAiDataToAccordionItem('urlResolve', 'URL Resolve', Network, ia.urlResolve));
+          newIndexingItems.push(mapAiDataToAccordionItem('robotsTxt', 'Robots.txt', FileCode, ia.robotsTxt));
+          newIndexingItems.push(mapAiDataToAccordionItem('xmlSitemap', 'XML Sitemap', FileText, ia.xmlSitemap));
+          newIndexingItems.push(mapAiDataToAccordionItem('sitemapValidity', 'Sitemaps Validity', ListChecks, ia.sitemapValidity));
+          newIndexingItems.push(mapAiDataToAccordionItem('urlParameters', 'URL Parameters', Link2Icon, ia.urlParameters));
         }
         setIndexingAccordionItems(newIndexingItems.length > 0 ? newIndexingItems : getDefaultIndexingAccordionItems());
 
+        // --- Process Technical SEO Analysis ---
+        const newTechnicalSeoItems: OnPageItem[] = [];
+        if (result.technicalSeoAnalysis) {
+          const tsa = result.technicalSeoAnalysis;
+          newTechnicalSeoItems.push(mapAiDataToAccordionItem('robotsTags', 'Robots Tags', Tags, tsa.robotsTags));
+          newTechnicalSeoItems.push(mapAiDataToAccordionItem('indexFollow', 'Index and Follow', Target, tsa.indexFollow));
+          newTechnicalSeoItems.push(mapAiDataToAccordionItem('hreflangTags', 'Hreflang Tags', Languages, tsa.hreflangTags));
+          newTechnicalSeoItems.push(mapAiDataToAccordionItem('brokenLinks', 'Broken Links', Unlink, tsa.brokenLinks));
+          newTechnicalSeoItems.push(mapAiDataToAccordionItem('underscoresInUrls', 'Underscores in the URLs', DraftingCompass, tsa.underscoresInUrls));
+          newTechnicalSeoItems.push(mapAiDataToAccordionItem('discoveredPages', 'Discovered Pages', FileStack, tsa.discoveredPages));
+        }
+        setTechnicalSeoAccordionItems(newTechnicalSeoItems.length > 0 ? newTechnicalSeoItems : getDefaultTechnicalSeoItems());
+        
+        // --- Process Mobile Analysis ---
+        const newMobileItems: OnPageItem[] = [];
+        if (result.mobileAnalysis) {
+          const ma = result.mobileAnalysis;
+          newMobileItems.push(mapAiDataToAccordionItem('mobileFriendliness', 'Mobile Friendliness', Smartphone, ma.mobileFriendliness));
+          newMobileItems.push(mapAiDataToAccordionItem('mobileRendering', 'Mobile Rendering', TabletSmartphone, ma.mobileRendering));
+          newMobileItems.push(mapAiDataToAccordionItem('tapTargets', 'Tap Targets', MousePointerClick, ma.tapTargets));
+        }
+        setMobileAccordionItems(newMobileItems.length > 0 ? newMobileItems : getDefaultMobileItems());
 
-        toast({
-          title: "Analysis Complete",
-          description: `SEO report for ${data.url} generated successfully.`,
-          variant: "default",
-        });
+        toast({ title: "Analysis Complete", description: `SEO report for ${data.url} generated successfully.`, variant: "default" });
       } else {
         throw new Error("Received empty report from AI.");
       }
@@ -359,13 +296,12 @@ export default function HomePage() {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during analysis.';
       setError(errorMessage);
-      setOnPageAccordionItems(getDefaultOnPageAccordionItems(currentUrl)); 
+      // Reset to defaults on error
+      setOnPageAccordionItems(getDefaultOnPageAccordionItems(currentUrl));
       setIndexingAccordionItems(getDefaultIndexingAccordionItems());
-      toast({
-        title: "Analysis Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      setTechnicalSeoAccordionItems(getDefaultTechnicalSeoItems());
+      setMobileAccordionItems(getDefaultMobileItems());
+      toast({ title: "Analysis Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -376,63 +312,31 @@ export default function HomePage() {
     if (urlValue) {
       onSubmit({ url: urlValue });
     } else {
-      toast({
-        title: "URL missing",
-        description: "Please enter a URL to refresh the analysis.",
-        variant: "destructive",
-      });
+      toast({ title: "URL missing", description: "Please enter a URL to refresh the analysis.", variant: "destructive" });
     }
   };
 
   const handleDownloadPdf = () => {
-    if (reportData) {
-       window.print();
-    } else {
-      toast({
-        title: "No Report Data",
-        description: "Please generate a report before downloading.",
-        variant: "destructive",
-      });
-    }
+    if (reportData) { window.print(); } 
+    else { toast({ title: "No Report Data", description: "Please generate a report before downloading.", variant: "destructive" }); }
   };
   
-
   return (
     <div className="min-h-screen flex flex-col items-center py-8 px-4 md:px-8 printable-area">
       <div className="w-full max-w-3xl mb-6 no-print">
          <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-end gap-3 p-4 bg-card rounded-lg shadow-md">
-              <FormField
-                control={form.control}
-                name="url"
-                render={({ field }) => (
+              <FormField control={form.control} name="url" render={({ field }) => (
                   <FormItem className="flex-grow">
                     <FormLabel className="text-sm text-muted-foreground sr-only">Website URL</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter website URL (e.g., https://example.com)"
-                        {...field}
-                        className="text-base py-2 h-10"
-                        disabled={isLoading}
-                      />
+                      <Input placeholder="Enter website URL (e.g., https://example.com)" {...field} className="text-base py-2 h-10" disabled={isLoading} />
                     </FormControl>
                     <FormMessage className="text-xs"/>
                   </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="py-2 h-10 text-sm font-semibold bg-primary hover:bg-primary/90"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  'Analyze'
-                )}
+                )} />
+              <Button type="submit" className="py-2 h-10 text-sm font-semibold bg-primary hover:bg-primary/90" disabled={isLoading}>
+                {isLoading ? (<><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>) : ('Analyze')}
               </Button>
             </form>
           </Form>
@@ -448,54 +352,31 @@ export default function HomePage() {
 
       {error && !isLoading && (
         <Card className="bg-destructive text-destructive-foreground shadow-md w-full max-w-3xl">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertTriangle className="mr-2 h-5 w-5" />
-              Analysis Error
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{error}</p>
-          </CardContent>
+          <CardHeader><CardTitle className="flex items-center"><AlertTriangle className="mr-2 h-5 w-5" />Analysis Error</CardTitle></CardHeader>
+          <CardContent><p>{error}</p></CardContent>
         </Card>
       )}
 
       {(!isLoading && !error) && (
         <main className="w-full max-w-4xl space-y-6">
           {(reportData || currentUrl) && (
-            <ReportHeaderCard
-              reportData={reportData}
-              isLoading={isLoading}
-              onRefresh={handleRefresh}
-              onDownloadPdf={handleDownloadPdf}
-              urlInput={form.getValues("url") || currentUrl}
-            />
+            <ReportHeaderCard reportData={reportData} isLoading={isLoading} onRefresh={handleRefresh} onDownloadPdf={handleDownloadPdf} urlInput={form.getValues("url") || currentUrl} />
           )}
           
           {(reportData || currentUrl) && <ReportFilters />}
 
           <div className={`print:block ${(!reportData && !currentUrl && !isLoading && !error) ? 'hidden' : ''}`}>
-            <ReportAccordionSection 
-              title="On-Page" 
-              items={onPageAccordionItems} 
-              defaultOpen={true} 
-            />
-            <ReportAccordionSection 
-              title="Indexing" 
-              items={indexingAccordionItems} 
-              defaultOpen={false} 
-            />
+            <ReportAccordionSection title="On-Page" items={onPageAccordionItems} defaultOpen={true} />
+            <ReportAccordionSection title="Indexing" items={indexingAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Technical SEO" items={technicalSeoAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Mobile" items={mobileAccordionItems} defaultOpen={false} />
           </div>
           
           {!reportData && !currentUrl && !isLoading && !error && (
             <Card className="w-full max-w-3xl shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold text-primary mb-3 text-center">Ready to analyze?</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="text-2xl font-semibold text-primary mb-3 text-center">Ready to analyze?</CardTitle></CardHeader>
               <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground">
-                  Enter a website URL above and click "Analyze" to get your SEO report.
-                </p>
+                <p className="text-muted-foreground">Enter a website URL above and click "Analyze" to get your SEO report.</p>
               </CardContent>
             </Card>
           )}
@@ -503,11 +384,8 @@ export default function HomePage() {
       )}
       <footer className="w-full max-w-4xl mt-12 pt-6 border-t border-border text-center text-sm text-muted-foreground no-print">
         <p>&copy; {new Date().getFullYear()} SEOVision. All rights reserved.</p>
-        <p>
-          Made by <a href="https://github.com/jobin-512" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">jobin-512</a>
-        </p>
+        <p>Made by <a href="https://github.com/jobin-512" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">jobin-512</a></p>
       </footer>
     </div>
   );
 }
-
