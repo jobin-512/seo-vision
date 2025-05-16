@@ -1,4 +1,29 @@
 
+import type { LucideIcon } from 'lucide-react';
+
+export interface GooglePreviewData {
+  url: string;
+  title: string;
+  description: string;
+}
+
+export interface OnPageItem {
+  id: string;
+  icon: LucideIcon;
+  title: string;
+  statusText: string;
+  statusColorClass: string; // e.g., "text-accent", "text-warning", "text-muted-foreground"
+  badgeVariant?: "default" | "secondary" | "destructive" | "outline";
+  content?: string | React.ReactNode; // Main textual content or React node
+  details?: string; // Additional details like length
+  googleDesktopPreview?: GooglePreviewData;
+  googleMobilePreview?: GooglePreviewData;
+  // Optional fields for filtering if needed later
+  // impact?: 'High' | 'Medium' | 'Low';
+  // effort?: 'Low' | 'Medium' | 'High';
+}
+
+
 export type ReportData = {
   // Fields from the AI flow
   report: string; // Overall text report
@@ -25,25 +50,8 @@ export type ReportData = {
   toImprovePercent?: number; // Percentage for the "To Improve" progress bar
   errorsPercent?: number; // Percentage for the "Errors" progress bar
 
-  // Placeholder for future detailed structured report data for accordion
-  // e.g., onPageDetails?: OnPageSectionData;
-  // technicalSeoDetails?: TechnicalSeoSectionData;
+  // Structured data for accordion sections
+  onPageSeoDetails?: OnPageItem[]; 
+  // technicalSeoDetails?: OnPageItem[];
+  // ... other sections
 };
-
-// Example structure for accordion data (to be defined later)
-/*
-export type OnPageSectionData = {
-  titleTag: ReportItemDetail;
-  metaDescription: ReportItemDetail;
-  // ... other on-page items
-};
-
-export type ReportItemDetail = {
-  title: string;
-  status: 'Passed' | 'To Improve' | 'Error' | 'Informational' | 'Outdated';
-  description: string;
-  details?: string; // e.g., "Length: 71 character(s) (519 pixels)"
-  // impact?: 'High' | 'Medium' | 'Low';
-  // effort?: 'Low' | 'Medium' | 'High';
-};
-*/

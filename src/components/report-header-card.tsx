@@ -29,14 +29,26 @@ const ReportHeaderCard: React.FC<ReportHeaderCardProps> = ({
   const urlAnalyzed = reportData?.urlAnalyzed || urlInput || "example.com";
   const analysisTimestamp = reportData?.analysisTimestamp
     ? format(new Date(reportData.analysisTimestamp), 'MMM dd, yyyy h:mm a')
-    : format(new Date(), 'MMM dd, yyyy h:mm a'); // Fallback to current time if no timestamp
+    : format(new Date(), 'MMM dd, yyyy h:mm a');
 
-  // Mock counts if not provided, sum should ideally be 100 for progress bars
-  // These would come from your AI analysis in a real scenario
   const passedPercent = reportData?.passedPercent ?? (score > 0 ? Math.min(score + 10, 70) : 0);
   const toImprovePercent = reportData?.toImprovePercent ?? (score > 0 ? 20 : 0);
   const errorsPercent = reportData?.errorsPercent ?? (score > 0 ? 10 : 0);
 
+  const renderProgressWithLabel = (
+    label: string,
+    value: number,
+    IconComponent: React.ElementType,
+    iconColorClass: string,
+    progressColorStyle: React.CSSProperties
+  ) => (
+    <div className="flex items-center space-x-2">
+      <IconComponent className={`h-5 w-5 ${iconColorClass}`} />
+      <span className="text-sm w-24">{label}</span>
+      <Progress value={value} className="flex-1 h-3 status-progress-bar" style={progressColorStyle} />
+      <span className="text-sm w-10 text-right">{value}%</span>
+    </div>
+  );
 
   return (
     <Card className="w-full report-header-card shadow-lg mb-6">
@@ -53,22 +65,28 @@ const ReportHeaderCard: React.FC<ReportHeaderCardProps> = ({
           </a>
           <p className="text-sm text-muted-foreground mt-1">{analysisTimestamp}</p>
 
-          <div className="w-full max-w-md mt-6 space-y-3">
-            <div className="flex items-center">
-              <CheckCircle2 className="h-5 w-5 text-accent mr-2" />
-              <span className="text-sm mr-2">Passed</span>
-              <Progress value={passedPercent} className="flex-1 h-2 status-progress-bar" style={{ '--progress-color': 'hsl(var(--accent))' } as React.CSSProperties} />
-            </div>
-            <div className="flex items-center">
-              <AlertTriangle className="h-5 w-5 text-warning mr-2" />
-              <span className="text-sm mr-2">To Improve</span>
-              <Progress value={toImprovePercent} className="flex-1 h-2 status-progress-bar" style={{ '--progress-color': 'hsl(var(--warning))' } as React.CSSProperties} />
-            </div>
-            <div className="flex items-center">
-              <XCircle className="h-5 w-5 text-destructive mr-2" />
-              <span className="text-sm mr-2">Errors</span>
-              <Progress value={errorsPercent} className="flex-1 h-2 status-progress-bar" style={{ '--progress-color': 'hsl(var(--destructive))' } as React.CSSProperties} />
-            </div>
+          <div className="w-full max-w-md mt-6 space-y-2">
+            {renderProgressWithLabel(
+              "Passed",
+              passedPercent,
+              CheckCircle2,
+              "text-accent",
+              { '--progress-color': 'hsl(var(--accent))' } as React.CSSProperties
+            )}
+            {renderProgressWithLabel(
+              "To Improve",
+              toImprovePercent,
+              AlertTriangle,
+              "text-warning",
+              { '--progress-color': 'hsl(var(--warning))' } as React.CSSProperties
+            )}
+            {renderProgressWithLabel(
+              "Errors",
+              errorsPercent,
+              XCircle,
+              "text-destructive",
+              { '--progress-color': 'hsl(var(--destructive))' } as React.CSSProperties
+            )}
           </div>
         </div>
         <div className="flex items-center justify-between mt-8 border-t pt-4">
@@ -76,7 +94,7 @@ const ReportHeaderCard: React.FC<ReportHeaderCardProps> = ({
             <FileDown className="mr-2 h-4 w-4" />
             Download PDF
           </Button>
-          <Button onClick={onRefresh} disabled={isLoading} className="bg-primary hover:bg-primary/90">
+          <Button onClick={onRefresh} disabled={isLoading} className="bg-primary hover:bg-primary/90 flex-grow ml-4">
             <RefreshCw className="mr-2 h-4 w-4" />
             {isLoading ? 'Refreshing...' : 'Refresh'}
           </Button>
