@@ -8,72 +8,72 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import GooglePreviewCard from './google-preview-card';
+import GooglePreviewCard from '@/components/google-preview-card';
 import type { OnPageItem } from '@/lib/types';
 import { Circle } from 'lucide-react';
 
 // On-Page Content Components
-import HeadingsAccordionContent from './headings-accordion-content';
-import ContentAnalysisAccordionContent from './content-analysis-accordion-content';
-import AltAttributeAccordionContent from './alt-attribute-accordion-content';
-import InPageLinksAccordionContent from './inpage-links-accordion-content';
+import HeadingsAccordionContent from '@/components/headings-accordion-content';
+import ContentAnalysisAccordionContent from '@/components/content-analysis-accordion-content';
+import AltAttributeAccordionContent from '@/components/alt-attribute-accordion-content';
+import InPageLinksAccordionContent from '@/components/inpage-links-accordion-content';
 
 // Indexing Content Components
-import WebFeedsAccordionContent from './webfeeds-accordion-content';
-import UrlResolveAccordionContent from './url-resolve-accordion-content';
-import RobotsTxtAccordionContent from './robotstxt-accordion-content';
-import XmlSitemapAccordionContent from './xmlsitemap-accordion-content';
-import SitemapsValidityAccordionContent from './sitemaps-validity-accordion-content';
-import UrlParametersAccordionContent from './url-parameters-accordion-content';
+import WebFeedsAccordionContent from '@/components/webfeeds-accordion-content';
+import UrlResolveAccordionContent from '@/components/url-resolve-accordion-content';
+import RobotsTxtAccordionContent from '@/components/robotstxt-accordion-content';
+import XmlSitemapAccordionContent from '@/components/xmlsitemap-accordion-content';
+import SitemapsValidityAccordionContent from '@/components/sitemaps-validity-accordion-content';
+import UrlParametersAccordionContent from '@/components/url-parameters-accordion-content';
 
 // Technical SEO Content Components
-import RobotsTagsAccordionContent from './robots-tags-accordion-content';
-import IndexFollowAccordionContent from './index-follow-accordion-content';
-import HreflangTagsAccordionContent from './hreflang-tags-accordion-content';
-import BrokenLinksAccordionContent from './broken-links-accordion-content';
-import UnderscoresInUrlsAccordionContent from './underscores-in-urls-accordion-content';
-import DiscoveredPagesAccordionContent from './discovered-pages-accordion-content';
+import RobotsTagsAccordionContent from '@/components/robots-tags-accordion-content';
+import IndexFollowAccordionContent from '@/components/index-follow-accordion-content';
+import HreflangTagsAccordionContent from '@/components/hreflang-tags-accordion-content';
+import BrokenLinksAccordionContent from '@/components/broken-links-accordion-content';
+import UnderscoresInUrlsAccordionContent from '@/components/underscores-in-urls-accordion-content';
+import DiscoveredPagesAccordionContent from '@/components/discovered-pages-accordion-content';
 
 // Mobile Content Components
-import MobileFriendlinessAccordionContent from './mobile-friendliness-accordion-content';
-import MobileRenderingAccordionContent from './mobile-rendering-accordion-content';
-import TapTargetsAccordionContent from './tap-targets-accordion-content';
+import MobileFriendlinessAccordionContent from '@/components/mobile-friendliness-accordion-content';
+import MobileRenderingAccordionContent from '@/components/mobile-rendering-accordion-content';
+import TapTargetsAccordionContent from '@/components/tap-targets-accordion-content';
 
 // Structured Data Content Components
-import SchemaOrgAccordionContent from './schemaorg-accordion-content';
-import OpenGraphAccordionContent from './opengraph-accordion-content';
-import TwitterCardAccordionContent from './twitter-card-accordion-content'; 
+import SchemaOrgAccordionContent from '@/components/schemaorg-accordion-content';
+import OpenGraphAccordionContent from '@/components/opengraph-accordion-content';
+import TwitterCardAccordionContent from '@/components/twitter-card-accordion-content'; 
 
 // Microformats Content Component
-import MicroformatsAccordionContent from './microformats-accordion-content'; 
+import MicroformatsAccordionContent from '@/components/microformats-accordion-content'; 
 
 // Security Content Components
-import EmailPrivacyAccordionContent from './email-privacy-accordion-content'; 
-import DmarcAccordionContent from './dmarc-accordion-content'; 
-import SslSecureAccordionContent from './ssl-secure-accordion-content'; 
-import MixedContentAccordionContent from './mixed-content-accordion-content'; 
+import EmailPrivacyAccordionContent from '@/components/email-privacy-accordion-content'; 
+import DmarcAccordionContent from '@/components/dmarc-accordion-content'; 
+import SslSecureAccordionContent from '@/components/ssl-secure-accordion-content'; 
+import MixedContentAccordionContent from '@/components/mixed-content-accordion-content'; 
 
 // Performance Content Components
-import AssetMinificationAccordionContent from './asset-minification-accordion-content'; 
+import AssetMinificationAccordionContent from '@/components/asset-minification-accordion-content'; 
 
 // Accessibility Content Components
-import ContrastAccordionContent from './contrast-accordion-content';
-import NavigationAccordionContent from './navigation-accordion-content';
+import ContrastAccordionContent from '@/components/contrast-accordion-content'; 
+import NavigationAccordionContent from '@/components/navigation-accordion-content';
 
 // Technologies, Analytics, Doctype, Encoding Components
-import TechnologiesAccordionContent from './technologies-accordion-content';
-import AnalyticsAccordionContent from './analytics-accordion-content';
-import DoctypeAccordionContent from './doctype-accordion-content';
-import EncodingAccordionContent from './encoding-accordion-content';
+import TechnologiesAccordionContent from '@/components/technologies-accordion-content';
+import AnalyticsAccordionContent from '@/components/analytics-accordion-content';
+import DoctypeAccordionContent from '@/components/doctype-accordion-content';
+import EncodingAccordionContent from '@/components/encoding-accordion-content';
 
 // Branding Components
-import UrlAccordionContent from './url-accordion-content';
-import FaviconAccordionContent from './favicon-accordion-content';
-import Custom404PageAccordionContent from './custom-404-page-accordion-content';
+import UrlAccordionContent from '@/components/url-accordion-content';
+import FaviconAccordionContent from '@/components/favicon-accordion-content';
+import Custom404PageAccordionContent from '@/components/custom-404-page-accordion-content';
 
 // Domain Components
-import DomainRegistrationAccordionContent from './domain-registration-accordion-content';
-import DomainAvailabilityAccordionContent from './domain-availability-accordion-content';
+import DomainRegistrationAccordionContent from '@/components/domain-registration-accordion-content';
+import DomainAvailabilityAccordionContent from '@/components/domain-availability-accordion-content';
 
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
@@ -290,13 +290,19 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
           <IconComponent className={`h-5 w-5 ${statusColorClass || 'text-muted-foreground'}`} />
           <span>{title}</span>
           <div className="flex items-center space-x-1 ml-auto mr-2">
+            {/* Visual cue for status, could be dynamic based on overall health of the item */}
             {Array(3).fill(0).map((_, i) => (
               <Circle key={i} className={`h-1.5 w-1.5 ${ i === 0 ? (statusColorClass || 'text-gray-300 dark:text-gray-600') : 'text-gray-300 dark:text-gray-600'} fill-current`} />
             ))}
           </div>
           <Badge 
             variant={effectiveBadgeVariant} 
-            className={`text-xs px-2 py-0.5 ${statusColorClass === 'text-warning' && effectiveBadgeVariant === 'default' ? 'bg-yellow-500/20 text-yellow-700 border-yellow-500' : ''} ${(statusColorClass || '').includes('text-muted') ? 'bg-muted text-muted-foreground' : ''} ${statusColorClass === 'text-warning' ? '!bg-yellow-500/20 !text-yellow-700 !border-yellow-500/50' : ''}`}
+            className={`text-xs px-2 py-0.5 
+                        ${statusColorClass === 'text-warning' && effectiveBadgeVariant === 'default' ? 'bg-yellow-500/20 text-yellow-700 border-yellow-500 dark:text-yellow-400 dark:border-yellow-500/70' : ''} 
+                        ${(statusColorClass || '').includes('text-muted') ? 'bg-muted text-muted-foreground' : ''} 
+                        ${statusColorClass === 'text-accent' && effectiveBadgeVariant === 'default' ? 'bg-accent/20 text-accent border-accent/50' : ''}
+                        ${statusColorClass === 'text-destructive' && effectiveBadgeVariant === 'destructive' ? 'bg-destructive/20 text-destructive border-destructive/50' : ''}
+                       `}
           >
             {statusText}
           </Badge>
@@ -310,6 +316,3 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 };
 
 export default ReportAccordionItem;
-
-
-    
