@@ -53,7 +53,25 @@ import {
   type MixedContentAnalysis as AiMixedContentAnalysisType,
   // Performance types
   type PerformanceAnalysis as AiPerformanceAnalysisType,
-  type AssetMinificationAnalysis as AiAssetMinificationAnalysisType
+  type AssetMinificationAnalysis as AiAssetMinificationAnalysisType,
+  // Accessibility types
+  type AccessibilityAnalysis as AiAccessibilityAnalysisType,
+  type ContrastAnalysis as AiContrastAnalysisType,
+  type NavigationAnalysis as AiNavigationAnalysisType,
+  // Technologies, Analytics, Doctype, Encoding
+  type TechnologiesAnalysis as AiTechnologiesAnalysisType,
+  type AnalyticsAnalysis as AiAnalyticsAnalysisType,
+  type DoctypeAnalysis as AiDoctypeAnalysisType,
+  type EncodingAnalysis as AiEncodingAnalysisType,
+  // Branding
+  type BrandingAnalysis as AiBrandingAnalysisType,
+  type UrlAnalysis as AiUrlAnalysisType,
+  type FaviconAnalysis as AiFaviconAnalysisType,
+  type Custom404PageAnalysis as AiCustom404PageAnalysisType,
+  // Domain
+  type DomainAnalysis as AiDomainAnalysisType,
+  type DomainRegistrationAnalysis as AiDomainRegistrationAnalysisType,
+  type DomainAvailabilityAnalysis as AiDomainAvailabilityAnalysisType,
 } from '@/ai/flows/generate-seo-report';
 
 import type { 
@@ -93,7 +111,22 @@ import type {
   SslSecureAnalysis,
   MixedContentAnalysis,
   // Performance
-  AssetMinificationAnalysis
+  AssetMinificationAnalysis,
+  // Accessibility
+  ContrastAnalysis,
+  NavigationAnalysis,
+  // Technologies, Analytics, Doctype, Encoding
+  TechnologiesAnalysis,
+  AnalyticsAnalysis,
+  DoctypeAnalysis,
+  EncodingAnalysis,
+  // Branding
+  UrlAnalysis,
+  FaviconAnalysis,
+  Custom404PageAnalysis,
+  // Domain
+  DomainRegistrationAnalysis,
+  DomainAvailabilityAnalysis,
 } from '@/lib/types';
 
 import { useToast } from "@/hooks/use-toast";
@@ -101,7 +134,8 @@ import {
   LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Heading1, 
   FileSearch2, ImageIcon, Link as LinkIcon, Rss, Network, FileCode, ListChecks, Link2 as Link2Icon,
   Tags, Target, Languages, Unlink, DraftingCompass, FileStack, Smartphone, TabletSmartphone, MousePointerClick,
-  Binary, Share2, Twitter, Code2 as MicroformatsIcon, ShieldAlert, MailWarning, ShieldCheck as DmarcIcon, Lock, Blend, Gauge // Icons
+  Binary, Share2, Twitter, Code2 as MicroformatsIcon, ShieldAlert, MailWarning, ShieldCheck as DmarcIcon, Lock, Blend, Gauge,
+  Contrast as ContrastIcon, Navigation as NavigationIcon, Cpu, AreaChart, FileBadge, Globe, CalendarDays, FileQuestion
 } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
@@ -179,6 +213,21 @@ const mapAiDataToAccordionItem = (
   if (id === 'mixedContent' && aiData) item.mixedContentData = aiData as MixedContentAnalysis;
 
   if (id === 'assetMinification' && aiData) item.assetMinificationData = aiData as AssetMinificationAnalysis;
+  
+  if (id === 'contrast' && aiData) item.contrastData = aiData as ContrastAnalysis;
+  if (id === 'navigation' && aiData) item.navigationData = aiData as NavigationAnalysis;
+
+  if (id === 'technologies' && aiData) item.technologiesData = aiData as TechnologiesAnalysis;
+  if (id === 'analytics' && aiData) item.analyticsData = aiData as AnalyticsAnalysis;
+  if (id === 'doctype' && aiData) item.doctypeData = aiData as DoctypeAnalysis;
+  if (id === 'encoding' && aiData) item.encodingData = aiData as EncodingAnalysis;
+
+  if (id === 'url' && aiData) item.urlAnalysisData = aiData as UrlAnalysis;
+  if (id === 'favicon' && aiData) item.faviconAnalysisData = aiData as FaviconAnalysis;
+  if (id === 'custom404' && aiData) item.custom404PageData = aiData as Custom404PageAnalysis;
+  
+  if (id === 'domainRegistration' && aiData) item.domainRegistrationData = aiData as DomainRegistrationAnalysis;
+  if (id === 'domainAvailability' && aiData) item.domainAvailabilityData = aiData as DomainAvailabilityAnalysis;
   
   return item;
 };
@@ -259,6 +308,29 @@ const getDefaultPerformanceItems = (): OnPageItem[] => [
   { id: 'assetMinification', icon: Gauge, title: 'Asset Minification', statusText: 'N/A', statusColorClass: 'text-muted-foreground', assetMinificationData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
 ];
 
+const getDefaultAccessibilityItems = (): OnPageItem[] => [
+  { id: 'contrast', icon: ContrastIcon, title: 'Contrast', statusText: 'N/A', statusColorClass: 'text-muted-foreground', contrastData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...', items: [] } },
+  { id: 'navigation', icon: NavigationIcon, title: 'Navigation', statusText: 'N/A', statusColorClass: 'text-muted-foreground', navigationData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', summaryText: 'Checking...', checks: [], notRelevantChecks: [] } },
+];
+
+const getDefaultMetaTechItems = (): OnPageItem[] => [
+  { id: 'technologies', icon: Cpu, title: 'Technologies', statusText: 'N/A', statusColorClass: 'text-muted-foreground', technologiesData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', detectedTechnologies: [] } },
+  { id: 'analytics', icon: AreaChart, title: 'Analytics', statusText: 'N/A', statusColorClass: 'text-muted-foreground', analyticsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', detectedTools: [] } },
+  { id: 'doctype', icon: FileBadge, title: 'Doctype', statusText: 'N/A', statusColorClass: 'text-muted-foreground', doctypeData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', doctype: 'Checking...' } },
+  { id: 'encoding', icon: Binary, title: 'Encoding', statusText: 'N/A', statusColorClass: 'text-muted-foreground', encodingData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', encoding: 'Checking...' } },
+];
+
+const getDefaultBrandingItems = (url?: string): OnPageItem[] => [
+  { id: 'url', icon: LinkIcon, title: 'URL', statusText: 'N/A', statusColorClass: 'text-muted-foreground', urlAnalysisData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', url: url || 'N/A', length: url?.length || 0 } },
+  { id: 'favicon', icon: ImageIcon, title: 'Favicon', statusText: 'N/A', statusColorClass: 'text-muted-foreground', faviconAnalysisData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+  { id: 'custom404', icon: FileQuestion, title: 'Custom 404 Page', statusText: 'N/A', statusColorClass: 'text-muted-foreground', custom404PageData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
+];
+
+const getDefaultDomainItems = (): OnPageItem[] => [
+  { id: 'domainRegistration', icon: CalendarDays, title: 'Domain Registration', statusText: 'N/A', statusColorClass: 'text-muted-foreground', domainRegistrationData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', createdDate: 'Checking...', expiryDate: 'Checking...' } },
+  { id: 'domainAvailability', icon: Globe, title: 'Domain Availability', statusText: 'N/A', statusColorClass: 'text-muted-foreground', domainAvailabilityData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', domains: [] } },
+];
+
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -271,6 +343,11 @@ export default function HomePage() {
   const [microformatsAccordionItems, setMicroformatsAccordionItems] = React.useState<OnPageItem[]>(getDefaultMicroformatsItems());
   const [securityAccordionItems, setSecurityAccordionItems] = React.useState<OnPageItem[]>(getDefaultSecurityItems());
   const [performanceAccordionItems, setPerformanceAccordionItems] = React.useState<OnPageItem[]>(getDefaultPerformanceItems());
+  const [accessibilityAccordionItems, setAccessibilityAccordionItems] = React.useState<OnPageItem[]>(getDefaultAccessibilityItems());
+  const [metaTechAccordionItems, setMetaTechAccordionItems] = React.useState<OnPageItem[]>(getDefaultMetaTechItems());
+  const [brandingAccordionItems, setBrandingAccordionItems] = React.useState<OnPageItem[]>(getDefaultBrandingItems());
+  const [domainAccordionItems, setDomainAccordionItems] = React.useState<OnPageItem[]>(getDefaultDomainItems());
+
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
 
@@ -295,6 +372,10 @@ export default function HomePage() {
     setMicroformatsAccordionItems(getDefaultMicroformatsItems());
     setSecurityAccordionItems(getDefaultSecurityItems());
     setPerformanceAccordionItems(getDefaultPerformanceItems());
+    setAccessibilityAccordionItems(getDefaultAccessibilityItems());
+    setMetaTechAccordionItems(getDefaultMetaTechItems());
+    setBrandingAccordionItems(getDefaultBrandingItems(data.url));
+    setDomainAccordionItems(getDefaultDomainItems());
 
 
     try {
@@ -304,7 +385,6 @@ export default function HomePage() {
           ...result,
           urlAnalyzed: data.url,
           analysisTimestamp: new Date().toISOString(),
-          // Mock percentages for the header card - consider deriving these from score or detailed issues later
           passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, 
           toImprovePercent: result.score > 0 ? 20 : 0, 
           errorsPercent: result.score > 0 ? 10 : 0, 
@@ -396,6 +476,42 @@ export default function HomePage() {
         }
         setPerformanceAccordionItems(newPerformanceItems.length > 0 ? newPerformanceItems : getDefaultPerformanceItems());
 
+        // --- Process Accessibility Analysis ---
+        const newAccessibilityItems: OnPageItem[] = [];
+        if (result.accessibilityAnalysis) {
+            const aa = result.accessibilityAnalysis;
+            newAccessibilityItems.push(mapAiDataToAccordionItem('contrast', 'Contrast', ContrastIcon, aa.contrast));
+            newAccessibilityItems.push(mapAiDataToAccordionItem('navigation', 'Navigation', NavigationIcon, aa.navigation));
+        }
+        setAccessibilityAccordionItems(newAccessibilityItems.length > 0 ? newAccessibilityItems : getDefaultAccessibilityItems());
+
+        // --- Process Meta & Technologies Analysis ---
+        const newMetaTechItems: OnPageItem[] = [];
+        if (result.technologiesAnalysis) newMetaTechItems.push(mapAiDataToAccordionItem('technologies', 'Technologies', Cpu, result.technologiesAnalysis));
+        if (result.analyticsAnalysis) newMetaTechItems.push(mapAiDataToAccordionItem('analytics', 'Analytics', AreaChart, result.analyticsAnalysis));
+        if (result.doctypeAnalysis) newMetaTechItems.push(mapAiDataToAccordionItem('doctype', 'Doctype', FileBadge, result.doctypeAnalysis));
+        if (result.encodingAnalysis) newMetaTechItems.push(mapAiDataToAccordionItem('encoding', 'Encoding', Binary, result.encodingAnalysis));
+        setMetaTechAccordionItems(newMetaTechItems.length > 0 ? newMetaTechItems : getDefaultMetaTechItems());
+        
+        // --- Process Branding Analysis ---
+        const newBrandingItems: OnPageItem[] = [];
+        if (result.brandingAnalysis) {
+            const ba = result.brandingAnalysis;
+            if (ba.urlAnalysis) newBrandingItems.push(mapAiDataToAccordionItem('url', 'URL', LinkIcon, ba.urlAnalysis));
+            if (ba.faviconAnalysis) newBrandingItems.push(mapAiDataToAccordionItem('favicon', 'Favicon', ImageIcon, ba.faviconAnalysis));
+            if (ba.custom404PageAnalysis) newBrandingItems.push(mapAiDataToAccordionItem('custom404', 'Custom 404 Page', FileQuestion, ba.custom404PageAnalysis));
+        }
+        setBrandingAccordionItems(newBrandingItems.length > 0 ? newBrandingItems : getDefaultBrandingItems(data.url));
+
+        // --- Process Domain Analysis ---
+        const newDomainItems: OnPageItem[] = [];
+        if (result.domainAnalysis) {
+            const da = result.domainAnalysis;
+            if (da.domainRegistration) newDomainItems.push(mapAiDataToAccordionItem('domainRegistration', 'Domain Registration', CalendarDays, da.domainRegistration));
+            if (da.domainAvailability) newDomainItems.push(mapAiDataToAccordionItem('domainAvailability', 'Domain Availability', Globe, da.domainAvailability));
+        }
+        setDomainAccordionItems(newDomainItems.length > 0 ? newDomainItems : getDefaultDomainItems());
+
 
         toast({ title: "Analysis Complete", description: `SEO report for ${data.url} generated successfully.`, variant: "default" });
       } else {
@@ -413,6 +529,11 @@ export default function HomePage() {
       setMicroformatsAccordionItems(getDefaultMicroformatsItems());
       setSecurityAccordionItems(getDefaultSecurityItems());
       setPerformanceAccordionItems(getDefaultPerformanceItems());
+      setAccessibilityAccordionItems(getDefaultAccessibilityItems());
+      setMetaTechAccordionItems(getDefaultMetaTechItems());
+      setBrandingAccordionItems(getDefaultBrandingItems(currentUrl));
+      setDomainAccordionItems(getDefaultDomainItems());
+
       toast({ title: "Analysis Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoading(false);
@@ -486,6 +607,10 @@ export default function HomePage() {
             <ReportAccordionSection title="Microformats" items={microformatsAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Security" items={securityAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Performance" items={performanceAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Accessibility" items={accessibilityAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Meta & Technologies" items={metaTechAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Branding" items={brandingAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Domain" items={domainAccordionItems} defaultOpen={false} />
           </div>
           
           {!reportData && !currentUrl && !isLoading && !error && (
@@ -505,4 +630,3 @@ export default function HomePage() {
     </div>
   );
 }
-

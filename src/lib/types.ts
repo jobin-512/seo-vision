@@ -62,7 +62,30 @@ import type {
   SecurityAnalysis as AiSecurityAnalysis,
   // Performance
   AssetMinificationAnalysis as AiAssetMinificationAnalysis,
-  PerformanceAnalysis as AiPerformanceAnalysis
+  PerformanceAnalysis as AiPerformanceAnalysis,
+  // Accessibility
+  ContrastItem as AiContrastItem,
+  ContrastAnalysis as AiContrastAnalysis,
+  NavigationCheckItem as AiNavigationCheckItem,
+  NavigationAnalysis as AiNavigationAnalysis,
+  AccessibilityAnalysis as AiAccessibilityAnalysis,
+   // Technologies, Analytics, Doctype, Encoding
+  TechnologyItem as AiTechnologyItem,
+  TechnologiesAnalysis as AiTechnologiesAnalysis,
+  AnalyticsTool as AiAnalyticsTool,
+  AnalyticsAnalysis as AiAnalyticsAnalysis,
+  DoctypeAnalysis as AiDoctypeAnalysis,
+  EncodingAnalysis as AiEncodingAnalysis,
+  // Branding
+  UrlAnalysis as AiUrlAnalysis,
+  FaviconAnalysis as AiFaviconAnalysis,
+  Custom404PageAnalysis as AiCustom404PageAnalysis,
+  BrandingAnalysis as AiBrandingAnalysis,
+  // Domain
+  DomainRegistrationAnalysis as AiDomainRegistrationAnalysis,
+  DomainAvailabilityItem as AiDomainAvailabilityItem,
+  DomainAvailabilityAnalysis as AiDomainAvailabilityAnalysis,
+  DomainAnalysis as AiDomainAnalysis,
 } from '@/ai/schemas/seo-report-schemas';
 
 // Re-exporting AI types for easier use in components
@@ -132,6 +155,33 @@ export interface SecurityAnalysis extends AiSecurityAnalysis {}
 export interface AssetMinificationAnalysis extends AiAssetMinificationAnalysis {}
 export interface PerformanceAnalysis extends AiPerformanceAnalysis {}
 
+// Accessibility Interfaces
+export interface ContrastItem extends AiContrastItem {}
+export interface ContrastAnalysis extends AiContrastAnalysis {}
+export interface NavigationCheckItem extends AiNavigationCheckItem {}
+export interface NavigationAnalysis extends AiNavigationAnalysis {}
+export interface AccessibilityAnalysis extends AiAccessibilityAnalysis {}
+
+// Technologies, Analytics, Doctype, Encoding Interfaces
+export interface TechnologyItem extends AiTechnologyItem {}
+export interface TechnologiesAnalysis extends AiTechnologiesAnalysis {}
+export interface AnalyticsTool extends AiAnalyticsTool {}
+export interface AnalyticsAnalysis extends AiAnalyticsAnalysis {}
+export interface DoctypeAnalysis extends AiDoctypeAnalysis {}
+export interface EncodingAnalysis extends AiEncodingAnalysis {}
+
+// Branding Interfaces
+export interface UrlAnalysis extends AiUrlAnalysis {}
+export interface FaviconAnalysis extends AiFaviconAnalysis {}
+export interface Custom404PageAnalysis extends AiCustom404PageAnalysis {}
+export interface BrandingAnalysis extends AiBrandingAnalysis {}
+
+// Domain Interfaces
+export interface DomainRegistrationAnalysis extends AiDomainRegistrationAnalysis {}
+export interface DomainAvailabilityItem extends AiDomainAvailabilityItem {}
+export interface DomainAvailabilityAnalysis extends AiDomainAvailabilityAnalysis {}
+export interface DomainAnalysis extends AiDomainAnalysis {}
+
 
 export interface OnPageItem { // This type is becoming more generic for any accordion item
   id: string; 
@@ -188,6 +238,25 @@ export interface OnPageItem { // This type is becoming more generic for any acco
   
   // Performance specific data
   assetMinificationData?: AssetMinificationAnalysis;
+
+  // Accessibility specific data
+  contrastData?: ContrastAnalysis;
+  navigationData?: NavigationAnalysis;
+
+  // Technologies, Analytics, Doctype, Encoding specific data
+  technologiesData?: TechnologiesAnalysis;
+  analyticsData?: AnalyticsAnalysis;
+  doctypeData?: DoctypeAnalysis;
+  encodingData?: EncodingAnalysis;
+
+  // Branding specific data
+  urlAnalysisData?: UrlAnalysis;
+  faviconAnalysisData?: FaviconAnalysis;
+  custom404PageData?: Custom404PageAnalysis;
+
+  // Domain specific data
+  domainRegistrationData?: DomainRegistrationAnalysis;
+  domainAvailabilityData?: DomainAvailabilityAnalysis;
 }
 
 
@@ -225,6 +294,13 @@ export type ReportData = {
   microformatsAnalysis?: AiMicroformatsAnalysis;
   securityAnalysis?: AiSecurityAnalysis;
   performanceAnalysis?: AiPerformanceAnalysis;
+  accessibilityAnalysis?: AiAccessibilityAnalysis;
+  technologiesAnalysis?: AiTechnologiesAnalysis;
+  analyticsAnalysis?: AiAnalyticsAnalysis;
+  doctypeAnalysis?: AiDoctypeAnalysis;
+  encodingAnalysis?: AiEncodingAnalysis;
+  brandingAnalysis?: AiBrandingAnalysis;
+  domainAnalysis?: AiDomainAnalysis;
 
 
   // Fields for the header card (some might overlap or be derived)
@@ -234,4 +310,3 @@ export type ReportData = {
   toImprovePercent?: number; 
   errorsPercent?: number; 
 };
-

@@ -42,19 +42,38 @@ import TapTargetsAccordionContent from './tap-targets-accordion-content';
 // Structured Data Content Components
 import SchemaOrgAccordionContent from './schemaorg-accordion-content';
 import OpenGraphAccordionContent from './opengraph-accordion-content';
-import TwitterCardAccordionContent from './twitter-card-accordion-content'; // New
+import TwitterCardAccordionContent from './twitter-card-accordion-content'; 
 
 // Microformats Content Component
-import MicroformatsAccordionContent from './microformats-accordion-content'; // New
+import MicroformatsAccordionContent from './microformats-accordion-content'; 
 
 // Security Content Components
-import EmailPrivacyAccordionContent from './email-privacy-accordion-content'; // New
-import DmarcAccordionContent from './dmarc-accordion-content'; // New
-import SslSecureAccordionContent from './ssl-secure-accordion-content'; // New
-import MixedContentAccordionContent from './mixed-content-accordion-content'; // New
+import EmailPrivacyAccordionContent from './email-privacy-accordion-content'; 
+import DmarcAccordionContent from './dmarc-accordion-content'; 
+import SslSecureAccordionContent from './ssl-secure-accordion-content'; 
+import MixedContentAccordionContent from './mixed-content-accordion-content'; 
 
 // Performance Content Components
-import AssetMinificationAccordionContent from './asset-minification-accordion-content'; // New
+import AssetMinificationAccordionContent from './asset-minification-accordion-content'; 
+
+// Accessibility Content Components
+import ContrastAccordionContent from './contrast-accordion-content';
+import NavigationAccordionContent from './navigation-accordion-content';
+
+// Technologies, Analytics, Doctype, Encoding Components
+import TechnologiesAccordionContent from './technologies-accordion-content';
+import AnalyticsAccordionContent from './analytics-accordion-content';
+import DoctypeAccordionContent from './doctype-accordion-content';
+import EncodingAccordionContent from './encoding-accordion-content';
+
+// Branding Components
+import UrlAccordionContent from './url-accordion-content';
+import FaviconAccordionContent from './favicon-accordion-content';
+import Custom404PageAccordionContent from './custom-404-page-accordion-content';
+
+// Domain Components
+import DomainRegistrationAccordionContent from './domain-registration-accordion-content';
+import DomainAvailabilityAccordionContent from './domain-availability-accordion-content';
 
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
@@ -94,16 +113,31 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
   // Structured Data
   schemaOrgData,
   openGraphData,
-  twitterCardData, // New
+  twitterCardData, 
   // Microformats
-  microformatsData, // New
+  microformatsData, 
   // Security
-  emailPrivacyData, // New
-  dmarcData, // New
-  sslSecureData, // New
-  mixedContentData, // New
+  emailPrivacyData, 
+  dmarcData, 
+  sslSecureData, 
+  mixedContentData, 
   // Performance
-  assetMinificationData, // New
+  assetMinificationData, 
+  // Accessibility
+  contrastData,
+  navigationData,
+  // Technologies, Analytics, Doctype, Encoding
+  technologiesData,
+  analyticsData,
+  doctypeData,
+  encodingData,
+  // Branding
+  urlAnalysisData,
+  faviconAnalysisData,
+  custom404PageData,
+  // Domain
+  domainRegistrationData,
+  domainAvailabilityData,
 }) => {
   let effectiveBadgeVariant = badgeVariant;
   if (statusColorClass.includes('text-accent')) {
@@ -214,6 +248,36 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
       case 'assetMinification':
         return assetMinificationData ? <AssetMinificationAccordionContent data={assetMinificationData} /> : <p>No Asset Minification data available.</p>;
 
+      // --- ACCESSIBILITY ---
+      case 'contrast':
+        return contrastData ? <ContrastAccordionContent data={contrastData} /> : <p>No Contrast data available.</p>;
+      case 'navigation':
+        return navigationData ? <NavigationAccordionContent data={navigationData} /> : <p>No Navigation data available.</p>;
+      
+      // --- TECHNOLOGIES, ANALYTICS, DOCTYPE, ENCODING ---
+      case 'technologies':
+        return technologiesData ? <TechnologiesAccordionContent data={technologiesData} /> : <p>No Technologies data available.</p>;
+      case 'analytics':
+        return analyticsData ? <AnalyticsAccordionContent data={analyticsData} /> : <p>No Analytics data available.</p>;
+      case 'doctype':
+        return doctypeData ? <DoctypeAccordionContent data={doctypeData} /> : <p>No Doctype data available.</p>;
+      case 'encoding':
+        return encodingData ? <EncodingAccordionContent data={encodingData} /> : <p>No Encoding data available.</p>;
+
+      // --- BRANDING ---
+      case 'url':
+        return urlAnalysisData ? <UrlAccordionContent data={urlAnalysisData} /> : <p>No URL data available.</p>;
+      case 'favicon':
+        return faviconAnalysisData ? <FaviconAccordionContent data={faviconAnalysisData} /> : <p>No Favicon data available.</p>;
+      case 'custom404':
+        return custom404PageData ? <Custom404PageAccordionContent data={custom404PageData} /> : <p>No Custom 404 Page data available.</p>;
+      
+      // --- DOMAIN ---
+      case 'domainRegistration':
+        return domainRegistrationData ? <DomainRegistrationAccordionContent data={domainRegistrationData} /> : <p>No Domain Registration data available.</p>;
+      case 'domainAvailability':
+        return domainAvailabilityData ? <DomainAvailabilityAccordionContent data={domainAvailabilityData} /> : <p>No Domain Availability data available.</p>;
+
       default:
         return typeof content === 'string' ? <p>{content}</p> : <p>No specific content view for this item (ID: {id}).</p>;
     }
@@ -232,13 +296,13 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
           </div>
           <Badge 
             variant={effectiveBadgeVariant} 
-            className={`text-xs px-2 py-0.5 ${statusColorClass === 'text-warning' && effectiveBadgeVariant === 'default' ? 'bg-warning/20 text-yellow-700 border-warning' : ''} ${(statusColorClass || '').includes('text-muted') ? 'bg-muted text-muted-foreground' : ''}`}
+            className={`text-xs px-2 py-0.5 ${statusColorClass === 'text-warning' && effectiveBadgeVariant === 'default' ? 'bg-yellow-500/20 text-yellow-700 border-yellow-500' : ''} ${(statusColorClass || '').includes('text-muted') ? 'bg-muted text-muted-foreground' : ''} ${statusColorClass === 'text-warning' ? '!bg-yellow-500/20 !text-yellow-700 !border-yellow-500/50' : ''}`}
           >
             {statusText}
           </Badge>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="py-4 px-3 text-sm bg-background rounded-b-md">
+      <AccordionContent className="py-4 px-3 text-sm bg-card/50 dark:bg-background rounded-b-md">
         {renderContent()}
       </AccordionContent>
     </AccordionItem>
@@ -247,3 +311,5 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 
 export default ReportAccordionItem;
 
+
+    

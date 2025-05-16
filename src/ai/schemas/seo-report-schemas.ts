@@ -123,7 +123,7 @@ export type UrlResolveAnalysis = z.infer<typeof UrlResolveAnalysisSchema>;
 export const RobotsTxtAnalysisSchema = z.object({
   statusText: z.string().describe("Overall status of robots.txt analysis."),
   statusColorClass: z.string().describe("Tailwind class for status color."),
-  robotsTxtUrl: z.string().nullable().optional().describe("URL to the robots.txt file, if found."),
+  robotsTxtUrl: z.string().nullable().optional().describe("URL to the robots.txt file, if found. Return empty string if not found."),
   findings: z.array(z.string()).optional().describe("Key findings or details from robots.txt review, e.g., 'We found your robots.txt here', 'The reviewed page is allowed...'"),
 });
 export type RobotsTxtAnalysis = z.infer<typeof RobotsTxtAnalysisSchema>;
@@ -131,7 +131,7 @@ export type RobotsTxtAnalysis = z.infer<typeof RobotsTxtAnalysisSchema>;
 export const XmlSitemapAnalysisSchema = z.object({
   statusText: z.string().describe("Overall status of XML sitemap presence/accessibility."),
   statusColorClass: z.string().describe("Tailwind class for status color."),
-  sitemapUrl: z.string().nullable().optional().describe("URL to the XML sitemap, if found."),
+  sitemapUrl: z.string().nullable().optional().describe("URL to the XML sitemap, if found. Return empty string if not found."),
   details: z.string().nullable().optional().describe("Brief summary or note."),
 });
 export type XmlSitemapAnalysis = z.infer<typeof XmlSitemapAnalysisSchema>;
@@ -145,7 +145,7 @@ export type SitemapValidityCheckItem = z.infer<typeof SitemapValidityCheckItemSc
 export const SitemapValidityAnalysisSchema = z.object({
   statusText: z.string().describe("Overall status of sitemap validity."),
   statusColorClass: z.string().describe("Tailwind class for status color."),
-  sitemapUrl: z.string().nullable().optional().describe("URL to the sitemap that was validated."),
+  sitemapUrl: z.string().nullable().optional().describe("URL to the sitemap that was validated. Return empty string if not found."),
   summary: z.string().nullable().optional().describe("Summary like 'We found X sitemap(s) listing Y URL(s).'"),
   checks: z.array(SitemapValidityCheckItemSchema).optional().describe("List of checks, issues, and positive findings related to sitemap validity."),
 });
@@ -291,10 +291,10 @@ export const OpenGraphTagSchema = z.object({
 export type OpenGraphTag = z.infer<typeof OpenGraphTagSchema>;
 
 export const OpenGraphPreviewSchema = z.object({
-  title: z.string().nullable().optional().describe("The Open Graph title for the preview."),
-  description: z.string().nullable().optional().describe("The Open Graph description for the preview."),
-  imageUrl: z.string().optional().describe("The Open Graph image URL for the preview. Use placeholder 'https://placehold.co/600x315.png?text=OG+Preview' and add data-ai-hint if not available."),
-  url: z.string().nullable().optional().describe("The Open Graph URL or site name for the preview."),
+  title: z.string().nullable().optional().describe("The Open Graph title for the preview. Return empty string if not found."),
+  description: z.string().nullable().optional().describe("The Open Graph description for the preview. Return empty string if not found."),
+  imageUrl: z.string().optional().describe("The Open Graph image URL for the preview. Use placeholder 'https://placehold.co/600x315.png' and add data-ai-hint if not available."),
+  url: z.string().nullable().optional().describe("The Open Graph URL or site name for the preview. Return empty string if not found."),
 });
 export type OpenGraphPreview = z.infer<typeof OpenGraphPreviewSchema>;
 
@@ -306,7 +306,6 @@ export const OpenGraphAnalysisSchema = z.object({
 });
 export type OpenGraphAnalysis = z.infer<typeof OpenGraphAnalysisSchema>;
 
-// TWITTER CARD SCHEMAS
 export const TwitterTagSchema = z.object({
   tag: z.string().describe("The Twitter Card tag name, e.g., 'twitter:card', 'twitter:title'."),
   value: z.string().describe("The value of the Twitter Card tag."),
@@ -314,12 +313,12 @@ export const TwitterTagSchema = z.object({
 export type TwitterTag = z.infer<typeof TwitterTagSchema>;
 
 export const TwitterCardPreviewSchema = z.object({
-  cardType: z.string().nullable().optional().describe("Type of Twitter card, e.g., 'summary', 'summary_large_image'."),
-  site: z.string().nullable().optional().describe("The Twitter @username of the website/publisher."),
-  title: z.string().nullable().optional().describe("The title for the Twitter Card preview."),
-  description: z.string().nullable().optional().describe("The description for the Twitter Card preview."),
-  imageUrl: z.string().optional().describe("The image URL for the Twitter Card preview. Use placeholder 'https://placehold.co/600x315.png?text=Twitter+Card' and add data-ai-hint if not available."),
-  domain: z.string().nullable().optional().describe("The domain of the content."),
+  cardType: z.string().nullable().optional().describe("Type of Twitter card, e.g., 'summary', 'summary_large_image'. Return empty string if not found."),
+  site: z.string().nullable().optional().describe("The Twitter @username of the website/publisher. Return empty string if not found."),
+  title: z.string().nullable().optional().describe("The title for the Twitter Card preview. Return empty string if not found."),
+  description: z.string().nullable().optional().describe("The description for the Twitter Card preview. Return empty string if not found."),
+  imageUrl: z.string().optional().describe("The image URL for the Twitter Card preview. Use placeholder 'https://placehold.co/600x315.png' and add data-ai-hint if not available."),
+  domain: z.string().nullable().optional().describe("The domain of the content. Return empty string if not found."),
 });
 export type TwitterCardPreview = z.infer<typeof TwitterCardPreviewSchema>;
 
@@ -409,9 +408,145 @@ export type AssetMinificationAnalysis = z.infer<typeof AssetMinificationAnalysis
 
 export const PerformanceAnalysisSchema = z.object({
   assetMinification: AssetMinificationAnalysisSchema.optional(),
-  // Can add more performance metrics like server response time, compression, etc.
 }).describe("Analysis of website performance aspects.");
 export type PerformanceAnalysis = z.infer<typeof PerformanceAnalysisSchema>;
+
+// --- ACCESSIBILITY ANALYSIS ---
+export const ContrastItemSchema = z.object({
+  elementHtml: z.string().describe("A short HTML snippet of the element with low contrast."),
+  ratio: z.string().describe("The calculated contrast ratio, e.g., '2.5:1'."),
+  expectedRatio: z.string().describe("The expected contrast ratio, e.g., '4.5:1 expected'."),
+  previewText: z.string().default("Aa").describe("Text to display for visual preview, typically 'Aa'."),
+});
+export type ContrastItem = z.infer<typeof ContrastItemSchema>;
+
+export const ContrastAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of contrast accessibility."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  details: z.string().optional().describe("Summary description of contrast issues or findings."),
+  items: z.array(ContrastItemSchema).optional().describe("List of elements with contrast issues."),
+});
+export type ContrastAnalysis = z.infer<typeof ContrastAnalysisSchema>;
+
+export const NavigationCheckItemSchema = z.object({
+  text: z.string().describe("Description of the navigation check performed."),
+  passed: z.boolean().describe("True if the check passed, false otherwise."),
+});
+export type NavigationCheckItem = z.infer<typeof NavigationCheckItemSchema>;
+
+export const NavigationAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status of navigation accessibility."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  summaryText: z.string().optional().describe("A summary text like 'This page has not passed all 5 checks'."),
+  checks: z.array(NavigationCheckItemSchema).optional().describe("List of specific navigation checks and their outcomes."),
+  notRelevantChecks: z.array(z.string()).optional().describe("List of navigation checks not relevant to the page."),
+});
+export type NavigationAnalysis = z.infer<typeof NavigationAnalysisSchema>;
+
+export const AccessibilityAnalysisSchema = z.object({
+  contrast: ContrastAnalysisSchema.optional(),
+  navigation: NavigationAnalysisSchema.optional(),
+}).describe("Analysis of website accessibility aspects.");
+export type AccessibilityAnalysis = z.infer<typeof AccessibilityAnalysisSchema>;
+
+// --- TECHNOLOGIES, ANALYTICS, DOCTYPE, ENCODING ---
+export const TechnologyItemSchema = z.object({
+  name: z.string().describe("Name of the detected technology, e.g., 'React', 'Google Analytics'."),
+});
+export type TechnologyItem = z.infer<typeof TechnologyItemSchema>;
+
+export const TechnologiesAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status text for detected technologies."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  detectedTechnologies: z.array(TechnologyItemSchema).optional().describe("List of detected technologies."),
+});
+export type TechnologiesAnalysis = z.infer<typeof TechnologiesAnalysisSchema>;
+
+export const AnalyticsToolSchema = z.object({
+  name: z.string().describe("Name of the detected analytics tool, e.g., 'Google Analytics', 'Google Analytics 4'."),
+});
+export type AnalyticsTool = z.infer<typeof AnalyticsToolSchema>;
+
+export const AnalyticsAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status text for detected analytics tools."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  detectedTools: z.array(AnalyticsToolSchema).optional().describe("List of detected analytics tools."),
+});
+export type AnalyticsAnalysis = z.infer<typeof AnalyticsAnalysisSchema>;
+
+export const DoctypeAnalysisSchema = z.object({
+  statusText: z.string().describe("Status text for Doctype."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  doctype: z.string().optional().describe("The detected DOCTYPE, e.g., 'HTML5'."),
+});
+export type DoctypeAnalysis = z.infer<typeof DoctypeAnalysisSchema>;
+
+export const EncodingAnalysisSchema = z.object({
+  statusText: z.string().describe("Status text for character encoding."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  encoding: z.string().optional().describe("The detected character encoding, e.g., 'utf-8'."),
+});
+export type EncodingAnalysis = z.infer<typeof EncodingAnalysisSchema>;
+
+// --- BRANDING ---
+export const UrlAnalysisSchema = z.object({
+  statusText: z.string().describe("Status text for URL analysis."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  url: z.string().optional().describe("The primary URL of the page."),
+  length: z.number().optional().describe("Length of the URL string."),
+});
+export type UrlAnalysis = z.infer<typeof UrlAnalysisSchema>;
+
+export const FaviconAnalysisSchema = z.object({
+  statusText: z.string().describe("Status text for Favicon presence."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  details: z.string().optional().describe("Details about favicon presence or issues. e.g. 'Great, your website has a favicon.'"),
+});
+export type FaviconAnalysis = z.infer<typeof FaviconAnalysisSchema>;
+
+export const Custom404PageAnalysisSchema = z.object({
+  statusText: z.string().describe("Status text for Custom 404 Page presence."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  details: z.string().optional().describe("Details about the custom 404 page. e.g., 'Great, your website has a custom 404 error page.'"),
+  httpStatusCode: z.number().optional().describe("The HTTP status code returned for a non-existent page, e.g., 404."),
+});
+export type Custom404PageAnalysis = z.infer<typeof Custom404PageAnalysisSchema>;
+
+export const BrandingAnalysisSchema = z.object({
+  urlAnalysis: UrlAnalysisSchema.optional(),
+  faviconAnalysis: FaviconAnalysisSchema.optional(),
+  custom404PageAnalysis: Custom404PageAnalysisSchema.optional(),
+});
+export type BrandingAnalysis = z.infer<typeof BrandingAnalysisSchema>;
+
+// --- DOMAIN ---
+export const DomainRegistrationAnalysisSchema = z.object({
+  statusText: z.string().describe("Status text for Domain Registration."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  createdDate: z.string().optional().describe("Simulated creation date, e.g., 'Created a year ago'."),
+  expiryDate: z.string().optional().describe("Simulated expiry date, e.g., 'Expires in 2 years'."),
+});
+export type DomainRegistrationAnalysis = z.infer<typeof DomainRegistrationAnalysisSchema>;
+
+export const DomainAvailabilityItemSchema = z.object({
+  domain: z.string().describe("The domain name variant, e.g., 'example.com'."),
+  status: z.string().describe("Availability status message, e.g., 'Available. Register it now!' or 'Taken'."),
+  isAvailable: z.boolean().describe("True if the domain is likely available, false otherwise."),
+});
+export type DomainAvailabilityItem = z.infer<typeof DomainAvailabilityItemSchema>;
+
+export const DomainAvailabilityAnalysisSchema = z.object({
+  statusText: z.string().describe("Overall status text for Domain Availability."),
+  statusColorClass: z.string().describe("Tailwind CSS class for status color."),
+  domains: z.array(DomainAvailabilityItemSchema).optional().describe("List of related domains and their simulated availability."),
+});
+export type DomainAvailabilityAnalysis = z.infer<typeof DomainAvailabilityAnalysisSchema>;
+
+export const DomainAnalysisSchema = z.object({
+  domainRegistration: DomainRegistrationAnalysisSchema.optional(),
+  domainAvailability: DomainAvailabilityAnalysisSchema.optional(),
+});
+export type DomainAnalysis = z.infer<typeof DomainAnalysisSchema>;
 
 
 // --- MAIN SCHEMAS ---
@@ -454,6 +589,12 @@ export const GenerateSeoReportOutputSchema = z.object({
   microformatsAnalysis: MicroformatsAnalysisSchema.optional().describe("Analysis of detected microformats on the page."),
   securityAnalysis: SecurityAnalysisSchema.optional().describe("Analysis of website security aspects."),
   performanceAnalysis: PerformanceAnalysisSchema.optional().describe("Analysis of website performance aspects."),
+  accessibilityAnalysis: AccessibilityAnalysisSchema.optional().describe("Analysis of website accessibility aspects."),
+  technologiesAnalysis: TechnologiesAnalysisSchema.optional().describe("Analysis of detected technologies."),
+  analyticsAnalysis: AnalyticsAnalysisSchema.optional().describe("Analysis of detected analytics tools."),
+  doctypeAnalysis: DoctypeAnalysisSchema.optional().describe("Analysis of the website's DOCTYPE."),
+  encodingAnalysis: EncodingAnalysisSchema.optional().describe("Analysis of the website's character encoding."),
+  brandingAnalysis: BrandingAnalysisSchema.optional().describe("Analysis of website branding elements (URL, Favicon, Custom 404)."),
+  domainAnalysis: DomainAnalysisSchema.optional().describe("Analysis of domain registration and availability."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
-

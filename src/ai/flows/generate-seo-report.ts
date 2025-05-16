@@ -13,9 +13,10 @@ import { getWebsiteTrafficDataTool } from '@/ai/tools/get-website-traffic-tool';
 import { 
   GenerateSeoReportInputSchema, 
   GenerateSeoReportOutputSchema,
-  // Import all other necessary schemas from the dedicated schema file
+  // Shared
   type MonthlyTrafficData,
   type GooglePreviewData,
+  // On-Page
   type OnPageDetailItem,
   type HeadingItem,
   type HeadingsAnalysis,
@@ -72,7 +73,30 @@ import {
   type SecurityAnalysis,
   // Performance
   type AssetMinificationAnalysis,
-  type PerformanceAnalysis
+  type PerformanceAnalysis,
+  // Accessibility
+  type ContrastItem,
+  type ContrastAnalysis,
+  type NavigationCheckItem,
+  type NavigationAnalysis,
+  type AccessibilityAnalysis,
+  // Technologies, Analytics, Doctype, Encoding
+  type TechnologyItem,
+  type TechnologiesAnalysis,
+  type AnalyticsTool,
+  type AnalyticsAnalysis,
+  type DoctypeAnalysis,
+  type EncodingAnalysis,
+  // Branding
+  type UrlAnalysis,
+  type FaviconAnalysis,
+  type Custom404PageAnalysis,
+  type BrandingAnalysis,
+  // Domain
+  type DomainRegistrationAnalysis,
+  type DomainAvailabilityItem,
+  type DomainAvailabilityAnalysis,
+  type DomainAnalysis,
 } from '@/ai/schemas/seo-report-schemas';
 
 // Export types for external use (e.g., by the frontend)
@@ -80,8 +104,10 @@ import {
 export type { 
   GenerateSeoReportInput, 
   GenerateSeoReportOutput,
+  // Shared
   MonthlyTrafficData,
   GooglePreviewData,
+  // On-Page
   OnPageDetailItem,
   HeadingItem,
   HeadingsAnalysis,
@@ -138,7 +164,30 @@ export type {
   SecurityAnalysis,
   // Performance
   AssetMinificationAnalysis,
-  PerformanceAnalysis
+  PerformanceAnalysis,
+  // Accessibility
+  ContrastItem,
+  ContrastAnalysis,
+  NavigationCheckItem,
+  NavigationAnalysis,
+  AccessibilityAnalysis,
+  // Technologies, Analytics, Doctype, Encoding
+  TechnologyItem,
+  TechnologiesAnalysis,
+  AnalyticsTool,
+  AnalyticsAnalysis,
+  DoctypeAnalysis,
+  EncodingAnalysis,
+  // Branding
+  UrlAnalysis,
+  FaviconAnalysis,
+  Custom404PageAnalysis,
+  BrandingAnalysis,
+  // Domain
+  DomainRegistrationAnalysis,
+  DomainAvailabilityItem,
+  DomainAvailabilityAnalysis,
+  DomainAnalysis,
 };
 
 
@@ -155,7 +204,7 @@ const prompt = ai.definePrompt({
 
   For each section and sub-section, determine a 'statusText' (e.g., 'Good', 'Needs Improvement', 'Outdated', 'Multiple H1s', 'Well-optimized', 'All images have alts', 'Some missing', 'Good link distribution', 'OK', 'Error', 'Very Good', 'Perfect', '10 Warnings', 'Warning!', 'Secure') and a 'statusColorClass' (Tailwind CSS class: 'text-accent' for good/positive, 'text-warning' for moderate issues/warnings, 'text-destructive' for critical issues/errors, 'text-muted-foreground' for informational/neutral).
 
-  If content for a field (like title tag text, meta description text, or URLs) is missing or not found, please return an empty string "" or an empty array [] as appropriate, rather than null, unless the schema specifically allows null. Use a placeholder image URL like "https://placehold.co/WIDTHxHEIGHT.png" (e.g. "https://placehold.co/600x315.png") if an actual image URL for Open Graph or Twitter Card preview is not found, appending data-ai-hint with relevant keywords (e.g., data-ai-hint="social media" or data-ai-hint="twitter card").
+  If content for a field (like title tag text, meta description text, URLs, or other text fields) is missing or not found, please return an empty string "" or an empty array [] as appropriate, rather than null, unless the schema specifically allows null (e.g. for optional objects). Use a placeholder image URL like "https://placehold.co/WIDTHxHEIGHT.png" (e.g. "https://placehold.co/600x315.png") if an actual image URL for Open Graph or Twitter Card preview is not found, appending data-ai-hint with relevant keywords (e.g., data-ai-hint="social media" or data-ai-hint="twitter card").
 
   1.  **Overall Report & Scores**:
       *   Identify problems and provide optimization suggestions in the main 'report' field.
@@ -165,8 +214,8 @@ const prompt = ai.definePrompt({
       *   Determine Core Web Vitals: 'lcpValue' (e.g., "2.5s") & 'lcpStatus' ("Good", "Improve", "Poor"), 'clsValue' & 'clsStatus', 'fidValue' & 'fidStatus'.
 
   2.  **On-Page SEO Details ('onPageSeoDetails')**: (Array of items for Title Tag, Meta Description, Google Preview)
-      *   **Title Tag**: id "titleTag", title "Title Tag". statusText, statusColorClass. 'content' (current text or empty string), 'details' (char length).
-      *   **Meta Description**: id "metaDescription", title "Meta Description". statusText, statusColorClass. 'content' (current text or empty string if missing, not null), 'details' (char length).
+      *   **Title Tag**: id "titleTag", title "Title Tag". statusText, statusColorClass. 'content' (current text or empty string if not found), 'details' (char length).
+      *   **Meta Description**: id "metaDescription", title "Meta Description". statusText, statusColorClass. 'content' (current text or empty string if missing), 'details' (char length).
       *   **Google Preview**: id "googlePreview", title "Google Preview". statusText, statusColorClass. 'googleDesktopPreview' (url, title, description), 'googleMobilePreview' (url, title, description).
 
   3.  **Headings Analysis ('headingsAnalysis')**:
@@ -184,9 +233,9 @@ const prompt = ai.definePrompt({
   7.  **Indexing Analysis ('indexingAnalysis')**:
       *   **Web Feeds ('webFeeds')**: statusText, statusColorClass. 'details'. 'feeds': array of {url, format}.
       *   **URL Resolve ('urlResolve')**: statusText, statusColorClass. 'details'. 'resolutions': array of {originalUrl, resolvedUrl}.
-      *   **Robots.txt ('robotsTxt')**: statusText, statusColorClass. 'robotsTxtUrl'. 'findings': array of strings.
-      *   **XML Sitemap ('xmlSitemap')**: statusText, statusColorClass. 'sitemapUrl'. 'details'.
-      *   **Sitemaps Validity ('sitemapValidity')**: statusText, statusColorClass. 'sitemapUrl'. 'summary'. 'checks': array of {text, type ("check", "issue", "positive")}.
+      *   **Robots.txt ('robotsTxt')**: statusText, statusColorClass. 'robotsTxtUrl' (return empty string if not found). 'findings': array of strings.
+      *   **XML Sitemap ('xmlSitemap')**: statusText, statusColorClass. 'sitemapUrl' (return empty string if not found). 'details'.
+      *   **Sitemaps Validity ('sitemapValidity')**: statusText, statusColorClass. 'sitemapUrl' (return empty string if not found). 'summary'. 'checks': array of {text, type ("check", "issue", "positive")}.
       *   **URL Parameters ('urlParameters')**: statusText, statusColorClass. 'details'.
 
   8.  **Technical SEO Analysis ('technicalSeoAnalysis')**:
@@ -210,11 +259,11 @@ const prompt = ai.definePrompt({
           *   'warningCount': Total number of warnings found.
       *   **Open Graph Protocol ('openGraph')**:
           *   statusText, statusColorClass (e.g., "Well Implemented", "Missing Key Tags").
-          *   'previewData': {title, description, imageUrl (use placeholder "https://placehold.co/600x315.png" data-ai-hint="social media" if none found), url (or siteName)}.
-          *   'tags': Array of {tag (e.g., "og:type", "og:title"), value}. Include common tags like og:type, og:title, og:description, og:image, og:url, og:site_name if found.
+          *   'previewData': {title (or ""), description (or ""), imageUrl (use placeholder "https://placehold.co/600x315.png" data-ai-hint="social media" if none found), url (or siteName, or "")}.
+          *   'tags': Array of {tag (e.g., "og:type", "og:title"), value}. Include common tags.
       *   **Twitter Card ('twitterCard')**:
           *   statusText, statusColorClass (e.g., "Found", "Missing").
-          *   'previewData': {cardType, site, title, description, imageUrl (use placeholder "https://placehold.co/600x315.png" data-ai-hint="twitter card" if none found), domain}.
+          *   'previewData': {cardType (or ""), site (or ""), title (or ""), description (or ""), imageUrl (use placeholder "https://placehold.co/600x315.png" data-ai-hint="twitter card" if none found), domain (or "")}.
           *   'tags': Array of {tag (e.g., "twitter:card", "twitter:title"), value}. Include common tags.
 
   11. **Microformats Analysis ('microformatsAnalysis')**:
@@ -229,6 +278,35 @@ const prompt = ai.definePrompt({
 
   13. **Performance Analysis ('performanceAnalysis')**:
       *   **Asset Minification ('assetMinification')**: statusText, statusColorClass. 'details' (e.g., "Perfect, all your assets are minified." or "Some CSS/JS files could be minified.").
+
+  14. **Accessibility Analysis ('accessibilityAnalysis')**:
+      *   **Contrast ('contrast')**: statusText, statusColorClass. 'details' (summary, e.g., "The table below shows X elements..."). 'items': array of {elementHtml (short HTML snippet), ratio (e.g., "4.47:1"), expectedRatio (e.g., "4.5:1 expected"), previewText ("Aa")}.
+      *   **Navigation ('navigation')**: statusText, statusColorClass. 'summaryText' (e.g., "This page has not passed all 5 checks."). 'checks': array of {text (e.g., "The page contains a heading..."), passed (boolean)}. 'notRelevantChecks': array of strings for checks not applicable.
+
+  15. **Technologies Analysis ('technologiesAnalysis')**:
+      *   statusText, statusColorClass.
+      *   'detectedTechnologies': Array of {name (e.g., "Elementor", "Google Analytics 4", "PHP")}.
+
+  16. **Analytics Analysis ('analyticsAnalysis')**:
+      *   statusText, statusColorClass.
+      *   'detectedTools': Array of {name (e.g., "Google Analytics", "Google Analytics 4")}.
+
+  17. **Doctype Analysis ('doctypeAnalysis')**:
+      *   statusText, statusColorClass.
+      *   'doctype': The detected doctype (e.g., "HTML5").
+
+  18. **Encoding Analysis ('encodingAnalysis')**:
+      *   statusText, statusColorClass.
+      *   'encoding': The detected character encoding (e.g., "utf-8").
+
+  19. **Branding Analysis ('brandingAnalysis')**:
+      *   **URL ('urlAnalysis')**: statusText, statusColorClass. 'url' (the canonical URL of the page), 'length' (character count).
+      *   **Favicon ('faviconAnalysis')**: statusText, statusColorClass. 'details' (e.g., "Great, your website has a favicon.").
+      *   **Custom 404 Page ('custom404PageAnalysis')**: statusText, statusColorClass. 'details' (e.g., "Great, your website has a custom 404 error page."), 'httpStatusCode' (e.g., 404, if applicable).
+
+  20. **Domain Analysis ('domainAnalysis')**:
+      *   **Domain Registration ('domainRegistration')**: statusText, statusColorClass. 'createdDate' (simulated, e.g., "Created a year ago"), 'expiryDate' (simulated, e.g., "Expires in 2 years").
+      *   **Domain Availability ('domainAvailability')**: statusText, statusColorClass. 'domains': Array of {domain (e.g., "{{{url}}}.net", "{{{url}}}.org"), status (e.g., "Available. Register it now!"), isAvailable (boolean)}. Simulate for .net, .org, .info, .biz TLDs based on the main URL.
 
   Use the 'getWebsiteTrafficData' tool to fetch website traffic data for {{{url}}} for the last 6 months. Include this in 'websiteTraffic'. If no data, omit or set to empty array.
 
@@ -247,4 +325,3 @@ const generateSeoReportFlow = ai.defineFlow(
     return output!;
   }
 );
-
