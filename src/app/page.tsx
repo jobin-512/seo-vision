@@ -9,10 +9,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { generateSeoReport, type OnPageDetailItem as AiOnPageDetailItem } from '@/ai/flows/generate-seo-report';
-import type { ReportData, OnPageItem, GooglePreviewData } from '@/lib/types';
+import { 
+  generateSeoReport, 
+  type OnPageDetailItem as AiOnPageDetailItem,
+  type HeadingsAnalysis as AiHeadingsAnalysisType,
+  type ContentAnalysis as AiContentAnalysisType,
+  type AltAttributeAnalysis as AiAltAttributeAnalysisType,
+  type InPageLinksAnalysis as AiInPageLinksAnalysisType
+} from '@/ai/flows/generate-seo-report';
+import type { ReportData, OnPageItem, GooglePreviewData, HeadingsAnalysis, ContentAnalysis, AltAttributeAnalysis, InPageLinksAnalysis } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
-import { LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen } from 'lucide-react';
+import { LoaderCircle, AlertTriangle, CheckCircle2, Info, FileText, BookOpen, Heading1, FileSearch2, ImageIcon, Link as LinkIcon } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
 import ReportFilters from '@/components/report-filters';
@@ -24,11 +31,48 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const mapAiDataToAccordionItem = (
+  id: string, 
+  title: string, 
+  icon: React.ElementType, 
+  aiData: AiHeadingsAnalysisType | AiContentAnalysisType | AiAltAttributeAnalysisType | AiInPageLinksAnalysisType | undefined,
+  defaultStatusText: string = 'N/A',
+  defaultStatusColorClass: string = 'text-muted-foreground'
+): OnPageItem => {
+  
+  let statusText = defaultStatusText;
+  let statusColorClass = defaultStatusColorClass;
+
+  if (aiData && 'statusText' in aiData && aiData.statusText) {
+    statusText = aiData.statusText;
+  }
+  if (aiData && 'statusColorClass' in aiData && aiData.statusColorClass) {
+    statusColorClass = aiData.statusColorClass;
+  }
+  
+  const item: OnPageItem = {
+    id,
+    icon,
+    title,
+    statusText,
+    statusColorClass,
+    badgeVariant: 'outline',
+  };
+
+  if (id === 'headings' && aiData && 'h1Count' in aiData) item.headingsAnalysis = aiData as HeadingsAnalysis;
+  if (id === 'contentAnalysis' && aiData && 'keywords' in aiData) item.contentAnalysisData = aiData as ContentAnalysis;
+  if (id === 'altAttributes' && aiData && 'totalImages' in aiData) item.altAttributeAnalysis = aiData as AltAttributeAnalysis;
+  if (id === 'inPageLinks' && aiData && 'totalLinks' in aiData) item.inPageLinksAnalysis = aiData as InPageLinksAnalysis;
+  
+  return item;
+};
+
+
 const mapAiOnPageDetailToOnPageItem = (aiItem: AiOnPageDetailItem): OnPageItem => {
-  let icon: React.ElementType = Info; // Default icon
+  let icon: React.ElementType = Info; 
   if (aiItem.id === 'titleTag') icon = FileText;
   else if (aiItem.id === 'metaDescription') icon = BookOpen;
-  else if (aiItem.id === 'googlePreview') icon = CheckCircle2; // Using CheckCircle2 as a placeholder for search/preview
+  else if (aiItem.id === 'googlePreview') icon = CheckCircle2;
 
   return {
     id: aiItem.id,
@@ -36,17 +80,16 @@ const mapAiOnPageDetailToOnPageItem = (aiItem: AiOnPageDetailItem): OnPageItem =
     title: aiItem.title,
     statusText: aiItem.statusText,
     statusColorClass: aiItem.statusColorClass,
-    badgeVariant: 'outline', // Default, can be refined based on status
-    content: aiItem.content,
+    badgeVariant: 'outline', 
+    content: aiItem.content || undefined, // Ensure content is not null
     details: aiItem.details,
-    googleDesktopPreview: aiItem.googleDesktopPreview as GooglePreviewData | undefined, // Cast if structure matches
-    googleMobilePreview: aiItem.googleMobilePreview as GooglePreviewData | undefined, // Cast if structure matches
+    googleDesktopPreview: aiItem.googleDesktopPreview as GooglePreviewData | undefined, 
+    googleMobilePreview: aiItem.googleMobilePreview as GooglePreviewData | undefined, 
   };
 };
 
-
-// Mock data for On-Page SEO Accordion - Fallback
-const mockOnPageItems: OnPageItem[] = [
+const getDefaultAccordionItems = (url?: string): OnPageItem[] => [
+  // On-Page Base
   {
     id: 'titleTag',
     icon: FileText,
@@ -54,7 +97,7 @@ const mockOnPageItems: OnPageItem[] = [
     statusText: 'N/A',
     statusColorClass: 'text-muted-foreground',
     badgeVariant: 'outline',
-    content: 'Example: Your Website Title - Engaging and Relevant',
+    content: `Example: ${url ? new URL(url).hostname : 'YourWebsite'}.com Title - Engaging and Relevant`,
     details: 'Length: ~60 character(s)',
   },
   {
@@ -75,14 +118,64 @@ const mockOnPageItems: OnPageItem[] = [
     statusColorClass: 'text-muted-foreground',
     badgeVariant: 'outline',
     googleDesktopPreview: {
-      url: 'example.com',
-      title: 'Example Website Title - Your Catchy Headline',
+      url: url ? new URL(url).hostname : 'example.com',
+      title: `Example ${url ? new URL(url).hostname : 'Website'} Title - Your Catchy Headline`,
       description: 'This is an example of how your website might appear in Google search results on a desktop computer. Make it count!',
     },
     googleMobilePreview: {
-      url: 'https://example.com',
-      title: 'Example Title - Mobile Friendly',
+      url: url || 'https://example.com',
+      title: `Example Title - Mobile Friendly`,
       description: 'Shorter, punchy description for mobile users. Easy to read on the go.',
+    },
+  },
+  // New Sections
+  {
+    id: 'headings',
+    icon: Heading1,
+    title: 'Headings',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    badgeVariant: 'outline',
+    headingsAnalysis: { 
+      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
+      h1Count: 0, h2Count: 0, h3Count: 0, h4Count: 0, h5Count: 0, h6Count: 0, headings: [] 
+    },
+  },
+  {
+    id: 'contentAnalysis',
+    icon: FileSearch2,
+    title: 'Content Analysis',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    badgeVariant: 'outline',
+    contentAnalysisData: { 
+      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
+      keywords: [{keyword: "example", count: 1}] 
+    },
+  },
+  {
+    id: 'altAttributes',
+    icon: ImageIcon,
+    title: 'Alt Attributes',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    badgeVariant: 'outline',
+    altAttributeAnalysis: { 
+      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
+      totalImages: 0, imagesMissingAlts: 0, details: 'No image data yet.' 
+    },
+  },
+  {
+    id: 'inPageLinks',
+    icon: LinkIcon,
+    title: 'In-Page Links',
+    statusText: 'N/A',
+    statusColorClass: 'text-muted-foreground',
+    badgeVariant: 'outline',
+    inPageLinksAnalysis: { 
+      statusText: 'N/A', statusColorClass: 'text-muted-foreground',
+      totalLinks: 0, internalLinks: 0, externalLinksFollow: 0, externalLinksNofollow: 0, 
+      links: [{anchorText: "Example", url: "#", type: "Internal", followStatus: "Follow"}] 
     },
   },
 ];
@@ -91,7 +184,7 @@ const mockOnPageItems: OnPageItem[] = [
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [reportData, setReportData] = React.useState<ReportData | null>(null);
-  const [currentOnPageItems, setCurrentOnPageItems] = React.useState<OnPageItem[]>(mockOnPageItems);
+  const [currentAccordionItems, setCurrentAccordionItems] = React.useState<OnPageItem[]>(getDefaultAccordionItems());
   const [error, setError] = React.useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = React.useState<string>('');
 
@@ -108,7 +201,7 @@ export default function HomePage() {
     setIsLoading(true);
     setError(null);
     setReportData(null);
-    setCurrentOnPageItems(mockOnPageItems); // Reset to mock data while loading new
+    setCurrentAccordionItems(getDefaultAccordionItems(data.url)); 
     setCurrentUrl(data.url);
 
     try {
@@ -118,19 +211,54 @@ export default function HomePage() {
           ...result,
           urlAnalyzed: data.url,
           analysisTimestamp: new Date().toISOString(),
+          // Placeholder percentages, ideally these would come from AI or calculations
           passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, 
           toImprovePercent: result.score > 0 ? 20 : 0, 
           errorsPercent: result.score > 0 ? 10 : 0, 
-          // onPageSeoDetails is now directly from AI of type AiOnPageDetailItem[]
         };
         setReportData(augmentedResult);
 
+        let newAccordionItems: OnPageItem[] = [];
+
         if (result.onPageSeoDetails && result.onPageSeoDetails.length > 0) {
-          const transformedItems = result.onPageSeoDetails.map(mapAiOnPageDetailToOnPageItem);
-          setCurrentOnPageItems(transformedItems);
+          newAccordionItems.push(...result.onPageSeoDetails.map(mapAiOnPageDetailToOnPageItem));
         } else {
-          setCurrentOnPageItems(mockOnPageItems); // Fallback if AI doesn't provide details
+          // Add default on-page items if AI doesn't provide them
+          newAccordionItems.push(...getDefaultAccordionItems(data.url).filter(item => ['titleTag', 'metaDescription', 'googlePreview'].includes(item.id)));
         }
+        
+        // Map new sections
+        newAccordionItems.push(mapAiDataToAccordionItem('headings', 'Headings', Heading1, result.headingsAnalysis, result.headingsAnalysis?.statusText, result.headingsAnalysis?.statusColorClass));
+        newAccordionItems.push(mapAiDataToAccordionItem('contentAnalysis', 'Content Analysis', FileSearch2, result.contentAnalysis, result.contentAnalysis?.statusText, result.contentAnalysis?.statusColorClass));
+        newAccordionItems.push(mapAiDataToAccordionItem('altAttributes', 'Alt Attributes', ImageIcon, result.altAttributeAnalysis, result.altAttributeAnalysis?.statusText, result.altAttributeAnalysis?.statusColorClass));
+        newAccordionItems.push(mapAiDataToAccordionItem('inPageLinks', 'In-Page Links', LinkIcon, result.inPageLinksAnalysis, result.inPageLinksAnalysis?.statusText, result.inPageLinksAnalysis?.statusColorClass));
+        
+        // Filter out any items that might have been duplicated if AI didn't provide onPageSeoDetails but provided other analyses
+        const uniqueItemIds = new Set<string>();
+        const finalAccordionItems = newAccordionItems.filter(item => {
+            if (!uniqueItemIds.has(item.id)) {
+                uniqueItemIds.add(item.id);
+                return true;
+            }
+            // If onPageSeoDetails was missing, we added defaults. If AI provided structured data for other sections,
+            // ensure we prioritize the AI-derived status for those sections over the generic default.
+            const existingItem = currentAccordionItems.find(ci => ci.id === item.id);
+            if (existingItem && item.statusText !== 'N/A') { // AI provided a status
+                existingItem.statusText = item.statusText;
+                existingItem.statusColorClass = item.statusColorClass;
+                // Update specific content for that item
+                if(item.headingsAnalysis) existingItem.headingsAnalysis = item.headingsAnalysis;
+                if(item.contentAnalysisData) existingItem.contentAnalysisData = item.contentAnalysisData;
+                if(item.altAttributeAnalysis) existingItem.altAttributeAnalysis = item.altAttributeAnalysis;
+                if(item.inPageLinksAnalysis) existingItem.inPageLinksAnalysis = item.inPageLinksAnalysis;
+
+            }
+            return false;
+        });
+
+
+        setCurrentAccordionItems(finalAccordionItems.length > 0 ? finalAccordionItems : getDefaultAccordionItems(data.url));
+
 
         toast({
           title: "Analysis Complete",
@@ -144,7 +272,7 @@ export default function HomePage() {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred during analysis.';
       setError(errorMessage);
-      setCurrentOnPageItems(mockOnPageItems); // Reset to mock on error
+      setCurrentAccordionItems(getDefaultAccordionItems(currentUrl)); 
       toast({
         title: "Analysis Failed",
         description: errorMessage,
@@ -180,7 +308,7 @@ export default function HomePage() {
     }
   };
   
-  const onPageSectionData = currentOnPageItems;
+  const onPageSectionData = currentAccordionItems;
 
 
   return (
@@ -260,8 +388,6 @@ export default function HomePage() {
           
           {(reportData || currentUrl) && <ReportFilters />}
 
-          {/* Always render the accordion section container, but items depend on data */}
-          {/* This ensures print styles can target it even if it's "empty" on screen pre-analysis */}
           <div className={`print:block ${(!reportData && !currentUrl && !isLoading && !error) ? 'hidden' : ''}`}>
             <ReportAccordionSection 
               title="On-Page" 
@@ -270,8 +396,6 @@ export default function HomePage() {
             />
           </div>
           
-
-          {/* Initial state message before any analysis */}
           {!reportData && !currentUrl && !isLoading && !error && (
             <Card className="w-full max-w-3xl shadow-lg">
               <CardHeader>
@@ -286,7 +410,6 @@ export default function HomePage() {
           )}
         </main>
       )}
-      {/* Footer */}
       <footer className="w-full max-w-4xl mt-12 pt-6 border-t border-border text-center text-sm text-muted-foreground no-print">
         <p>&copy; {new Date().getFullYear()} SEOVision. All rights reserved.</p>
         <p>

@@ -11,29 +11,76 @@ import { Badge } from '@/components/ui/badge';
 import GooglePreviewCard from './google-preview-card';
 import type { OnPageItem } from '@/lib/types';
 import { Circle } from 'lucide-react';
+import HeadingsAccordionContent from './headings-accordion-content';
+import ContentAnalysisAccordionContent from './content-analysis-accordion-content';
+import AltAttributeAccordionContent from './alt-attribute-accordion-content';
+import InPageLinksAccordionContent from './inpage-links-accordion-content';
 
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
+  id,
   icon: IconComponent,
   title,
   statusText,
   statusColorClass,
   badgeVariant = "outline",
-  content,
+  content, // Can be simple string or complex data for new sections
   details,
   googleDesktopPreview,
   googleMobilePreview,
+  headingsAnalysis,
+  contentAnalysisData,
+  altAttributeAnalysis,
+  inPageLinksAnalysis,
 }) => {
-  // Determine badge variant based on statusColorClass if not explicitly passed
   let effectiveBadgeVariant = badgeVariant;
   if (statusColorClass.includes('text-accent')) {
-    effectiveBadgeVariant = 'default'; // Or a custom "success" variant if defined
+    effectiveBadgeVariant = 'default'; 
   } else if (statusColorClass.includes('text-warning')) {
-    effectiveBadgeVariant = 'default'; // Needs a custom "warning" variant or use outline with yellow text
+    effectiveBadgeVariant = 'default'; 
   } else if (statusColorClass.includes('text-destructive')) {
     effectiveBadgeVariant = 'destructive';
   }
 
+  const renderContent = () => {
+    switch (id) {
+      case 'titleTag':
+      case 'metaDescription':
+        return (
+          <>
+            {typeof content === 'string' ? <p className="mb-2">{content}</p> : content}
+            {details && <p className="text-xs text-muted-foreground mb-2">{details}</p>}
+          </>
+        );
+      case 'googlePreview':
+        return (
+          <>
+            {googleDesktopPreview && (
+              <div className="mb-4">
+                <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Desktop Version</h4>
+                <GooglePreviewCard type="Desktop" {...googleDesktopPreview} />
+              </div>
+            )}
+            {googleMobilePreview && (
+              <div>
+                <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Mobile Version</h4>
+                <GooglePreviewCard type="Mobile" {...googleMobilePreview} />
+              </div>
+            )}
+          </>
+        );
+      case 'headings':
+        return headingsAnalysis ? <HeadingsAccordionContent data={headingsAnalysis} /> : <p>No heading data available.</p>;
+      case 'contentAnalysis':
+        return contentAnalysisData ? <ContentAnalysisAccordionContent data={contentAnalysisData} /> : <p>No content analysis data available.</p>;
+      case 'altAttributes':
+        return altAttributeAnalysis ? <AltAttributeAccordionContent data={altAttributeAnalysis} /> : <p>No alt attribute data available.</p>;
+      case 'inPageLinks':
+        return inPageLinksAnalysis ? <InPageLinksAccordionContent data={inPageLinksAnalysis} /> : <p>No in-page link data available.</p>;
+      default:
+        return typeof content === 'string' ? <p>{content}</p> : <p>No specific content view for this item.</p>;
+    }
+  };
 
   return (
     <AccordionItem value={title} className="border-b border-border last:border-b-0">
@@ -55,21 +102,7 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
         </div>
       </AccordionTrigger>
       <AccordionContent className="py-4 px-3 text-sm bg-background rounded-b-md">
-        {typeof content === 'string' ? <p className="mb-2">{content}</p> : content}
-        {details && <p className="text-xs text-muted-foreground mb-2">{details}</p>}
-        
-        {googleDesktopPreview && (
-          <div className="mb-4">
-            <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Desktop Version</h4>
-            <GooglePreviewCard type="Desktop" {...googleDesktopPreview} />
-          </div>
-        )}
-        {googleMobilePreview && (
-          <div>
-            <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Mobile Version</h4>
-            <GooglePreviewCard type="Mobile" {...googleMobilePreview} />
-          </div>
-        )}
+        {renderContent()}
       </AccordionContent>
     </AccordionItem>
   );
