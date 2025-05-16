@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --background: 220 20% 96%; /* Light Grey-Blue */
+    --background: 0 0% 96%; /* Light Grey for page background */
     --foreground: 224 71.4% 4.1%; /* Near Black */
 
-    --card: 0 0% 100%; /* White */
+    --card: 0 0% 100%; /* White for card backgrounds */
     --card-foreground: 224 71.4% 4.1%; /* Near Black */
 
     --popover: 0 0% 100%; /* White */
@@ -24,8 +24,11 @@
 
     --accent: 145 63% 49%; /* #2ecc71 Green */
     --accent-foreground: 0 0% 100%; /* White */
+    
+    --warning: 45 100% 51%; /* Yellow/Orange for 'To Improve' */
+    --warning-foreground: 224 71.4% 4.1%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84.2% 60.2%; /* Red for 'Errors' */
     --destructive-foreground: 0 0% 98%;
 
     --border: 215 20.2% 88.8%; /* Light Grey Border */
@@ -45,7 +48,7 @@
     --background: 224 71.4% 4.1%; /* Near Black */
     --foreground: 0 0% 98%; /* White */
 
-    --card: 224 71.4% 4.1%; /* Near Black */
+    --card: 222 47.4% 11.2%; /* Darker card background */
     --card-foreground: 0 0% 98%; /* White */
 
     --popover: 224 71.4% 4.1%; /* Near Black */
@@ -62,6 +65,9 @@
 
     --accent: 145 63% 49%; /* #2ecc71 Green */
     --accent-foreground: 0 0% 100%; /* White */
+
+    --warning: 45 100% 51%; 
+    --warning-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
@@ -108,103 +114,47 @@
   }
 
   .print\:block { display: block !important; }
-  .print\:inline-block { display: inline-block !important; }
-  .print\:inline { display: inline !important; }
-  .print\:flex { display: flex !important; }
-  .print\:inline-flex { display: inline-flex !important; }
-  .print\:grid { display: grid !important; }
-  .print\:inline-grid { display: inline-grid !important; }
-  .print\:table { display: table !important; }
-  .print\:table-row { display: table-row !important; }
-  .print\:table-cell { display: table-cell !important; }
+  /* Add other print display utilities as needed */
   
-  .print\:space-y-4 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-y-reverse: 0;
-    margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
-    margin-bottom: calc(1rem * var(--tw-space-y-reverse));
-  }
-   .print\:pt-4 { padding-top: 1rem !important; }
-   .print\:p-2 { padding: 0.5rem !important; }
-   .print\:shadow-none { box-shadow: none !important; }
-   .print\:border { border-width: 1px !important; border-color: #ccc !important; }
-   .print\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important;}
-   .print\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important;}
-   .print\:h-\[180px\] { height: 180px !important; }
-   .print\:h-\[220px\] { height: 220px !important; }
-   .print\:fill-black { fill: black !important; }
-   .print\:text-xl { font-size: 1.25rem !important; line-height: 1.75rem !important; }
-   .print\:text-gray-700 { color: #4a5568 !important; }
-   .print\:text-gray-800 { color: #2d3748 !important; }
-
-
   .printable-area {
     width: 100%;
     margin: 0;
-    padding: 10px; /* Reduced padding for print */
+    padding: 10px; 
     box-shadow: none !important;
     border: none !important;
   }
   
-  .printable-area header, .printable-area footer { /* These are already no-print, but good to be explicit */
+  /* Hide elements not relevant to the core report content */
+  .report-header-card > div:last-child, /* Hides button row in header card */
+  .report-filters-bar { 
     display: none !important;
   }
 
-  .printable-area h1, 
-  .printable-area h2, 
-  .printable-area h3, 
-  .printable-area .text-primary { /* Generic headings and primary text */
-    color: #3498db !important; /* Blue */
-  }
-  
-  .printable-area .score-card, 
-  .printable-area .report-content-card,
-  .printable-area .core-vital-card, /* Include core vital cards */
-  .printable-area .chart-card /* A potential class for cards containing charts */
-   {
-    page-break-inside: avoid;
-    border: 1px solid #ccc !important; /* Add borders for clarity in print */
-    margin-bottom: 15px; /* Space between cards */
-    background-color: white !important;
-    color: black !important;
+  .report-header-card {
+    border: 1px solid #ccc !important;
+    margin-bottom: 15px;
     box-shadow: none !important;
   }
 
-   .printable-area .score-card .text-muted-foreground, 
-   .printable-area .report-content-card .text-muted-foreground,
-   .printable-area .core-vital-card .text-muted-foreground {
-    color: #555 !important; /* Darken muted foreground for print */
-   }
-   
-  /* Specific color overrides for status text in print */
-  .printable-area .text-accent { /* Good status */
-     color: #2ecc71 !important; 
+  .circular-progress-text {
+    fill: hsl(var(--accent)) !important; /* Green for score */
   }
-  .printable-area .text-\[hsl\(var\(--chart-4\)\)\] { /* Improve status - Yellow */
-    color: #f1c40f !important; /* Or a darker yellow/orange for print */
+  .circular-progress-path {
+    stroke: hsl(var(--accent)) !important;
   }
-   .printable-area .text-\[hsl\(var\(--chart-1\)\)\] { /* Below Average status - Orange */
-    color: #e67e22 !important;
-   }
-  .printable-area .text-destructive { /* Poor/Error status */
-    color: #e74c3c !important;
+  .circular-progress-trail {
+    stroke: #eee !important;
   }
-
-  /* Ensure chart labels are visible */
-  .printable-area .recharts-cartesian-axis-tick_text,
-  .printable-area .recharts-label tspan {
-    fill: #333 !important;
+  .status-progress-bar > div { /* Target the indicator */
+    background-color: var(--progress-color, hsl(var(--primary))) !important;
   }
-   .printable-area .recharts-legend-item-text {
-    color: #333 !important;
-   }
-
 
   a {
     text-decoration: none;
     color: inherit !important;
   }
 
-  a[href]:after { /* Show URLs for links in print */
+  a[href]:after { 
     content: " (" attr(href) ")";
     font-size: 0.8em;
     color: #555 !important;
