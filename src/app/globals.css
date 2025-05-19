@@ -154,28 +154,32 @@
     page-break-inside: avoid;
   }
 
-
-  /* Force all accordion content to be visible and styled for print */
-  .print-accordion-content { /* Target the AccordionContent component itself */
+  /* Force all accordion content (Radix UI primitive) to be visible and styled for print */
+  /* This targets the AccordionPrimitive.Content element */
+  div[data-radix-collection-item] > div[data-state="closed"],
+  div[data-radix-collection-item] > div[data-state="open"] {
       display: block !important;
       height: auto !important;
+      max-height: none !important; /* Remove any max-height that might be collapsing it */
       overflow: visible !important;
       animation: none !important; /* Remove collapse/expand animation */
       opacity: 1 !important;
       visibility: visible !important;
-      /* The data-state attribute will still be 'closed' or 'open' from Radix,
-         but these styles should override its effects for print. */
   }
 
-  /* Style the inner div for padding, if it exists */
-  .print-accordion-content > div {
+  /* Style the inner div (which holds our .print-accordion-content class and actual content) */
+  /* This ensures the div where our custom className is applied also behaves correctly */
+  div[data-radix-collection-item] > div[data-state="closed"] > div,
+  div[data-radix-collection-item] > div[data-state="open"] > div {
       padding-top: 0.5rem !important;
       padding-bottom: 1rem !important;
+      display: block !important;
+      height: auto !important;
+      overflow: visible !important;
   }
 
-
   /* Hide the accordion trigger's chevron icon during print */
-  .print-accordion-trigger svg.lucide-chevron-down {
+  button[data-radix-accordion-trigger] svg.lucide-chevron-down {
     display: none !important;
   }
 
@@ -242,4 +246,3 @@
     border-color: #ccc !important;
   }
 }
-
