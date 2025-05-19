@@ -14,9 +14,8 @@ interface SchemaOrgAccordionContentProps {
 const SchemaOrgAccordionContent: React.FC<SchemaOrgAccordionContentProps> = ({ data }) => {
   const { schemaTypes, issues, warningCount, statusText, statusColorClass } = data;
   const [showAllIssues, setShowAllIssues] = React.useState(false);
+  const MAX_ISSUES_VISIBLE_ONSCREEN = 3;
 
-  const MAX_ISSUES_VISIBLE = 3;
-  const displayedIssues = showAllIssues ? issues : issues?.slice(0, MAX_ISSUES_VISIBLE);
 
   const getIssueIcon = (severity: 'warning' | 'error') => {
     if (severity === 'error') {
@@ -60,17 +59,22 @@ const SchemaOrgAccordionContent: React.FC<SchemaOrgAccordionContentProps> = ({ d
       {issues && issues.length > 0 && (
         <div>
           <h4 className="font-semibold text-foreground mb-2">Issues:</h4>
-          <ul className="space-y-2">
-            {displayedIssues?.map((issue, index) => (
-              <li key={index} className={`flex items-start p-2 rounded-md border ${issue.severity === 'error' ? 'border-destructive/30 bg-destructive/5' : 'border-yellow-500/30 bg-yellow-500/5'}`}>
+          <ul className={`space-y-2 schema-issues-list ${!showAllIssues && issues.length > MAX_ISSUES_VISIBLE_ONSCREEN ? 'collapsed' : ''}`}>
+            {issues.map((issue, index) => (
+              <li key={index} className={`flex items-start p-2 rounded-md border ${issue.severity === 'error' ? 'border-destructive/30 bg-destructive/5' : 'border-yellow-500/30 bg-yellow-500/5'} issue-item`}>
                 {getIssueIcon(issue.severity)}
                 <span className={`${issue.severity === 'error' ? 'text-destructive' : 'text-yellow-700 dark:text-yellow-400'}`}>{issue.text}</span>
               </li>
             ))}
           </ul>
-          {issues.length > MAX_ISSUES_VISIBLE && (
-            <Button variant="link" onClick={() => setShowAllIssues(!showAllIssues)} className="mt-2 px-0 h-auto py-1 text-primary">
-              {showAllIssues ? 'Show less' : `Show more (${issues.length - MAX_ISSUES_VISIBLE} more)`}
+          {issues.length > MAX_ISSUES_VISIBLE_ONSCREEN && (
+            <Button 
+              variant="link" 
+              onClick={() => setShowAllIssues(!showAllIssues)} 
+              className="mt-2 px-0 h-auto py-1 text-primary show-more-button-schema"
+              data-role="show-more-button"
+            >
+              {showAllIssues ? 'Show less' : `Show more (${issues.length - MAX_ISSUES_VISIBLE_ONSCREEN} more)`}
             </Button>
           )}
         </div>

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,6 +94,12 @@
   }
 }
 
+/* Screen-specific styles for Schema.org issues list */
+.schema-issues-list.collapsed .issue-item:nth-child(n + 4) { /* Assumes MAX_ISSUES_VISIBLE_ONSCREEN = 3 */
+  display: none;
+}
+
+
 /* Print styles */
 @media print {
   body {
@@ -114,6 +121,8 @@
   }
 
   .print\:block { display: block !important; }
+  .print\:grid { display: grid !important; }
+  .print\:flex { display: flex !important; }
   /* Add other print display utilities as needed */
   
   .printable-area {
@@ -125,7 +134,7 @@
   }
   
   /* Hide elements not relevant to the core report content */
-  .report-header-card > div:last-child, /* Hides button row in header card */
+  .report-header-card > div > div:last-child, /* Hides button row in header card */
   .report-filters-bar { 
     display: none !important;
   }
@@ -134,7 +143,42 @@
     border: 1px solid #ccc !important;
     margin-bottom: 15px;
     box-shadow: none !important;
+    page-break-inside: avoid;
   }
+  
+  .score-card, .report-content-card { /* Classes that might exist on content cards */
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+
+  /* Force all accordion content to be visible and styled for print */
+  .print-accordion-content > div {
+      height: auto !important;
+      overflow: visible !important;
+      animation: none !important; /* Remove collapse/expand animation */
+      opacity: 1 !important;
+      visibility: visible !important;
+      display: block !important;
+      padding-top: 0.5rem !important;
+      padding-bottom: 1rem !important;
+  }
+
+  /* Hide the accordion trigger's chevron icon during print */
+  .print-accordion-trigger svg.lucide-chevron-down {
+    display: none !important;
+  }
+
+  /* Ensure all Schema.org issues are visible and hide the "Show more" button */
+  .schema-issues-list .issue-item {
+    display: flex !important; /* or list-item if that's more appropriate for your li styling */
+    page-break-inside: avoid;
+  }
+  .show-more-button-schema { /* Target the button for Schema.org issues */
+    display: none !important;
+  }
+  
 
   .circular-progress-text {
     fill: hsl(var(--accent)) !important; /* Green for score */
@@ -154,9 +198,39 @@
     color: inherit !important;
   }
 
-  a[href]:after { 
+  a[href^="http"]:after, a[href^="https"]:after { /* Only add for external-like links */
     content: " (" attr(href) ")";
     font-size: 0.8em;
     color: #555 !important;
+    word-break: break-all; /* Prevent long URLs from breaking layout */
+  }
+  a[href^="mailto"]:after {
+    content: " (" attr(href) ")" ;
+    font-size: 0.8em;
+    color: #555 !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--primary)) !important; /* Primary color for headings */
+    page-break-after: avoid;
+  }
+  .text-muted-foreground {
+    color: #555 !important; /* Darken muted text */
+  }
+  .text-accent {
+    color: hsl(var(--accent)) !important;
+  }
+  .text-warning {
+    color: hsl(var(--warning)) !important;
+  }
+  .text-destructive {
+    color: hsl(var(--destructive)) !important;
+  }
+  .bg-card, .bg-background {
+    background-color: white !important;
+  }
+  .border {
+    border-color: #ccc !important;
   }
 }
+

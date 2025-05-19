@@ -348,7 +348,7 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 
   return (
     <AccordionItem value={title} className="border-b border-border last:border-b-0">
-      <AccordionTrigger className="py-3 px-2 hover:bg-muted/50 rounded-t-md text-sm font-medium">
+      <AccordionTrigger className="py-3 px-2 hover:bg-muted/50 rounded-t-md text-sm font-medium print-accordion-trigger">
         <div className="flex items-center space-x-3 flex-1">
           <IconComponent className={`h-5 w-5 ${statusColorClass || 'text-muted-foreground'}`} />
           <span>{title}</span>
@@ -371,7 +371,7 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
           </Badge>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="py-4 px-3 text-sm bg-card/50 dark:bg-background rounded-b-md">
+      <AccordionContent className="py-4 px-3 text-sm bg-card/50 dark:bg-background rounded-b-md print-accordion-content">
         {renderContent()}
       </AccordionContent>
     </AccordionItem>
@@ -379,4 +379,3 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
 };
 
 export default ReportAccordionItem;
-
