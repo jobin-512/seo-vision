@@ -134,7 +134,9 @@
   }
   
   /* Hide elements not relevant to the core report content */
-  .report-header-card > div > div:last-child, /* Hides button row in header card */
+  .report-header-card > div > div:last-child { /* Hides button row in header card */
+    display: none !important;
+  }
   .report-filters-bar { 
     display: none !important;
   }
@@ -154,16 +156,23 @@
 
 
   /* Force all accordion content to be visible and styled for print */
-  .print-accordion-content > div {
+  .print-accordion-content { /* Target the AccordionContent component itself */
+      display: block !important;
       height: auto !important;
       overflow: visible !important;
       animation: none !important; /* Remove collapse/expand animation */
       opacity: 1 !important;
       visibility: visible !important;
-      display: block !important;
+      /* The data-state attribute will still be 'closed' or 'open' from Radix,
+         but these styles should override its effects for print. */
+  }
+
+  /* Style the inner div for padding, if it exists */
+  .print-accordion-content > div {
       padding-top: 0.5rem !important;
       padding-bottom: 1rem !important;
   }
+
 
   /* Hide the accordion trigger's chevron icon during print */
   .print-accordion-trigger svg.lucide-chevron-down {
