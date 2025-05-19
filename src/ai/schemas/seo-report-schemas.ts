@@ -646,7 +646,7 @@ export type DiscoveredProfiles = z.infer<typeof DiscoveredProfilesSchema>;
 
 export const SocialAccountDetailsSchema = z.object({
   platform: z.string().describe("Name of the social media platform, e.g., 'Facebook', 'Twitter'."),
-  url: z.string().url().nullable().optional().describe("URL to the specific social media page. Return empty string if not found."),
+  url: z.union([z.string().url(), z.literal(""), z.null()]).optional().describe("URL to the specific social media page. Return empty string if not found."),
   name: z.string().nullable().optional().describe("Name of the account or page. Return empty string if not found."),
   found: z.boolean().describe("Whether the account was found or not."),
   statusText: z.string().describe("Status like 'Found', 'Not found', 'Needs update'."),
@@ -714,6 +714,7 @@ export const GenerateSeoReportOutputSchema = z.object({
   contentAnalysis: ContentAnalysisSchema.optional().describe("Analysis of keywords and keyphrases found in the content."),
   altAttributeAnalysis: AltAttributeAnalysisSchema.optional().describe("Analysis of image alt attributes."),
   inPageLinksAnalysis: InPageLinksAnalysisSchema.optional().describe("Analysis of internal and external links on the page."),
+  
   indexingAnalysis: IndexingAnalysisSchema.optional().describe("Detailed analysis of website indexing aspects."),
   technicalSeoAnalysis: TechnicalSeoAnalysisSchema.optional().describe("Detailed analysis of technical SEO aspects like robots tags, hreflang, etc."),
   mobileAnalysis: MobileAnalysisSchema.optional().describe("Detailed analysis of mobile friendliness, rendering, and tap targets."),
@@ -729,11 +730,11 @@ export const GenerateSeoReportOutputSchema = z.object({
   brandingAnalysis: BrandingAnalysisSchema.optional().describe("Analysis of website branding elements (URL, Favicon, Custom 404)."),
   domainAnalysis: DomainAnalysisSchema.optional().describe("Analysis of domain registration and availability."),
 
-  // New Sections based on the image
   offPageAnalysis: OffPageAnalysisSchema.optional().describe("Analysis of off-page SEO factors like backlinks."),
   trafficReportAnalysis: TrafficReportAnalysisSchema.optional().describe("Analysis of traffic estimations and rank (not chart data)."),
   localSeoAnalysis: LocalSeoAnalysisSchema.optional().describe("Analysis of local SEO factors like directories and reviews."),
   socialMediaAnalysis: SocialMediaAnalysisSchema.optional().describe("Analysis of social media presence and engagement."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
+
 
