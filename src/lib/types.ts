@@ -100,6 +100,13 @@ import type {
   LocalDirectories as AiLocalDirectories,
   OnlineReviews as AiOnlineReviews,
   LocalSeoAnalysis as AiLocalSeoAnalysis,
+  // Social Media
+  SocialProfile as AiSocialProfile,
+  DiscoveredProfiles as AiDiscoveredProfiles,
+  SocialAccountDetails as AiSocialAccountDetails,
+  SocialEngagementItem as AiSocialEngagementItem,
+  SocialMediaEngagement as AiSocialMediaEngagement,
+  SocialMediaAnalysis as AiSocialMediaAnalysis,
 } from '@/ai/schemas/seo-report-schemas';
 
 // Re-exporting AI types for easier use in components
@@ -213,6 +220,14 @@ export interface LocalDirectories extends AiLocalDirectories {}
 export interface OnlineReviews extends AiOnlineReviews {}
 export interface LocalSeoAnalysis extends AiLocalSeoAnalysis {}
 
+// Social Media Interfaces
+export interface SocialProfile extends AiSocialProfile {}
+export interface DiscoveredProfiles extends AiDiscoveredProfiles {}
+export interface SocialAccountDetails extends AiSocialAccountDetails {}
+export interface SocialEngagementItem extends AiSocialEngagementItem {}
+export interface SocialMediaEngagement extends AiSocialMediaEngagement {}
+export interface SocialMediaAnalysis extends AiSocialMediaAnalysis {}
+
 
 export interface OnPageItem { // This type is becoming more generic for any accordion item
   id: string; 
@@ -301,6 +316,11 @@ export interface OnPageItem { // This type is becoming more generic for any acco
   // Local SEO specific data
   localDirectoriesData?: LocalDirectories;
   onlineReviewsData?: OnlineReviews;
+
+  // Social Media specific data
+  discoveredProfilesData?: DiscoveredProfiles;
+  socialAccountData?: SocialAccountDetails; // Generic for FB, Twitter, IG, LI
+  socialEngagementData?: SocialMediaEngagement;
 }
 
 
@@ -350,6 +370,7 @@ export type ReportData = {
   offPageAnalysis?: AiOffPageAnalysis;
   trafficReportAnalysis?: AiTrafficReportAnalysis;
   localSeoAnalysis?: AiLocalSeoAnalysis;
+  socialMediaAnalysis?: AiSocialMediaAnalysis;
 
 
   // Fields for the header card (some might overlap or be derived)

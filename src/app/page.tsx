@@ -85,6 +85,11 @@ import {
   type LocalSeoAnalysis as AiLocalSeoAnalysisType,
   type LocalDirectories as AiLocalDirectoriesType,
   type OnlineReviews as AiOnlineReviewsType,
+  // Social Media
+  type SocialMediaAnalysis as AiSocialMediaAnalysisType,
+  type DiscoveredProfiles as AiDiscoveredProfilesType,
+  type SocialAccountDetails as AiSocialAccountDetailsType,
+  type SocialMediaEngagement as AiSocialMediaEngagementType,
 } from '@/ai/flows/generate-seo-report';
 
 import type { 
@@ -150,6 +155,10 @@ import type {
   // Local SEO
   LocalDirectories,
   OnlineReviews,
+  // Social Media
+  DiscoveredProfiles,
+  SocialAccountDetails,
+  SocialMediaEngagement,
 } from '@/lib/types';
 
 import { useToast } from "@/hooks/use-toast";
@@ -159,7 +168,8 @@ import {
   Tags, Target, Languages, Unlink, DraftingCompass, FileStack, Smartphone, TabletSmartphone, MousePointerClick,
   Binary, Share2, Twitter, Code2 as MicroformatsIcon, ShieldAlert, MailWarning, ShieldCheck as DmarcIcon, Lock, Blend, Gauge,
   Contrast as ContrastIcon, Navigation as NavigationIcon, Cpu, AreaChart, FileBadge, Globe, CalendarDays, FileQuestion,
-  Award, TrendingUp, Users, BarChartHorizontal, MapPin, MessageSquare, Activity // New icons
+  Award, TrendingUp, Users, BarChartHorizontal, MapPin, MessageSquare, Activity,
+  Facebook, Instagram, Linkedin, ThumbsUp, MessageCircle as MessageCircleIcon, Search // New Social Media Icons
 } from 'lucide-react';
 
 import ReportHeaderCard from '@/components/report-header-card';
@@ -253,18 +263,20 @@ const mapAiDataToAccordionItem = (
   if (id === 'domainRegistration' && aiData) item.domainRegistrationData = aiData as DomainRegistrationAnalysis;
   if (id === 'domainAvailability' && aiData) item.domainAvailabilityData = aiData as DomainAvailabilityAnalysis;
 
-  // Off-Page
   if (id === 'backlinksScore' && aiData) item.backlinksScoreData = aiData as BacklinksScore;
   if (id === 'backlinksCounter' && aiData) item.backlinksCounterData = aiData as BacklinksCounter;
   if (id === 'referringDomains' && aiData) item.referringDomainsData = aiData as ReferringDomains;
 
-  // Traffic Report
   if (id === 'trafficEstimations' && aiData) item.trafficEstimationsData = aiData as TrafficEstimations;
   if (id === 'trafficRank' && aiData) item.trafficRankData = aiData as TrafficRank;
 
-  // Local SEO
   if (id === 'localDirectories' && aiData) item.localDirectoriesData = aiData as LocalDirectories;
   if (id === 'onlineReviews' && aiData) item.onlineReviewsData = aiData as OnlineReviews;
+
+  // Social Media
+  if (id === 'discoveredProfiles' && aiData) item.discoveredProfilesData = aiData as DiscoveredProfiles;
+  if (['facebookPage', 'twitterAccount', 'instagramAccount', 'linkedinAccount'].includes(id) && aiData) item.socialAccountData = aiData as SocialAccountDetails;
+  if (id === 'socialMediaEngagement' && aiData) item.socialEngagementData = aiData as SocialMediaEngagement;
   
   return item;
 };
@@ -327,7 +339,7 @@ const getDefaultMobileItems = (): OnPageItem[] => [
 const getDefaultStructuredDataItems = (): OnPageItem[] => [
     { id: 'schemaOrg', icon: Binary, title: 'Schema.org', statusText: 'N/A', statusColorClass: 'text-muted-foreground', schemaOrgData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', schemaTypes: [], issues: [], warningCount: 0 } },
     { id: 'openGraphProtocol', icon: Share2, title: 'Open Graph Protocol', statusText: 'N/A', statusColorClass: 'text-muted-foreground', openGraphData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', previewData: { title: 'Example Site', description: 'An example site description for Open Graph.', imageUrl: 'https://placehold.co/600x315.png', url: 'example.com' }, tags: [] } },
-    { id: 'twitterCard', icon: Twitter, title: 'Twitter Card', statusText: 'N/A', statusColorClass: 'text-muted-foreground', twitterCardData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', previewData: { title: 'Example Site', description: 'An example site description for Twitter.', imageUrl: 'https://placehold.co/600x315.png', domain: 'example.com' }, tags: [] } },
+    { id: 'twitterCard', icon: Twitter, title: 'Twitter Card', statusText: 'N/A', statusColorClass: 'text-muted-foreground', twitterCardData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', previewData: { title: 'Example Site', description: 'An example site description for Twitter Card.', imageUrl: 'https://placehold.co/600x315.png', domain: 'example.com', cardType: 'summary', site: '@example' }, tags: [] } },
 ];
 
 const getDefaultMicroformatsItems = (): OnPageItem[] => [
@@ -384,6 +396,15 @@ const getDefaultLocalSeoItems = (): OnPageItem[] => [
   { id: 'onlineReviews', icon: MessageSquare, title: 'Online Reviews', statusText: 'N/A', statusColorClass: 'text-muted-foreground', onlineReviewsData: { statusText: 'N/A', statusColorClass: 'text-muted-foreground', details: 'Checking...' } },
 ];
 
+const getDefaultSocialMediaItems = (): OnPageItem[] => [
+  { id: 'discoveredProfiles', icon: Search, title: 'Discovered Profiles', statusText: 'N/A', statusColorClass: 'text-muted-foreground', discoveredProfilesData: { statusText: 'Checking...', statusColorClass: 'text-muted-foreground', summaryText: 'Looking for social profiles...', profiles: [] } },
+  { id: 'facebookPage', icon: Facebook, title: 'Facebook Page', statusText: 'N/A', statusColorClass: 'text-muted-foreground', socialAccountData: { platform: 'Facebook', found: false, statusText: 'N/A', statusColorClass: 'text-muted-foreground' } },
+  { id: 'twitterAccount', icon: Twitter, title: 'Twitter Account', statusText: 'N/A', statusColorClass: 'text-muted-foreground', socialAccountData: { platform: 'Twitter', found: false, statusText: 'N/A', statusColorClass: 'text-muted-foreground' } },
+  { id: 'instagramAccount', icon: Instagram, title: 'Instagram Account', statusText: 'N/A', statusColorClass: 'text-muted-foreground', socialAccountData: { platform: 'Instagram', found: false, statusText: 'N/A', statusColorClass: 'text-muted-foreground' } },
+  { id: 'linkedinAccount', icon: Linkedin, title: 'LinkedIn Account', statusText: 'N/A', statusColorClass: 'text-muted-foreground', socialAccountData: { platform: 'LinkedIn', found: false, statusText: 'N/A', statusColorClass: 'text-muted-foreground' } },
+  { id: 'socialMediaEngagement', icon: ThumbsUp, title: 'Social Media Engagement', statusText: 'N/A', statusColorClass: 'text-muted-foreground', socialEngagementData: { statusText: 'Checking...', statusColorClass: 'text-muted-foreground', summary: 'Analyzing engagement...', engagements: [] } },
+];
+
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -405,6 +426,7 @@ export default function HomePage() {
   const [offPageAccordionItems, setOffPageAccordionItems] = React.useState<OnPageItem[]>(getDefaultOffPageItems());
   const [trafficReportAccordionItems, setTrafficReportAccordionItems] = React.useState<OnPageItem[]>(getDefaultTrafficReportItems());
   const [localSeoAccordionItems, setLocalSeoAccordionItems] = React.useState<OnPageItem[]>(getDefaultLocalSeoItems());
+  const [socialMediaAccordionItems, setSocialMediaAccordionItems] = React.useState<OnPageItem[]>(getDefaultSocialMediaItems());
 
 
   const [error, setError] = React.useState<string | null>(null);
@@ -433,6 +455,7 @@ export default function HomePage() {
     setOffPageAccordionItems(getDefaultOffPageItems());
     setTrafficReportAccordionItems(getDefaultTrafficReportItems());
     setLocalSeoAccordionItems(getDefaultLocalSeoItems());
+    setSocialMediaAccordionItems(getDefaultSocialMediaItems());
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -450,7 +473,6 @@ export default function HomePage() {
           ...result,
           urlAnalyzed: data.url,
           analysisTimestamp: new Date().toISOString(),
-          // Simulate category percentages based on overall score for header card
           passedPercent: result.score > 0 ? Math.min(result.score + 10, 70) : 0, 
           toImprovePercent: result.score > 0 ? 20 : 0, 
           errorsPercent: result.score > 0 ? 10 : 0, 
@@ -608,6 +630,19 @@ export default function HomePage() {
         }
         setLocalSeoAccordionItems(newLocalSeoItems.length > 0 ? newLocalSeoItems : getDefaultLocalSeoItems());
 
+        // --- Process Social Media Analysis ---
+        const newSocialMediaItems: OnPageItem[] = [];
+        if (result.socialMediaAnalysis) {
+          const sma = result.socialMediaAnalysis;
+          if (sma.discoveredProfiles) newSocialMediaItems.push(mapAiDataToAccordionItem('discoveredProfiles', 'Discovered Profiles', Search, sma.discoveredProfiles));
+          if (sma.facebookPage) newSocialMediaItems.push(mapAiDataToAccordionItem('facebookPage', 'Facebook Page', Facebook, sma.facebookPage));
+          if (sma.twitterAccount) newSocialMediaItems.push(mapAiDataToAccordionItem('twitterAccount', 'Twitter Account', Twitter, sma.twitterAccount));
+          if (sma.instagramAccount) newSocialMediaItems.push(mapAiDataToAccordionItem('instagramAccount', 'Instagram Account', Instagram, sma.instagramAccount));
+          if (sma.linkedinAccount) newSocialMediaItems.push(mapAiDataToAccordionItem('linkedinAccount', 'LinkedIn Account', Linkedin, sma.linkedinAccount));
+          if (sma.socialMediaEngagement) newSocialMediaItems.push(mapAiDataToAccordionItem('socialMediaEngagement', 'Social Media Engagement', ThumbsUp, sma.socialMediaEngagement));
+        }
+        setSocialMediaAccordionItems(newSocialMediaItems.length > 0 ? newSocialMediaItems : getDefaultSocialMediaItems());
+
 
         toast({ title: "Analysis Complete", description: `SEO report for ${data.url} generated successfully.`, variant: "default" });
       } else {
@@ -699,6 +734,7 @@ export default function HomePage() {
             <ReportAccordionSection title="Off-Page" items={offPageAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Traffic" items={trafficReportAccordionItems} defaultOpen={false} />
             <ReportAccordionSection title="Local" items={localSeoAccordionItems} defaultOpen={false} />
+            <ReportAccordionSection title="Social Media" items={socialMediaAccordionItems} defaultOpen={false} />
           </div>
           
           {!reportData && !currentUrl && !isLoading && !error && (

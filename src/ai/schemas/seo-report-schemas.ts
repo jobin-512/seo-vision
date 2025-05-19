@@ -629,6 +629,56 @@ export const LocalSeoAnalysisSchema = z.object({
 });
 export type LocalSeoAnalysis = z.infer<typeof LocalSeoAnalysisSchema>;
 
+// --- SOCIAL MEDIA ANALYSIS ---
+export const SocialProfileSchema = z.object({
+  platform: z.string().describe("Name of the social media platform, e.g., 'Facebook', 'Twitter'."),
+  url: z.string().url().describe("URL to the social media profile."),
+});
+export type SocialProfile = z.infer<typeof SocialProfileSchema>;
+
+export const DiscoveredProfilesSchema = z.object({
+  statusText: z.string().describe("Overall status, e.g., 'Found', 'Outdated', 'No profiles found'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  profiles: z.array(SocialProfileSchema).optional().describe("List of discovered social media profiles."),
+  summaryText: z.string().optional().describe("A brief summary about the discovered profiles, e.g., 'We found the following social profiles on your website:'")
+});
+export type DiscoveredProfiles = z.infer<typeof DiscoveredProfilesSchema>;
+
+export const SocialAccountDetailsSchema = z.object({
+  platform: z.string().describe("Name of the social media platform, e.g., 'Facebook', 'Twitter'."),
+  url: z.string().url().nullable().optional().describe("URL to the specific social media page. Return empty string if not found."),
+  name: z.string().nullable().optional().describe("Name of the account or page. Return empty string if not found."),
+  found: z.boolean().describe("Whether the account was found or not."),
+  statusText: z.string().describe("Status like 'Found', 'Not found', 'Needs update'."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+});
+export type SocialAccountDetails = z.infer<typeof SocialAccountDetailsSchema>;
+
+export const SocialEngagementItemSchema = z.object({
+  metricName: z.string().describe("Name of the engagement metric, e.g., 'Facebook Shares', 'Facebook Comments', 'Facebook Likes'."),
+  value: z.number().describe("The count for the engagement metric. Use 0 if no data."),
+  iconName: z.string().optional().describe("Optional: Name of a Lucide icon to represent the metric, e.g., 'ThumbsUp', 'MessageCircle', 'Share2'.")
+});
+export type SocialEngagementItem = z.infer<typeof SocialEngagementItemSchema>;
+
+export const SocialMediaEngagementSchema = z.object({
+  statusText: z.string().describe("Overall status of social media engagement."),
+  statusColorClass: z.string().describe("Tailwind class for status color."),
+  summary: z.string().optional().describe("A brief summary, e.g., 'Your homepage is sometimes shared on social networks.'"),
+  engagements: z.array(SocialEngagementItemSchema).optional().describe("List of engagement metrics."),
+});
+export type SocialMediaEngagement = z.infer<typeof SocialMediaEngagementSchema>;
+
+export const SocialMediaAnalysisSchema = z.object({
+  discoveredProfiles: DiscoveredProfilesSchema.optional(),
+  facebookPage: SocialAccountDetailsSchema.optional(),
+  twitterAccount: SocialAccountDetailsSchema.optional(),
+  instagramAccount: SocialAccountDetailsSchema.optional(),
+  linkedinAccount: SocialAccountDetailsSchema.optional(),
+  socialMediaEngagement: SocialMediaEngagementSchema.optional(),
+}).describe("Analysis of social media presence and engagement.");
+export type SocialMediaAnalysis = z.infer<typeof SocialMediaAnalysisSchema>;
+
 
 
 // --- MAIN SCHEMAS ---
@@ -654,7 +704,7 @@ export const GenerateSeoReportOutputSchema = z.object({
   fidStatus: z.enum(["Good", "Improve", "Poor"]).optional().describe('First Input Delay status.'),
   
   onPageScore: z.number().min(0).max(100).optional().describe('Score for On-Page SEO factors (0-100).'),
-  offPageScore: z.number().min(0).max(100).optional().describe('Score for Off-Page SEO factors (0-100).'), // This is general offPageScore
+  offPageScore: z.number().min(0).max(100).optional().describe('Score for Off-Page SEO factors (0-100).'),
   technicalScore: z.number().min(0).max(100).optional().describe('Score for Technical SEO factors (0-100).'),
   contentScore: z.number().min(0).max(100).optional().describe('Score for Content quality and relevance (0-100).'),
   uxScore: z.number().min(0).max(100).optional().describe('Score for User Experience (UX) factors (0-100).'),
@@ -683,6 +733,7 @@ export const GenerateSeoReportOutputSchema = z.object({
   offPageAnalysis: OffPageAnalysisSchema.optional().describe("Analysis of off-page SEO factors like backlinks."),
   trafficReportAnalysis: TrafficReportAnalysisSchema.optional().describe("Analysis of traffic estimations and rank (not chart data)."),
   localSeoAnalysis: LocalSeoAnalysisSchema.optional().describe("Analysis of local SEO factors like directories and reviews."),
+  socialMediaAnalysis: SocialMediaAnalysisSchema.optional().describe("Analysis of social media presence and engagement."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
 

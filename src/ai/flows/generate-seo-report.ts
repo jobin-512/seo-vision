@@ -102,7 +102,7 @@ import {
   type BacklinksCounter,
   type ReferringDomains,
   type OffPageAnalysis,
-  // Traffic (Report section, not chart data)
+  // Traffic (Report section)
   type TrafficEstimations,
   type TrafficRank,
   type TrafficReportAnalysis,
@@ -111,6 +111,13 @@ import {
   type LocalDirectories,
   type OnlineReviews,
   type LocalSeoAnalysis,
+  // Social Media
+  type SocialProfile,
+  type DiscoveredProfiles,
+  type SocialAccountDetails,
+  type SocialEngagementItem,
+  type SocialMediaEngagement,
+  type SocialMediaAnalysis,
 } from '@/ai/schemas/seo-report-schemas';
 
 // Export types for external use (e.g., by the frontend)
@@ -216,6 +223,13 @@ export type {
   LocalDirectories,
   OnlineReviews,
   LocalSeoAnalysis,
+  // Social Media
+  SocialProfile,
+  DiscoveredProfiles,
+  SocialAccountDetails,
+  SocialEngagementItem,
+  SocialMediaEngagement,
+  SocialMediaAnalysis,
 };
 
 
@@ -333,6 +347,14 @@ const prompt = ai.definePrompt({
   23. **Local SEO Analysis ('localSeoAnalysis')**:
       *   **Local Directories ('localDirectories')**: statusText, statusColorClass, 'links': Array of {text, url}. (e.g., "Add your Google My Business profile", "https://www.google.com/business/").
       *   **Online Reviews ('onlineReviews')**: statusText, statusColorClass, 'details'.
+  
+  24. **Social Media Analysis ('socialMediaAnalysis')**:
+      *   **Discovered Profiles ('discoveredProfiles')**: statusText, statusColorClass. 'summaryText'. 'profiles': Array of {platform, url}. (e.g., platform "Facebook", url "https://facebook.com/example")
+      *   **Facebook Page ('facebookPage')**: platform "Facebook". 'found' (boolean). 'url' (or empty string). 'name' (or empty string). statusText, statusColorClass.
+      *   **Twitter Account ('twitterAccount')**: platform "Twitter". 'found' (boolean). 'url' (or empty string). 'name' (or empty string). statusText, statusColorClass.
+      *   **Instagram Account ('instagramAccount')**: platform "Instagram". 'found' (boolean). 'url' (or empty string). 'name' (or empty string). statusText, statusColorClass.
+      *   **LinkedIn Account ('linkedinAccount')**: platform "LinkedIn". 'found' (boolean). 'url' (or empty string). 'name' (or empty string). statusText, statusColorClass.
+      *   **Social Media Engagement ('socialMediaEngagement')**: statusText, statusColorClass. 'summary'. 'engagements': Array of {metricName ("Facebook Shares", "Facebook Comments", "Facebook Likes"), value (number, use 0 if unknown/not applicable), iconName ("Share2", "MessageCircle", "ThumbsUp")}. *Simulate these values if real data is not available.*
 
   Use the 'getWebsiteTrafficData' tool to fetch website traffic data for {{{url}}} for the last 6 months. Include this in 'websiteTraffic'. If no data, omit or set to empty array.
 

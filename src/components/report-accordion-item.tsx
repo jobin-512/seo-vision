@@ -88,6 +88,11 @@ import TrafficRankAccordionContent from '@/components/traffic-rank-accordion-con
 import LocalDirectoriesAccordionContent from '@/components/local-directories-accordion-content';
 import OnlineReviewsAccordionContent from '@/components/online-reviews-accordion-content';
 
+// Social Media Components
+import DiscoveredProfilesAccordionContent from '@/components/discovered-profiles-accordion-content';
+import SocialAccountAccordionContent from '@/components/social-account-accordion-content';
+import SocialMediaEngagementAccordionContent from '@/components/social-media-engagement-accordion-content';
+
 
 const ReportAccordionItem: React.FC<OnPageItem> = ({
   id,
@@ -161,6 +166,10 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
   // Local SEO
   localDirectoriesData,
   onlineReviewsData,
+  // Social Media
+  discoveredProfilesData,
+  socialAccountData,
+  socialEngagementData,
 }) => {
   let effectiveBadgeVariant = badgeVariant;
   if (statusColorClass.includes('text-accent')) {
@@ -321,6 +330,16 @@ const ReportAccordionItem: React.FC<OnPageItem> = ({
       case 'onlineReviews':
         return onlineReviewsData ? <OnlineReviewsAccordionContent data={onlineReviewsData} /> : <p>No Online Reviews data available.</p>;
 
+      // --- SOCIAL MEDIA ---
+      case 'discoveredProfiles':
+        return discoveredProfilesData ? <DiscoveredProfilesAccordionContent data={discoveredProfilesData} /> : <p>No Discovered Profiles data available.</p>;
+      case 'facebookPage':
+      case 'twitterAccount':
+      case 'instagramAccount':
+      case 'linkedinAccount':
+        return socialAccountData ? <SocialAccountAccordionContent data={socialAccountData} /> : <p>No Social Account data available.</p>;
+      case 'socialMediaEngagement':
+        return socialEngagementData ? <SocialMediaEngagementAccordionContent data={socialEngagementData} /> : <p>No Social Media Engagement data available.</p>;
 
       default:
         return typeof content === 'string' ? <p>{content}</p> : <p>No specific content view for this item (ID: {id}).</p>;
