@@ -154,21 +154,18 @@
     page-break-inside: avoid;
   }
 
-  /* Force all accordion content (Radix UI primitive) to be visible and styled for print */
-  /* This targets the AccordionPrimitive.Content element */
-  div[data-radix-collection-item] > div[data-state="closed"],
+  /* Since accordions are now always open, these specific print overrides for expansion are no longer needed */
+  /* div[data-radix-collection-item] > div[data-state="closed"],
   div[data-radix-collection-item] > div[data-state="open"] {
       display: block !important;
       height: auto !important;
-      max-height: none !important; /* Remove any max-height that might be collapsing it */
+      max-height: none !important; 
       overflow: visible !important;
-      animation: none !important; /* Remove collapse/expand animation */
+      animation: none !important; 
       opacity: 1 !important;
       visibility: visible !important;
   }
 
-  /* Style the inner div (which holds our .print-accordion-content class and actual content) */
-  /* This ensures the div where our custom className is applied also behaves correctly */
   div[data-radix-collection-item] > div[data-state="closed"] > div,
   div[data-radix-collection-item] > div[data-state="open"] > div {
       padding-top: 0.5rem !important;
@@ -178,10 +175,15 @@
       overflow: visible !important;
   }
 
-  /* Hide the accordion trigger's chevron icon during print */
   button[data-radix-accordion-trigger] svg.lucide-chevron-down {
     display: none !important;
+  } */
+
+  .print-accordion-content > div { /* Ensure padding for accordion content */
+      padding-top: 0.5rem !important;
+      padding-bottom: 1rem !important;
   }
+
 
   /* Ensure all Schema.org issues are visible and hide the "Show more" button */
   .schema-issues-list .issue-item {
@@ -246,3 +248,4 @@
     border-color: #ccc !important;
   }
 }
+

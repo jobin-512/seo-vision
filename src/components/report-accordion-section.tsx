@@ -9,13 +9,12 @@ import type { OnPageItem } from '@/lib/types'; // Using OnPageItem as a generic 
 interface ReportAccordionSectionProps {
   title: string;
   items: OnPageItem[];
-  defaultOpen?: boolean; // If true, the first item will be open by default
+  defaultOpen?: boolean; // This prop is no longer strictly needed as all items will be open
 }
 
 const ReportAccordionSection: React.FC<ReportAccordionSectionProps> = ({
   title,
   items,
-  defaultOpen = false,
 }) => {
   if (!items || items.length === 0) {
     return (
@@ -26,12 +25,20 @@ const ReportAccordionSection: React.FC<ReportAccordionSectionProps> = ({
     );
   }
 
+  // Make all items open by default
+  const defaultValues = items.map(item => item.title);
+
   return (
     <div className="bg-card p-4 rounded-lg shadow mb-6">
       <h2 className="text-xl font-semibold mb-3 text-foreground px-2">{title}</h2>
-      <Accordion type="single" collapsible className="w-full" defaultValue={defaultOpen && items[0] ? items[0].title : undefined}>
+      <Accordion 
+        type="multiple" 
+        className="w-full" 
+        defaultValue={defaultValues}
+      >
         {items.map((item) => (
-          <ReportAccordionItem key={item.id} {...item} />
+          // Pass item.title as the value for AccordionItem
+          <ReportAccordionItem key={item.id} {...item} value={item.title} />
         ))}
       </Accordion>
     </div>
@@ -39,3 +46,4 @@ const ReportAccordionSection: React.FC<ReportAccordionSectionProps> = ({
 };
 
 export default ReportAccordionSection;
+
