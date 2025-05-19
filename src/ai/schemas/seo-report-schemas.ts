@@ -23,7 +23,7 @@ export const OnPageDetailItemSchema = z.object({
   statusText: z.string().describe("A status description, e.g., 'Outdated', 'Good', 'Needs Improvement'."),
   statusColorClass: z.string().describe("Tailwind class for status color, e.g., 'text-warning', 'text-accent'."),
   content: z.string().nullable().optional().describe("Main content, e.g., the text of the title tag or meta description. Return empty string if not found, not null."),
-  details: z.string().optional().describe("Additional details, e.g., character length."),
+  details: z.string().nullable().optional().describe("Additional details, e.g., character length. Can be null if no specific details."),
   googleDesktopPreview: GooglePreviewDataSchema.optional(),
   googleMobilePreview: GooglePreviewDataSchema.optional(),
 });
@@ -530,8 +530,8 @@ export type DomainRegistrationAnalysis = z.infer<typeof DomainRegistrationAnalys
 
 export const DomainAvailabilityItemSchema = z.object({
   domain: z.string().describe("The domain name variant, e.g., 'example.com'."),
-  status: z.string().describe("Availability status message, e.g., 'Available. Register it now!' or 'Taken'."),
-  isAvailable: z.boolean().describe("True if the domain is likely available, false otherwise."),
+  status: z.string().describe("Availability status message, e.g., 'Available. Register it now!' or 'Taken'.").default('Checking...'),
+  isAvailable: z.boolean().describe("True if the domain is likely available, false otherwise.").default(false),
 });
 export type DomainAvailabilityItem = z.infer<typeof DomainAvailabilityItemSchema>;
 
@@ -736,5 +736,4 @@ export const GenerateSeoReportOutputSchema = z.object({
   socialMediaAnalysis: SocialMediaAnalysisSchema.optional().describe("Analysis of social media presence and engagement."),
 });
 export type GenerateSeoReportOutput = z.infer<typeof GenerateSeoReportOutputSchema>;
-
 
